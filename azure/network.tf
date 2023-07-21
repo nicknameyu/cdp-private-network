@@ -97,3 +97,9 @@ resource "azurerm_private_dns_zone_virtual_network_link" "cdp" {
   private_dns_zone_name = azurerm_private_dns_zone.dw_aks.name
   virtual_network_id    = azurerm_virtual_network.cdp.id
 }
+resource "azurerm_private_dns_zone_virtual_network_link" "hub" {
+  name                  = "hub_vnet"
+  resource_group_name   = azurerm_resource_group.network.name
+  private_dns_zone_name = azurerm_private_dns_zone.dw_aks.name
+  virtual_network_id    = azurerm_virtual_network.hub.id
+}

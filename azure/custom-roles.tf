@@ -32,6 +32,9 @@ resource "azurerm_role_definition" "dw" {
       "Microsoft.Network/privateDnsZones/A/delete",
       "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read",
       "Microsoft.Network/virtualNetworks/subnets/joinViaServiceEndpoint/action",
+      "Microsoft.Network/virtualNetworks/subnets/read",                                 // added with testing result 07/20/2023
+      "Microsoft.Network/virtualNetworks/subnets/join/action",                          // added with testing result 07/20/2023
+      "Microsoft.Network/loadBalancers/write",                                          // added with testing result 07/20/2023
       "Microsoft.Network/routeTables/read",
       "Microsoft.Network/routeTables/write",
       "Microsoft.Network/routeTables/routes/read",

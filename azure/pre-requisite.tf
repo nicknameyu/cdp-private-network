@@ -104,6 +104,11 @@ locals {
         principal_id = azurerm_user_assigned_identity.managed_id["dw"].principal_id
         scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
         role  = azurerm_role_definition.dw.name
+      },
+      dw2 = {
+        principal_id = azurerm_user_assigned_identity.managed_id["dw"].principal_id
+        scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
+        role  = "Managed Identity Operator"        
       }
   }
 }
