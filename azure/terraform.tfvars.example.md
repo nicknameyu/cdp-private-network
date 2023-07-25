@@ -4,6 +4,7 @@
 hub_vnet_name = "dyu-hub-vnet"
 cdp_vnet_name = "dyu-cdp-vnet"
 firewall_name = "dyu_firewall"
+dns_resolver_name = "dyu_cdp_dns_resolver"
 managed_id = {
   assumer    = "dyu-cdp-assumer"
   dataaccess = "dyu-cdp-dataaccess"

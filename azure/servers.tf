@@ -85,6 +85,9 @@ resource "azurerm_linux_virtual_machine" "cdp-jump" {
   }
 }
 
+output "cdp_jump_server_private_ip" {
+  value = azurerm_network_interface.cdp-jump.ip_configuration[0].private_ip_address
+}
 
 ############# DNS Server ##################
 resource "azurerm_network_interface" "dns" {
@@ -177,4 +180,11 @@ resource "azurerm_firewall_nat_rule_collection" "dnat" {
     translated_address = azurerm_windows_virtual_machine.dns.private_ip_address
     protocols = ["TCP","UDP",]
   }
+}
+
+output "dns_server_public_ip" {
+  value = azurerm_public_ip.dns.ip_address
+}
+output "hub_jump_server_public_ip" {
+  value = azurerm_public_ip.hub-jump.ip_address
 }

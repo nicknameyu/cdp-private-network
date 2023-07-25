@@ -118,5 +118,13 @@ resource "azurerm_role_assignment" "assignment" {
   scope                = each.value["scope"]
   role_definition_name = each.value["role"]
   principal_id         = each.value["principal_id"]
+  depends_on           = [ 
+                            azurerm_role_definition.cmk,
+                            azurerm_role_definition.dw,
+                            azurerm_role_definition.env_multi_rg_pvt_ep,
+                            azurerm_role_definition.env_single_rg_pvt_ep,
+                            azurerm_role_definition.env_single_rg_svc_ep,
+                            azurerm_role_definition.liftie
+                         ]
 }
 
