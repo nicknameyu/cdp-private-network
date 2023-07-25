@@ -46,6 +46,9 @@ variable "cdp_subnets" {
     subnet_21_1 = "10.100.8.0/21"
   }
 }
+variable "resolver_inbound_subnet_cidr" {
+  default = "10.100.255.240/28"
+}
 
 variable "fw_app_rules" {
   default = {
@@ -141,6 +144,9 @@ variable "firewall_name" {
   type = string
 }
 
+variable "dns_resolver_name" {
+  type = string
+}
 ########### prerequisites #############
 variable "managed_id" {}
 variable "cdp_storage" {
