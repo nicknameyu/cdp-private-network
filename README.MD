@@ -6,4 +6,9 @@ This repo is to host terraform templates to create a lab networt environment for
 - Populate `terraform.tfvars` file and run terraform command to deploy the resources
 - Configure use the DNS server public IP ro rdp into the DNS server
   - Create DNS services
-  - Create conditional forward with `dns_resolver_inbound_ip` for privatelink domains.
+  - Create conditional forward to `dns_resolver_inbound_ip` for privatelink domains.
+    - `privatelink.mysql.database.azure.com`
+    - `privatelike.<region>.azmk8s.io`
+    - `privatelink.blob.core.windows.net`: if service endpoint is not allowed
+    - `privatelink.file.core.windows.net`: if service endpoint is not allowed
+    - `privatelink.postgres.database.azure.com`: if service endpoint is not allowed
