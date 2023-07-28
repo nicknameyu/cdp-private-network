@@ -109,10 +109,25 @@ variable "fw_app_rules" {
         "login.microsoftonline.com",                  // AKS
         "packages.microsoft.com",                     // AKS
         "acs-mirror.azureedge.net",                   // AKS
+        "data.policy.core.windows.net",               // AKS Azure Policy
+        "store.policy.core.windows.net",              // AKS Azure Policy
+        "dc.services.visualstudio.com",               // AKS Azure Policy
+        "nvidia.github.io",                           // AKS GPU
+        "us.download.nvidia.com",                     // AKS GPU
+        "download.docker.com",                        // AKS GPU
       ]
       type = "Https"
       port = "443"
     },
+    http_rules = {
+      target_fqdns = [
+        "security.ubuntu.com",                        // AKS
+        "azure.archive.ubuntu.com",                   // AKS
+        "changelogs.ubuntu.com",                      // AKS
+      ]
+      type = "Http"
+      port = "80"
+    }
   }
 }
 variable "fw_net_rules" {
@@ -167,4 +182,16 @@ variable "cdp_jump_server_name" {
 }
 variable "admin_username" {
   type = string
+}
+
+##################
+variable "spn_object_id" {
+  type = string
+  default = ""
+}
+
+##################
+variable "kv_name" {
+  type = string
+  default = ""
 }

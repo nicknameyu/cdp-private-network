@@ -41,4 +41,7 @@ custom_role_names = {
   env_multi_rg_pvt_ep  = "DYU CDP Multiple RG PvtEndpoint"
   cmk                  = "DYU CDP CMK"
 }
+
+spn_object_id = "******"  //this need to be the object id of the Enterprise application instead of the application registration
+kv_name = "dyucdpkeyvault"
 ```

@@ -33,6 +33,7 @@ resource "azurerm_user_assigned_identity" "managed_id" {
 }
 
 data azurerm_subscription "current"{}
+data "azurerm_client_config" "current" {}
 locals {
   role_assignment = {
       assumer1 = {
@@ -109,7 +110,27 @@ locals {
         principal_id = azurerm_user_assigned_identity.managed_id["dw"].principal_id
         scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
         role  = "Managed Identity Operator"        
-      }
+      },
+      spn_multi_rg = {
+        principal_id = var.spn_object_id
+        scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
+        role  = azurerm_role_definition.env_multi_rg_pvt_ep.name
+      },
+      spn_cmk = {
+        principal_id = var.spn_object_id
+        scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
+        role  = azurerm_role_definition.cmk.name
+      },
+      spn_dw = {
+        principal_id = var.spn_object_id
+        scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
+        role  = azurerm_role_definition.dw.name
+      },
+      spn_liftie = {
+        principal_id = var.spn_object_id
+        scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
+        role  = azurerm_role_definition.liftie.name
+      },
   }
 }
 
