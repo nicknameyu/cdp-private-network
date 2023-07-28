@@ -45,7 +45,7 @@ resource "azurerm_subnet" "cdp_subnets" {
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.cdp.name
   address_prefixes     = [each.value]
-  service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage"]
+  service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage", "Microsoft.KeyVault"]
 }
 resource "azurerm_subnet" "dns_resolver_inbound" {
   name                 = "dns_resolver_inbound"
@@ -159,4 +159,79 @@ resource "azurerm_private_dns_resolver_inbound_endpoint" "inbound" {
 }
 output "dns_resolver_inbound_ip" {
   value = azurerm_private_dns_resolver_inbound_endpoint.inbound.ip_configurations[0].private_ip_address
+}
+
+resource "azurerm_network_security_group" "default" {
+  for_each            = toset(["nsg-default", "nsg-knox"])
+  name                = each.key
+  location            = azurerm_resource_group.network.location
+  resource_group_name = azurerm_resource_group.network.name
+
+  security_rule {
+    name                       = "ssh"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "10.0.0.0/8"
+    destination_address_prefix = var.cdp_cidr[0]
+  }
+  security_rule {
+    name                       = "https"
+    priority                   = 101
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "10.0.0.0/8"
+    destination_address_prefix = var.cdp_cidr[0]
+  }
+  security_rule {
+    name                       = "mgmt"
+    priority                   = 102
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "9443"
+    source_address_prefix      = "10.0.0.0/8"
+    destination_address_prefix = var.cdp_cidr[0]
+  }
+  security_rule {
+    name                       = "comm-tcp"
+    priority                   = 103
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "0-65535"
+    source_address_prefix      = var.cdp_cidr[0]
+    destination_address_prefix = var.cdp_cidr[0]
+  }
+  security_rule {
+    name                       = "comm-udp"
+    priority                   = 104
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Udp"
+    source_port_range          = "*"
+    destination_port_range     = "0-65535"
+    source_address_prefix      = var.cdp_cidr[0]
+    destination_address_prefix = var.cdp_cidr[0]
+  }
+  security_rule {
+    name                       = "icmp"
+    priority                   = 105
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Icmp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "10.0.0.0/8"
+    destination_address_prefix = var.cdp_cidr[0]
+  }
+  tags = var.tags
 }
