@@ -167,6 +167,9 @@ variable "managed_id" {}
 variable "cdp_storage" {
   type = string
 }
+variable "cdp_file_storage" {
+  type = string
+}
 variable "custom_role_names" {
 }
 

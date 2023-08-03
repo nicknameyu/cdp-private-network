@@ -5,6 +5,8 @@
   - data container
   - log container
   - backup container
+- File storage for ML workspace
+- Key vault for CMK encryption
 - Managed identities
   - Assumer identity
   - data access identity
@@ -30,7 +32,10 @@
     - 23subnet1: 10.100.2.0/23
     - 22subnet1: 10.100.4.0/22
     - 21subnet1: 10.100.8.0/21
+    - resolver
   - Route tables: for each of the subnets in the vnet, internet egress routing to firewall ip address
+  - AKS private DNS zone
+  - network security groups
 
 ## Servers
 - DNS server

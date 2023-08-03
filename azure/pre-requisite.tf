@@ -24,6 +24,37 @@ resource "azurerm_storage_container" "containers" {
   container_access_type = "private"
 }
 
+# Get the public ip of this terraform client
+data "http" "myip" {
+  url = "http://ipv4.icanhazip.com"
+}
+resource "azurerm_storage_account" "fileshare" {
+  name                     = var.cdp_file_storage
+  resource_group_name      = azurerm_resource_group.prerequisite.name
+  location                 = azurerm_resource_group.prerequisite.location
+  account_tier             = "Premium"
+  account_replication_type = "LRS"
+  account_kind             = "FileStorage"
+  enable_https_traffic_only= false
+
+  network_rules {
+    default_action             = "Deny"
+    ip_rules                   = [ chomp(data.http.myip.response_body) ]             // Public ip of this terraform client need to be in the storage account firewall
+    virtual_network_subnet_ids = [ for subnet in azurerm_subnet.cdp_subnets: subnet.id ]
+  }
+
+  tags = var.tags
+}
+resource "azurerm_storage_share" "fileshare" {
+  name                 = "cdp-ml-share"
+  storage_account_name = azurerm_storage_account.fileshare.name
+  quota                = 101                                      // this value must be greater than 100 for premium file storage
+  enabled_protocol     = "NFS"
+
+}
+output "ml_fileshare" {
+  value = azurerm_storage_share.fileshare.url
+}
 ############## Managed Identity #################
 resource "azurerm_user_assigned_identity" "managed_id" {
   for_each            = var.managed_id
