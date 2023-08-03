@@ -1,5 +1,8 @@
 # Change log
 
+## v0.1.3 Azure template
+- Add Azure file share for ML workspace
+
 ## v0.1.2 Azure template
 - Add some firewall rules for AKS
 - Add CMK related resources

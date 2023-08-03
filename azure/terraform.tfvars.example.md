@@ -31,6 +31,7 @@ tags = {
     }
 
 cdp_storage = "dyucdpstorage"
+cdp_file_storage = "dyucdpfilestorage"
 
 admin_username = "dyu"
 custom_role_names = {
