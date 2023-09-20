@@ -32,7 +32,7 @@ variable "hub_subnets" {
   default = {
     AzureFirewallSubnet = ["10.128.0.0/26"]
     coresubnet          = ["10.128.1.0/24"]
-    resolversubnet      = ["10.128.0.64/26"]
+    //resolversubnet      = ["10.128.0.64/26"]
   }
 }
 variable "cdp_subnets" {
@@ -132,13 +132,13 @@ variable "fw_app_rules" {
 }
 variable "fw_net_rules" {
   default = {
-    ssh_rules = {
-      ip_prefix = [
-        "44.234.52.96/27"
-      ]
-      destination_ports = ["6000-6049",]
-      protocols         = ["TCP",]
-    },
+    # ssh_rules = {                                   // testing found this is not required, Aug 31
+    #   ip_prefix = [                                 // this is for CCMv1
+    #     "44.234.52.96/27"
+    #   ]
+    #   destination_ports = ["6000-6049",]
+    #   protocols         = ["TCP",]
+    # },
     https_rules = {
       ip_prefix = [ 
         "35.80.24.128/27",

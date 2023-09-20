@@ -1,5 +1,10 @@
 # Change log
 
+## v0.1.4 azure template
+- remove resolver subnet from hub vnet
+- add lifecycle configuration to route table resource to avoid deletion of routes for AKS
+- remove CCMv1 related firewall rule
+
 ## v0.1.3 Azure template
 - Add Azure file share for ML workspace
 

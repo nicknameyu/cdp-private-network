@@ -17,12 +17,12 @@ resource "azurerm_subnet" "firewall" {
   virtual_network_name = azurerm_virtual_network.hub.name
   address_prefixes     = var.hub_subnets.AzureFirewallSubnet
 }
-resource "azurerm_subnet" "resolver" {
-  name                 = "resolversubnet"
-  resource_group_name  = azurerm_resource_group.network.name
-  virtual_network_name = azurerm_virtual_network.hub.name
-  address_prefixes     = var.hub_subnets.resolversubnet
-}
+# resource "azurerm_subnet" "resolver" {
+#   name                 = "resolversubnet"
+#   resource_group_name  = azurerm_resource_group.network.name
+#   virtual_network_name = azurerm_virtual_network.hub.name
+#   address_prefixes     = var.hub_subnets.resolversubnet
+# }
 resource "azurerm_subnet" "core" {
   name                 = "coresubnet"
   resource_group_name  = azurerm_resource_group.network.name
@@ -90,6 +90,9 @@ resource "azurerm_route_table" "cdp_route" {
     address_prefix = "0.0.0.0/0"
     next_hop_type  = "VirtualAppliance"
     next_hop_in_ip_address = azurerm_firewall.firewall.ip_configuration[0].private_ip_address
+  }
+  lifecycle {
+    ignore_changes = [ route, tags ]
   }
 }
 
