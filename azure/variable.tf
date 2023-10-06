@@ -115,6 +115,12 @@ variable "fw_app_rules" {
         "nvidia.github.io",                           // AKS GPU
         "us.download.nvidia.com",                     // AKS GPU
         "download.docker.com",                        // AKS GPU
+        "aka.ms",                                     // Microsoft tools
+        "pypi.python.org",                            // Microsoft tools
+        "*.github.com",                               // Microsoft tools
+        "objects.githubusercontent.com",              // Microsoft tools
+        "files.pythonhosted.org",                     // Microsoft tools
+        "mirrorlist.centos.org",                      // Centos tools
       ]
       type = "Https"
       port = "443"
@@ -124,6 +130,7 @@ variable "fw_app_rules" {
         "security.ubuntu.com",                        // AKS
         "azure.archive.ubuntu.com",                   // AKS
         "changelogs.ubuntu.com",                      // AKS
+        "archive.ubuntu.com",                         // AKS
       ]
       type = "Http"
       port = "80"

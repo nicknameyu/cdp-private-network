@@ -1,5 +1,8 @@
 # Change log
 
+## v0.1.5 more fw rules
+- Add a few firewall rules for microsft tools. They are required to install Azure CLI 
+
 ## v0.1.4 azure template
 - remove resolver subnet from hub vnet
 - add lifecycle configuration to route table resource to avoid deletion of routes for AKS
