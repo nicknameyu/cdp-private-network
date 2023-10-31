@@ -121,7 +121,9 @@ variable "fw_app_rules" {
         "objects.githubusercontent.com",              // Microsoft tools
         "files.pythonhosted.org",                     // Microsoft tools
         "mirrorlist.centos.org",                      // Centos tools
+        "apt.releases.hashicorp.com",                 // hashicorp terraform
       ]
+      source_addresses = ["10.0.0.0/8"]
       type = "Https"
       port = "443"
     },
@@ -132,6 +134,7 @@ variable "fw_app_rules" {
         "changelogs.ubuntu.com",                      // AKS
         "archive.ubuntu.com",                         // AKS
       ]
+      source_addresses = ["10.0.0.0/8"]
       type = "Http"
       port = "80"
     }
@@ -155,8 +158,15 @@ variable "fw_net_rules" {
         "3.65.246.128/27",   // EU based Control Plane
         "3.26.127.64/27",    // AP based control plane
       ]
+      source_addresses  = ["10.0.0.0/8"]
       destination_ports = ["443",]
       protocols         = ["TCP",]
+    },
+    public_subnet = {
+      ip_prefix         = ["*"]
+      source_addresses  = ["10.128.1.0/24"]
+      destination_ports = ["*"]
+      protocols         = ["TCP", "UDP"]
     }
   }
 }
