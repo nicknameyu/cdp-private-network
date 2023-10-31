@@ -1,5 +1,10 @@
 # Change log
 
+## v0.1.5 core subnet route egress from firewall
+- Add route table to core subnet in hub vnet to control core subnet egress from firewall.
+  - Add firewall rule to allow egress from core subnet
+- ignore access policy changes in KeyVault
+
 ## v0.1.5 more fw rules
 - Add a few firewall rules for microsft tools. They are required to install Azure CLI 
 

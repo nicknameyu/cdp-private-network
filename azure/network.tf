@@ -17,12 +17,7 @@ resource "azurerm_subnet" "firewall" {
   virtual_network_name = azurerm_virtual_network.hub.name
   address_prefixes     = var.hub_subnets.AzureFirewallSubnet
 }
-# resource "azurerm_subnet" "resolver" {
-#   name                 = "resolversubnet"
-#   resource_group_name  = azurerm_resource_group.network.name
-#   virtual_network_name = azurerm_virtual_network.hub.name
-#   address_prefixes     = var.hub_subnets.resolversubnet
-# }
+
 resource "azurerm_subnet" "core" {
   name                 = "coresubnet"
   resource_group_name  = azurerm_resource_group.network.name
@@ -30,6 +25,26 @@ resource "azurerm_subnet" "core" {
   address_prefixes     = var.hub_subnets.coresubnet
 }
 
+resource "azurerm_route_table" "core" {
+  name                          = "rt_hub_coresubnet"
+  location                      = azurerm_resource_group.network.location
+  resource_group_name           = azurerm_resource_group.network.name
+  disable_bgp_route_propagation = false
+
+  route {
+    name           = "internet"
+    address_prefix = "0.0.0.0/0"
+    next_hop_type  = "VirtualAppliance"
+    next_hop_in_ip_address = azurerm_firewall.firewall.ip_configuration[0].private_ip_address
+  }
+  lifecycle {
+    ignore_changes = [ route, tags ]
+  }
+}
+resource "azurerm_subnet_route_table_association" "hub_core" {
+  subnet_id      = azurerm_subnet.core.id
+  route_table_id = azurerm_route_table.core.id
+}
 
 ################ CDP VNET #############
 resource "azurerm_virtual_network" "cdp" {
@@ -114,32 +129,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "cdp_aks" {
   private_dns_zone_name = azurerm_private_dns_zone.aks.name
   virtual_network_id    = azurerm_virtual_network.cdp.id
 }
-# resource "azurerm_private_dns_zone_virtual_network_link" "hub_aks" {
-#   name                  = "hub_vnet"
-#   resource_group_name   = azurerm_resource_group.network.name
-#   private_dns_zone_name = azurerm_private_dns_zone.aks.name
-#   virtual_network_id    = azurerm_virtual_network.hub.id
-# }
 
-// this piece was to pre-create private DNS zone for mysql to be used in CDE, so that we can avoid creating private dns zone on the fly. 
-// Turned out CDE anyway created private DNS zone on the fly.
-# resource "azurerm_private_dns_zone" "mysql" {
-#   name                = "privatelink.mysql.database.azure.com"
-#   resource_group_name = azurerm_resource_group.network.name
-#   tags                = var.tags
-# }
-# resource "azurerm_private_dns_zone_virtual_network_link" "cdp_db" {
-#   name                  = "cdp_vnet"
-#   resource_group_name   = azurerm_resource_group.network.name
-#   private_dns_zone_name = azurerm_private_dns_zone.mysql.name
-#   virtual_network_id    = azurerm_virtual_network.cdp.id
-# }
-# resource "azurerm_private_dns_zone_virtual_network_link" "hub_db" {
-#   name                  = "hub_vnet"
-#   resource_group_name   = azurerm_resource_group.network.name
-#   private_dns_zone_name = azurerm_private_dns_zone.mysql.name
-#   virtual_network_id    = azurerm_virtual_network.hub.id
-# }
 
 ########## Private DNS Resolver ##############
 resource "azurerm_private_dns_resolver" "dns_resolver" {

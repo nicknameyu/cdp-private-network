@@ -46,7 +46,7 @@ resource "azurerm_firewall_application_rule_collection" "app_rules" {
     for_each = var.fw_app_rules 
     content {
       name = rule.key
-      source_addresses = ["10.0.0.0/8"]
+      source_addresses = rule.value.source_addresses
       target_fqdns     = rule.value.target_fqdns
       protocol {
         port = rule.value.port
@@ -65,8 +65,8 @@ resource "azurerm_firewall_network_rule_collection" "network_rules" {
   dynamic "rule" {
     for_each = var.fw_net_rules 
     content {
-      name = rule.key
-      source_addresses = ["10.0.0.0/8"]
+      name                  = rule.key
+      source_addresses      = rule.value.source_addresses
       destination_ports     = rule.value.destination_ports
       destination_addresses = rule.value.ip_prefix
       protocols             = rule.value.protocols
