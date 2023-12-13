@@ -1,4 +1,15 @@
 # Change log
+## v0.2.1 AWS
+- adding lifecycle to instance resources so that instance won't need to be replaced when the ami data resource come back with a different ami id.
+- KMS key for encription.
+  - Key/KeyAlias
+  - Permisions required for KMS encryption.
+- Upcomine features
+  - KMS VPC endpoint
+  - Egress controlled by firewall
+  - RAZ support
+  - Custom Private DNS server
+
 ## v0.2.0 Add AWS template
 - This is the first AWS template. 
 - There is a hub-spoke network architecture in this template, core VPC, CDP VPC and transit gateway.
