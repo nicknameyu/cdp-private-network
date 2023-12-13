@@ -83,6 +83,9 @@ EOF
     Name = "${var.owner}-core-jump"
     owner = var.owner
   }
+  lifecycle {
+    ignore_changes = [ ami ]
+  }
 }
 
 
@@ -140,6 +143,9 @@ EOF
   tags = {
     Name = "${var.owner}-cdp-jump"
     owner = var.owner
+  }
+  lifecycle {
+    ignore_changes = [ ami ]
   }
 }
 

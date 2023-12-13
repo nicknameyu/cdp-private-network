@@ -78,6 +78,6 @@ variable "aws_dns" {
 
 variable "create_cross_account_role" {
   type = bool
-  description = "A switch to control whether to create cross account role. Default to false. "
-  default = false
+  description = "A switch to control whether to create cross account role. Default to true. "
+  default = true
 }

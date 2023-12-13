@@ -9,12 +9,25 @@ resource "aws_iam_policy" "cross_account" {
     owner = var.owner
   }
 }
+resource "aws_iam_policy" "ec2kms" {
+  count       = var.create_cross_account_role ? 1:0
+  name        = "${var.owner}-aws-cdp-ec2-kms-policy"
+  path        = "/"
+  description = "aws-cdp-ec2-kms-policy"
+  policy      = file("./policies/aws-cdp-ec2-kms-policy.json")
+  tags        = {
+    owner = var.owner
+  }
+}
 
 resource "aws_iam_role" "cross_account" {
   count               = var.create_cross_account_role ? 1:0
   name                = "${var.owner}-cdp-poc"
   assume_role_policy  = file("./policies/cdp-cross-account-trust-policy.json")
-  managed_policy_arns = [aws_iam_policy.cross_account[0].arn]
+  managed_policy_arns = [
+    aws_iam_policy.cross_account[0].arn,
+    aws_iam_policy.ec2kms[0].arn
+  ]
 
   tags = {
     owner = var.owner
@@ -23,7 +36,27 @@ resource "aws_iam_role" "cross_account" {
 
 
 ############### IAM ROLES ###################
+# KMS policies
+resource "aws_iam_policy" "kms_ro" {
+  name        = "${var.owner}-aws-cdp-sse-kms-read-only-policy"
+  path        = "/"
+  description = "aws-cdp-sse-kms-read-only-policy"
 
+  policy = replace(file("./policies/aws-cdp-sse-kms-read-only-policy.json"), "$${KEY_ARN}", aws_kms_alias.cdp.arn)
+  tags = {
+    owner = var.owner
+  }
+}
+resource "aws_iam_policy" "kms_rw" {
+  name        = "${var.owner}-aws-cdp-sse-kms-read-write-policy"
+  path        = "/"
+  description = "aws-cdp-sse-kms-read-write-policy"
+
+  policy = replace(file("./policies/aws-cdp-sse-kms-read-write-policy.json"), "$${KEY_ARN}", aws_kms_alias.cdp.arn)
+  tags = {
+    owner = var.owner
+  }
+}
 # IDBROKER role
 resource "aws_iam_policy" "assume" {
   name        = "${var.owner}-aws-cdp-idbroker-assume-role-policy"
@@ -86,7 +119,12 @@ resource "aws_iam_policy" "cdp_backup" {
 resource "aws_iam_role" "log" {
   name                = "${var.owner}-LOG_ROLE"
   assume_role_policy  = file("./policies/aws-cdp-ec2-role-trust-policy.json")
-  managed_policy_arns = [aws_iam_policy.restore.arn, aws_iam_policy.log.arn, aws_iam_policy.cdp_backup.arn]
+  managed_policy_arns = [
+    aws_iam_policy.restore.arn, 
+    aws_iam_policy.log.arn, 
+    aws_iam_policy.cdp_backup.arn,
+    aws_iam_policy.kms_rw.arn
+    ]
 
   tags = {
     owner = var.owner
@@ -135,7 +173,8 @@ resource "aws_iam_role" "ranger" {
     aws_iam_policy.ranger.arn,
     aws_iam_policy.bkt_access.arn,
     aws_iam_policy.dl_backup.arn,
-    aws_iam_policy.restore.arn
+    aws_iam_policy.restore.arn,
+    aws_iam_policy.kms_rw.arn
     ]
 
   tags = {
@@ -162,7 +201,8 @@ resource "aws_iam_role" "dl_admin" {
     aws_iam_policy.dl_admin.arn,
     aws_iam_policy.bkt_access.arn,
     aws_iam_policy.dl_backup.arn,
-    aws_iam_policy.restore.arn
+    aws_iam_policy.restore.arn,
+    aws_iam_policy.kms_rw.arn
     ]
 
   tags = {
