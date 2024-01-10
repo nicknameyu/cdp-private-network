@@ -1,12 +1,12 @@
 
 resource "aws_key_pair" "ssh_pub" {
   key_name   = "${var.owner}-ssh-key"
-  public_key = var.ssh_key == "" ? file("~/.ssh/id_rsa.pub") : var.ssh_key
+  public_key = file(var.ssh_key.public_key_path)
 }
 
 ############### Storage Location Base #################
 resource "aws_s3_bucket" "cdp" {
-  bucket = "${var.owner}-cdp-bucket"
+  bucket = var.cdp_bucket_name == null ? "${var.owner}-cdp-poc-bucket" : var.cdp_bucket_name
 
   tags = {
     Name        = "${var.owner}-cdp-bucket"

@@ -1,4 +1,16 @@
 # Change log
+## v0.2.2 AWS
+- Egress controlled by firewall
+  - route table adjusted
+  - Firewall rules added
+- DNS server added
+  - a windows server. Need manually configure the DNS service
+  - This is also a windows jump server, which will allow user to log on the CDP services. 
+- Upcomine features
+  - KMS VPC endpoint
+  - RAZ support
+  - Custom Private DNS server
+
 ## v0.2.1 AWS
 - adding lifecycle to instance resources so that instance won't need to be replaced when the ami data resource come back with a different ami id.
 - KMS key for encription.
