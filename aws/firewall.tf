@@ -91,6 +91,37 @@ resource "aws_networkfirewall_rule_group" "fw_domain_rg" {
     owner = var.owner
   }
 }
+
+resource "aws_networkfirewall_rule_group" "fw_http_ep" {
+  capacity = 100
+  name     = "${var.owner}-http-rulegroup"
+  type     = "STATEFUL"
+  
+  rule_group {
+    stateful_rule_options {
+      rule_order = "STRICT_ORDER"
+    }
+    rule_variables {
+      ip_sets {
+        key = "HOME_NET"
+        ip_set {
+          definition = [var.core_vpc.cidr, var.cdp_vpc.cidr]
+        }
+      }
+    }
+    rules_source {
+      rules_source_list {
+        generated_rules_type = "ALLOWLIST"
+        target_types = ["HTTP_HOST"]
+        targets = var.fw_http_ep
+      }
+    }
+
+  }
+  tags = {
+    owner = var.owner
+  }
+}
 resource "aws_networkfirewall_rule_group" "public" {
   capacity = 100
   name     = "${var.owner}-public-rulegroup"
@@ -140,10 +171,10 @@ resource "aws_networkfirewall_firewall_policy" "fw" {
       priority = 2
       resource_arn = aws_networkfirewall_rule_group.fw_domain_rg.arn
     }
-    # stateful_rule_group_reference {
-    #   priority = 3
-    #   resource_arn = aws_networkfirewall_rule_group.public.arn
-    # }
+    stateful_rule_group_reference {
+      priority = 3
+      resource_arn = aws_networkfirewall_rule_group.fw_http_ep.arn
+    }
   }
 
   tags = {
