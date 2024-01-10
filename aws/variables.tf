@@ -215,5 +215,16 @@ variable "fw_domain_ep" {
     # Public domains
     ".google.com",
     "cloudera.okta.com",
+    # aws cli
+    "awscli.amazonaws.com",
   ]
+}
+
+variable "fw_http_ep" {
+  type = list(string)
+  default = [     
+    # Ubuntu update
+    "security.ubuntu.com",
+    ".ec2.archive.ubuntu.com",
+    ".archive.canonical.com" ]
 }

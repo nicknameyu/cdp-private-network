@@ -1,4 +1,11 @@
 # Change log
+## v0.2.3 AWS
+- KMS VPC endpoint
+- Firewall rule group to allow Ubuntu repository and AWS cli
+- Upcomine features
+  - RAZ support
+  - Custom Private DNS server
+
 ## v0.2.2 AWS
 - Egress controlled by firewall
   - route table adjusted

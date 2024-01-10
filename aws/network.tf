@@ -10,6 +10,7 @@ resource "aws_vpc" "core" {
 resource "aws_vpc" "cdp" {
   cidr_block = var.cdp_vpc.cidr
   enable_dns_support = var.aws_dns
+  enable_dns_hostnames = true
   tags = {
     Name = var.cdp_vpc.name
     owner = var.owner
