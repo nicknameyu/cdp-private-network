@@ -152,3 +152,92 @@ EOF
 output "cdp_jump_private_ip" {
   value = aws_network_interface.cdp-jump.private_ip
 }
+
+################### Windows Server ################
+data "aws_ami" "windows" {
+     most_recent = true
+     filter {
+        name   = "name"
+        values = ["Windows_Server-2022-English-Full-Base-*"]
+ }
+     filter {
+       name   = "virtualization-type"
+       values = ["hvm"]
+ }
+     owners = ["801119661308"] # Canonical
+ }
+resource "aws_security_group" "dns" {
+  name   = "${var.owner}-dns-sg"
+  vpc_id = aws_vpc.core.id
+
+  ingress {
+    description      = "RDP"
+    from_port        = 3389
+    to_port          = 3389
+    protocol         = "TCP"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+  ingress {
+    description      = "DNS"
+    from_port        = 53
+    to_port          = 53
+    protocol         = "UDP"
+    cidr_blocks      = ["10.0.0.0/16"]
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+  tags   = {
+    owner = var.owner
+  }
+}
+resource "aws_eip" "dns" {
+  network_interface = aws_network_interface.dns.id
+  domain   = "vpc"
+  tags = {
+    Name = "${var.owner}-dns-eip"
+    owner = var.owner
+  }
+}
+output "dns_public_ip" {
+  value = aws_eip.dns.public_ip
+}
+output "dns_private_ip" {
+  value = aws_network_interface.dns.private_ip
+}
+
+resource "aws_network_interface" "dns" {
+  subnet_id   = aws_subnet.core["core"].id
+  security_groups = [ aws_security_group.dns.id ]
+
+  tags = {
+    Name = "${var.owner}-dns-nic"
+    owner = var.owner
+  }
+}
+
+resource "aws_instance" "dns" {
+  ami = data.aws_ami.windows.id
+  instance_type = "t2.micro"
+  key_name = aws_key_pair.ssh_pub.key_name
+  network_interface {
+    network_interface_id = aws_network_interface.dns.id
+    device_index         = 0
+  }
+  get_password_data = true
+  credit_specification {
+    cpu_credits = "unlimited"
+  }
+  tags = {
+    Name = "${var.owner}-dns"
+    owner = var.owner
+  }
+
+ }
+
+ output "dns_server_password" {
+   value = rsadecrypt(aws_instance.dns.password_data, file(var.ssh_key.private_rsa_key_path))
+ }

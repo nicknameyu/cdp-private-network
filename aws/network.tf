@@ -20,6 +20,7 @@ resource "aws_subnet" "core" {
   for_each = var.core_subnets
   vpc_id     = aws_vpc.core.id
   cidr_block = each.value.cidr
+  availability_zone = data.aws_availability_zones.available.names[each.value.az_sn]
 
   tags = {
     Name = each.value.name
@@ -30,7 +31,7 @@ resource "aws_subnet" "cdp" {
   for_each = var.cdp_subnets
   vpc_id = aws_vpc.cdp.id
   cidr_block = each.value.cidr
-  availability_zone = each.value.az
+  availability_zone = data.aws_availability_zones.available.names[each.value.az_sn]
 
   tags = {
     Name = each.value.name
@@ -82,18 +83,18 @@ resource "aws_internet_gateway" "igw" {
 
 resource "aws_route_table" "igw" {
   vpc_id = aws_vpc.core.id
-# I was trying to add the route rule to replace the default local rule based on terraform feature https://github.com/hashicorp/terraform-provider-aws/pull/32794
-# But failed. Created an issue for terraform to explain why this feature is not working. https://github.com/hashicorp/terraform-provider-aws/issues/34674
-# Leace this piece of code here for future possible enhancement. Before this issue is fixed, must manually modify the default local route from IGW to Firewall.
-#   route {
-#     cidr_block = var.core_vpc.cidr
-#   #  gateway_id = aws_internet_gateway.example.id
-# #   destination_cidr_block    = var.core_vpc.cidr
-# gateway_id = ""
-#    network_interface_id = "eni-0e99138623a9544da"
-#    #(tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
-#   }
-
+  route {
+    cidr_block      = var.core_subnets["core"].cidr
+    vpc_endpoint_id = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
+  }
+  route {
+    cidr_block      = var.core_subnets["nat"].cidr
+    vpc_endpoint_id = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
+  }
+  route {
+    cidr_block      = var.core_subnets["private"].cidr
+    vpc_endpoint_id = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
+  }
   tags = {
     Name = "rt_igw"
     owner = var.owner
@@ -178,25 +179,15 @@ resource "aws_ec2_transit_gateway_route" "tgw-nat" {
   destination_cidr_block           = "0.0.0.0/0"
   transit_gateway_attachment_id    = aws_ec2_transit_gateway_vpc_attachment.core.id
 }
+
 # Route from NAT GW subnet and core subnet to Firewall
-
-# resource "aws_route" "core-fw" {
-#   for_each                  = setsubtract(keys(var.core_subnets), ["firewall"])
-#   route_table_id            = aws_route_table.core[each.key].id
-#   destination_cidr_block    = "0.0.0.0/0"
-#   vpc_endpoint_id           = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
-# }
-
-
-# Route from core and NAT to IGW
-# This is a temporary route before I figure out how to route from igw to the firewall.
-resource "aws_route" "core-igw" {
+resource "aws_route" "core-fw" {
   for_each                  = setsubtract(keys(var.core_subnets), ["firewall", "private"])
   route_table_id            = aws_route_table.core[each.key].id
   destination_cidr_block    = "0.0.0.0/0"
-  gateway_id                = aws_internet_gateway.igw.id
+  vpc_endpoint_id           = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
 }
-
+# Route from private subnet to NAT gateway
 resource "aws_route" "private-nat" {
   route_table_id            = aws_route_table.core["private"].id
   destination_cidr_block    = "0.0.0.0/0"

@@ -1,9 +1,13 @@
 ##################### Firewall ######################
-resource "aws_networkfirewall_rule_group" "fw_rg" {
+resource "aws_networkfirewall_rule_group" "fw_standard_rg" {
   capacity = 100
-  name     = "${var.owner}-statefulgroup"
+  name     = "${var.owner}-standard-rulegroup"
   type     = "STATEFUL"
+  
   rule_group {
+    stateful_rule_options {
+      rule_order = "STRICT_ORDER"
+    }
     rules_source {
       stateful_rule {
         action = "PASS"
@@ -23,16 +27,31 @@ resource "aws_networkfirewall_rule_group" "fw_rg" {
       stateful_rule {
         action = "PASS"
         header {
-          destination      = aws_instance.core-jump.private_ip
+          destination      = var.core_subnets["core"].cidr
           destination_port = 22
           direction        = "FORWARD"
           protocol         = "SSH"
-          source           = "0.0.0.0/0"
+          source           = "ANY"
           source_port      = "ANY"
         }
         rule_option {
           keyword  = "sid"
           settings = ["2"]
+        }
+      }
+      stateful_rule {
+        action = "PASS"
+        header {
+          destination      = var.core_subnets["core"].cidr
+          destination_port = 3389
+          direction        = "FORWARD"
+          protocol         = "TCP"
+          source           = "ANY"
+          source_port      = "ANY"
+        }
+        rule_option {
+          keyword  = "sid"
+          settings = ["3"]
         }
       }
     }
@@ -42,17 +61,89 @@ resource "aws_networkfirewall_rule_group" "fw_rg" {
     owner = var.owner
   }
 }
+resource "aws_networkfirewall_rule_group" "fw_domain_rg" {
+  capacity = 100
+  name     = "${var.owner}-domain-rulegroup"
+  type     = "STATEFUL"
+  
+  rule_group {
+    stateful_rule_options {
+      rule_order = "STRICT_ORDER"
+    }
+    rule_variables {
+      ip_sets {
+        key = "HOME_NET"
+        ip_set {
+          definition = [var.core_vpc.cidr, var.cdp_vpc.cidr]
+        }
+      }
+    }
+    rules_source {
+      rules_source_list {
+        generated_rules_type = "ALLOWLIST"
+        target_types = ["TLS_SNI"]
+        targets = concat(var.fw_domain_ep, ["sts.${var.region}.amazonaws.com"])
+      }
+    }
 
+  }
+  tags = {
+    owner = var.owner
+  }
+}
+resource "aws_networkfirewall_rule_group" "public" {
+  capacity = 100
+  name     = "${var.owner}-public-rulegroup"
+  type     = "STATEFUL"
+  
+  rule_group {
+    stateful_rule_options {
+      rule_order = "STRICT_ORDER"
+    }
+    rule_variables {
+      ip_sets {
+        key = "HOME_NET"
+        ip_set {
+          definition = [var.core_subnets["core"].cidr]
+        }
+      }
+    }
+    rules_source {
+      rules_source_list {
+        generated_rules_type = "ALLOWLIST"
+        target_types = ["TLS_SNI"]
+        targets = ["www.google.com"]
+      }
+    }
+
+  }
+  tags = {
+    owner = var.owner
+  }
+}
 resource "aws_networkfirewall_firewall_policy" "fw" {
   name = "${var.fw_name}-policy"
 
-  firewall_policy {
-    stateless_default_actions          = ["aws:drop"]
-    stateless_fragment_default_actions = ["aws:drop"]
-    stateful_rule_group_reference {
-      resource_arn = aws_networkfirewall_rule_group.fw_rg.arn
-    }
 
+  firewall_policy {
+    stateful_default_actions = ["aws:drop_established"]
+    stateful_engine_options {
+      rule_order = "STRICT_ORDER"
+    }
+    stateless_default_actions          = ["aws:forward_to_sfe"]
+    stateless_fragment_default_actions = ["aws:forward_to_sfe"]
+    stateful_rule_group_reference {
+      priority = 1
+      resource_arn = aws_networkfirewall_rule_group.fw_standard_rg.arn
+    }
+    stateful_rule_group_reference {
+      priority = 2
+      resource_arn = aws_networkfirewall_rule_group.fw_domain_rg.arn
+    }
+    # stateful_rule_group_reference {
+    #   priority = 3
+    #   resource_arn = aws_networkfirewall_rule_group.public.arn
+    # }
   }
 
   tags = {
