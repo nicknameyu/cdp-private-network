@@ -144,7 +144,7 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "core" {
   }
 }
 resource "aws_ec2_transit_gateway_vpc_attachment" "cdp" {
-  subnet_ids         = [aws_subnet.cdp["subnet1"].id, aws_subnet.cdp["subnet2"].id]
+  subnet_ids         = [ for snet in aws_subnet.cdp: snet.id ]
   transit_gateway_id = aws_ec2_transit_gateway.tgw.id
   vpc_id             = aws_vpc.cdp.id
   dns_support        = "disable"
