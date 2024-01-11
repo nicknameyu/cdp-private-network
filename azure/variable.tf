@@ -73,6 +73,7 @@ variable "fw_app_rules" {
         "docker.repository.cloudera.com",             // Docker Image
         "container.repo.cloudera.com",                // Docker Image for data services
         "*.s3.us-west-2.amazonaws.com",               // Docker image for data services
+        "s3.us-west-2.amazonaws.com",                 // Document doesn't have this one. But DF will fail to download flows from S3.
         "*.s3.eu-1.amazonaws.com",                    // Docker image for data services
         "*.s3.ap-southeast-1.amazonaws.com",          // Docker image for data services
         "s3-r-w.us-west-1.amazonaws.com",                // Docker image for data services

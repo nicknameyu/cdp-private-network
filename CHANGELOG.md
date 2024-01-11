@@ -1,4 +1,9 @@
 # Change log
+## v0.2.5 Azure and AWS
+- Bug fix:
+  - added `s3.us-west-2.amazonaws.com` to firewall rule. This is not on our document. But DF fails downloading flow without it. 
+- 3rd subnet for AWS cdp VPC.
+
 ## v0.2.4 Auzre
 - Bug fix: 
   - disable key vault purge protection, so that it can be recreated. 

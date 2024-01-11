@@ -10,7 +10,7 @@ This repo is to host terraform templates to create a lab networt environment for
   - Create DNS services
   - Create conditional forward to `dns_resolver_inbound_ip` for privatelink domains.
     - `privatelink.mysql.database.azure.com`
-    - `privatelike.<region>.azmk8s.io`
+    - `privatelink.<region>.azmk8s.io`
     - `privatelink.blob.core.windows.net`: if service endpoint is not allowed
     - `privatelink.file.core.windows.net`: if service endpoint is not allowed
     - `privatelink.postgres.database.azure.com`: if service endpoint is not allowed

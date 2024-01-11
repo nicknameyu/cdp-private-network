@@ -78,6 +78,11 @@ variable "cdp_subnets" {
         cidr    = "10.2.1.0/24"
         az_sn   = 1
     }
+    subnet3 = {
+        name    = "subnet3"
+        cidr    = "10.2.3.0/24"
+        az_sn   = 2
+    }
   }
 }
 
