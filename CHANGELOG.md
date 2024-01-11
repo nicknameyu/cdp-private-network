@@ -1,4 +1,13 @@
 # Change log
+## v0.2.4 Auzre
+- Bug fix: 
+  - disable key vault purge protection, so that it can be recreated. 
+  - purge key vault when destroy
+  - If the key vault is deleted outside terraform, it may not have been purged. In this case, the key vault will be recovered, but key will run into error cause the recovered key is outstanding. In this case, there are several ways to remediate the failure.
+    - Option 1: manually import the key.
+    - Option 2: After running into error, comment off the key vault name, and run `terraform apply` so that terraform will purge the key vault; then uncomment the kv name, and run `terraform apply`.
+    - Option 3: manually purge the key vault and run `terraform apply`.
+
 ## v0.2.3 AWS
 - KMS VPC endpoint
 - Firewall rule group to allow Ubuntu repository and AWS cli
