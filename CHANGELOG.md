@@ -1,4 +1,7 @@
 # Change log
+## v0.2.6 AWS
+- Add a trust relationship policy statement to cross account role so that a user can be trusted to assume the cross account role for administration tasks. This is usually for the EKS clusters. 
+
 ## v0.2.5 Azure and AWS
 - Bug fix:
   - added `s3.us-west-2.amazonaws.com` to firewall rule. This is not on our document. But DF fails downloading flow without it. 

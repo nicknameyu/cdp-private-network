@@ -233,3 +233,9 @@ variable "fw_http_ep" {
     ".ec2.archive.ubuntu.com",
     ".archive.canonical.com" ]
 }
+
+variable "aws_sso_user_arn_keyword" {
+  description = "This keyword is used to create trust relationship between the cross account role and the target user, so that the user can assume this role for operation activities."
+  type = string
+  default = "cldr_poweruser"
+}
