@@ -12,6 +12,19 @@
                     "sts:ExternalId": "1ad3f7e3-0b0c-4644-81af-169bca32c77b"
                 }
             }
+        },
+        {
+            "Sid": "TrustProvisioner",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "*"
+            },
+            "Action": "sts:AssumeRole",
+            "Condition": {
+                "StringLike": {
+                    "aws:PrincipalArn": "*${PRINCIPAL_ARN_KEY_WORD}*"
+                }
+            }
         }
     ]
   }

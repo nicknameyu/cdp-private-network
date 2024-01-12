@@ -23,7 +23,7 @@ resource "aws_iam_policy" "ec2kms" {
 resource "aws_iam_role" "cross_account" {
   count               = var.create_cross_account_role ? 1:0
   name                = "${var.owner}-cdp-poc"
-  assume_role_policy  = file("./policies/cdp-cross-account-trust-policy.json")
+  assume_role_policy  = replace(file("./policies/cdp-cross-account-trust-policy.json"), "$${PRINCIPAL_ARN_KEY_WORD}", var.aws_sso_user_arn_keyword)
   managed_policy_arns = [
     aws_iam_policy.cross_account[0].arn,
     aws_iam_policy.ec2kms[0].arn

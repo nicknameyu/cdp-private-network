@@ -38,6 +38,9 @@ resource "aws_subnet" "cdp" {
     Name = each.value.name
     owner = var.owner
   }
+  lifecycle {
+    ignore_changes = [ tags, tags_all ]
+  }
 }
 
 resource "aws_route_table" "core" {
