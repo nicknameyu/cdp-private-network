@@ -49,7 +49,9 @@ variable "cdp_subnets" {
 variable "resolver_inbound_subnet_cidr" {
   default = "10.100.255.240/28"
 }
-
+variable "pg_flx_subnet_cidr" {
+  default = "10.100.255.224/28"
+}
 variable "fw_app_rules" {
   default = {
     https_rules = {
