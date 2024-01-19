@@ -1,4 +1,8 @@
 # Change log
+## v0.2.7 Azure
+- Add delegated subnet for Azure Postgres DB Flexible server. 
+- Change Azure storage location output format.
+
 ## v0.2.6 AWS
 - Add a trust relationship policy statement to cross account role so that a user can be trusted to assume the cross account role for administration tasks. This is usually for the EKS clusters. 
 

@@ -52,8 +52,13 @@ resource "azurerm_storage_share" "fileshare" {
   enabled_protocol     = "NFS"
 
 }
-output "ml_fileshare" {
-  value = azurerm_storage_share.fileshare.url
+output "storage" {
+  value = {
+    storage-location-base = "data@${azurerm_storage_account.cdp.primary_dfs_host}"
+    log-location          = "logs@${azurerm_storage_account.cdp.primary_dfs_host}"
+    backup-location       = "backup@${azurerm_storage_account.cdp.primary_dfs_host}"
+    nfs-file-share        = "nfs://${azurerm_storage_account.fileshare.primary_file_host}:/${azurerm_storage_share.fileshare.name}"
+  }
 }
 ############## Managed Identity #################
 resource "azurerm_user_assigned_identity" "managed_id" {

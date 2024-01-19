@@ -76,6 +76,21 @@ resource "azurerm_subnet" "dns_resolver_inbound" {
     }
   }
 }
+resource "azurerm_subnet" "pg_flx" {
+  name                 = "pg_flexible_subnet"
+  resource_group_name  = azurerm_resource_group.network.name
+  virtual_network_name = azurerm_virtual_network.cdp.name
+  address_prefixes     = [var.pg_flx_subnet_cidr]
+
+  delegation {
+    name = "Microsoft.DBforPostgreSQL/flexibleServers"
+    service_delegation {
+      actions = ["Microsoft.Network/virtualNetworks/subnets/join/action"] 
+          # this is a default action. If not added, Azure will add it by default, and next terraform apply will try to remove it. Lifecycling it is not appropriate.
+      name    = "Microsoft.DBforPostgreSQL/flexibleServers"
+    }
+  }
+}
 ########### Peering ##############
 resource "azurerm_virtual_network_peering" "hub_cdp" {
   name                      = "hub_cdp"
@@ -130,7 +145,24 @@ resource "azurerm_private_dns_zone_virtual_network_link" "cdp_aks" {
   virtual_network_id    = azurerm_virtual_network.cdp.id
 }
 
+resource "azurerm_private_dns_zone" "pg_flx" {
+  name                = "${var.location}.postgres.database.azure.com"
+  resource_group_name = azurerm_resource_group.network.name
+  tags                = var.tags
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "pg_flx" {
+  name                  = "cdp_vnet"
+  resource_group_name   = azurerm_resource_group.network.name
+  private_dns_zone_name = azurerm_private_dns_zone.pg_flx.name
+  virtual_network_id    = azurerm_virtual_network.cdp.id
+}
 
+output "private_dns_zones" {
+  value = {
+    aksPrivateDNSZoneID      = azurerm_private_dns_zone.aks.id
+    postgresPrivateDNSZoneID = azurerm_private_dns_zone.pg_flx.id
+  }
+}
 ########## Private DNS Resolver ##############
 resource "azurerm_private_dns_resolver" "dns_resolver" {
   name                = var.dns_resolver_name
