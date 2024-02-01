@@ -82,7 +82,7 @@ resource "aws_networkfirewall_rule_group" "fw_domain_rg" {
       rules_source_list {
         generated_rules_type = "ALLOWLIST"
         target_types = ["TLS_SNI"]
-        targets = concat(var.fw_domain_ep, ["sts.${var.region}.amazonaws.com"])
+        targets = local.fw_domain_ep
       }
     }
 

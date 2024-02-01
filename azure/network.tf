@@ -81,7 +81,7 @@ resource "azurerm_subnet" "pg_flx" {
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.cdp.name
   address_prefixes     = [var.pg_flx_subnet_cidr]
-
+  service_endpoints    = ["Microsoft.Storage"]
   delegation {
     name = "Microsoft.DBforPostgreSQL/flexibleServers"
     service_delegation {
