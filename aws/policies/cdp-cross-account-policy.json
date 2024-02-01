@@ -139,7 +139,9 @@
                 "s3:GetBucketLocation",
                 "s3:PutObject",
                 "s3:PutBucketTagging",
-                "s3:GetEncryptionConfiguration"
+                "s3:GetEncryptionConfiguration",
+                "s3:PutBucketPublicAccessBlock",
+                "s3:DeleteBucket"
             ],
             "Effect": "Allow",
             "Resource": [

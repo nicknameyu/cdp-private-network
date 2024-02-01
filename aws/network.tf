@@ -87,17 +87,13 @@ resource "aws_internet_gateway" "igw" {
 
 resource "aws_route_table" "igw" {
   vpc_id = aws_vpc.core.id
-  route {
-    cidr_block      = var.core_subnets["core"].cidr
-    vpc_endpoint_id = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
-  }
-  route {
-    cidr_block      = var.core_subnets["nat"].cidr
-    vpc_endpoint_id = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
-  }
-  route {
-    cidr_block      = var.core_subnets["private"].cidr
-    vpc_endpoint_id = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
+
+  dynamic route{
+    for_each = var.firewall_control ? ["core", "private", "nat"]:["core", "private"]
+    content {
+      cidr_block = var.core_subnets[route.value].cidr
+      vpc_endpoint_id = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
+    }
   }
   tags = {
     Name = "rt_igw"
@@ -186,10 +182,17 @@ resource "aws_ec2_transit_gateway_route" "tgw-nat" {
 
 # Route from NAT GW subnet and core subnet to Firewall
 resource "aws_route" "core-fw" {
-  for_each                  = setsubtract(keys(var.core_subnets), ["firewall", "private"])
+  for_each                  = setsubtract(keys(var.core_subnets), ["firewall", "private", "nat"])
   route_table_id            = aws_route_table.core[each.key].id
   destination_cidr_block    = "0.0.0.0/0"
   vpc_endpoint_id           = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
+}
+resource "aws_route" "nat-egress" {
+  route_table_id            = aws_route_table.core["nat"].id
+  destination_cidr_block    = "0.0.0.0/0"
+  # If firewall_control is yes, route to firewall, or route to IGW.
+  vpc_endpoint_id           = var.firewall_control ? (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id : null
+  gateway_id                = var.firewall_control ? null : aws_internet_gateway.igw.id
 }
 # Route from private subnet to NAT gateway
 resource "aws_route" "private-nat" {
@@ -221,3 +224,21 @@ resource "aws_vpc_endpoint_route_table_association" "cdp-s3" {
    route_table_id             = aws_route_table.cdp[each.key].id
    vpc_endpoint_id            = aws_vpc_endpoint.s3.id
 }
+# Route to Dynamo DB VPC endpoint
+# https://docs.cloudera.com/data-warehouse/cloud/aws-environments/topics/dw-aws-private-networking-prerequisites.html#pnavId1
+# This is weird that CDP is not creating DynamoDB, why need VPC endpoint for DynamoDB?
+# resource "aws_vpc_endpoint" "dynamodb" {
+#   vpc_id       = aws_vpc.cdp.id
+#   service_name = "com.amazonaws.${var.region}.dynamodb"
+
+#   tags = {
+#     Name = "${var.owner}-dynamodb-endpoint"
+#     owner = var.owner
+#   }
+# }
+
+# resource "aws_vpc_endpoint_route_table_association" "cdp-dynamodb" {
+#    for_each                   = var.cdp_subnets
+#    route_table_id             = aws_route_table.cdp[each.key].id
+#    vpc_endpoint_id            = aws_vpc_endpoint.dynamodb.id
+# }

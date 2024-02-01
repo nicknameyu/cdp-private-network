@@ -1,4 +1,13 @@
 # Change log
+## v0.2.8 Azure and AWS
+- Azure: Add service endpoint to PostgreSQL Flexible server delegated network to avoid removing it when re-apply the template.
+- AWS:
+  - Add `firewall_control` variable to switch beteen firewall control and no firewall control. This is for testing purpose.
+    - code for route tables are changed accordingly.
+  - Add `lifecycle` to dns server ami.
+  - Firewall rules update for data services.
+  - Now this version can successfully facilitate all data services.
+
 ## v0.2.7 Azure
 - Add delegated subnet for Azure Postgres DB Flexible server. 
 - Change Azure storage location output format.

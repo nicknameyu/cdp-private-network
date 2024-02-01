@@ -235,7 +235,9 @@ resource "aws_instance" "dns" {
     Name = "${var.owner}-dns"
     owner = var.owner
   }
-
+  lifecycle {
+    ignore_changes = [ ami ]
+  }
  }
 
  output "dns_server_password" {

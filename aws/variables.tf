@@ -202,6 +202,10 @@ variable "fw_domain_ep" {
     "pypi.org",
     # regional endpoint
     # US
+    ".s3.us-west-1.amazonaws.com",
+    ".s3.eu-central-1.amazonaws.com",
+    ".s3.ap-southeast-2.amazonaws.com",
+  
     ".cdp.cloudera.com",
     ".v2.ccm.cdp.cloudera.com",
     ".v2.us-west-1.ccm.cdp.cloudera.com",
@@ -214,6 +218,13 @@ variable "fw_domain_ep" {
     # AP
     "api.ap-1.cdp.cloudera.com",
     ".s3.ap-southeast-1.amazonaws.com",
+
+
+    # Public Signing Key Retrieval for Data Engineering DataFlow
+    "console.us-west-1.cdp.cloudera.com",
+    "console.eu-1.cdp.cloudera.com",
+    "console.ap-1.cdp.cloudera.com",
+
     # AWS STS
     "sts.amazonaws.com",
     ".rds.amazonaws.com",
@@ -222,7 +233,41 @@ variable "fw_domain_ep" {
     "cloudera.okta.com",
     # aws cli
     "awscli.amazonaws.com",
+    # k8s
+    "dl.k8s.io",
+    "cdn.dl.k8s.io",
+    "pkgs.k8s.io",
+    "prod-cdn.packages.k8s.io",
+
+    # Flow Definition storage for DF
+    # "s3.us-west-2.amazonaws.com",
+    "dfx-flow-artifacts.mow-prod.mow-prod.cloudera.com",
+    "cldr-mow-prod-eu-central-1-dfx-flow-artifacts.s3.eu-central-1.amazonaws.com",
+    "cldr-mow-prod-ap-southeast-2-dfx-flow-artifacts.s3.ap-southeast-2.amazonaws.com",
+
+    # Missing endpoints
+    "iamapi.us-west-1.altus.cloudera.com",  # DSE-34294
   ]
+}
+
+locals {
+  fw_regional_domain_ep = [
+    # these are AWS regional service endpoint. Can be converted to VPC enpoints. 
+    "sts.${var.region}.amazonaws.com", 
+    ".s3.${var.region}.amazonaws.com",
+    "api.ecr.${var.region}.amazonaws.com",
+    ".dkr.ecr.${var.region}.amazonaws.com",
+    "ec2.${var.region}.amazonaws.com",
+    "eks.${var.region}.amazonaws.com",
+    "cloudformation.${var.region}.amazonaws.com",
+    "autoscaling.${var.region}.amazonaws.com",
+    "elasticfilesystem.${var.region}.amazonaws.com",
+    "elasticloadbalancing.${var.region}.amazonaws.com",
+    "rds.${var.region}.amazonaws.com",
+    "servicequotas.${var.region}.amazonaws.com",
+    "pricing.${var.region}.amazonaws.com",
+  ]
+  fw_domain_ep = concat(var.fw_domain_ep, local.fw_regional_domain_ep)
 }
 
 variable "fw_http_ep" {
@@ -238,4 +283,10 @@ variable "aws_sso_user_arn_keyword" {
   description = "This keyword is used to create trust relationship between the cross account role and the target user, so that the user can assume this role for operation activities."
   type = string
   default = "cldr_poweruser"
+}
+
+variable "firewall_control" {
+  type = bool
+  default = true
+  description = "This is to control whether CDP VPC internet traffic is controled by firewall. For testing purpose."
 }
