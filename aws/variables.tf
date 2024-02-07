@@ -227,7 +227,7 @@ variable "fw_domain_ep" {
 
     # AWS STS
     "sts.amazonaws.com",
-    ".rds.amazonaws.com",
+    # ".rds.amazonaws.com",  # This is not required 
     # Public domains
     ".google.com",
     "cloudera.okta.com",
@@ -253,19 +253,20 @@ variable "fw_domain_ep" {
 locals {
   fw_regional_domain_ep = [
     # these are AWS regional service endpoint. Can be converted to VPC enpoints. 
+    # these are not required when creating environment and datalake and datahub. They are required for EKS based data services.
     "sts.${var.region}.amazonaws.com", 
-    ".s3.${var.region}.amazonaws.com",
-    "api.ecr.${var.region}.amazonaws.com",
-    ".dkr.ecr.${var.region}.amazonaws.com",
-    "ec2.${var.region}.amazonaws.com",
-    "eks.${var.region}.amazonaws.com",
-    "cloudformation.${var.region}.amazonaws.com",
-    "autoscaling.${var.region}.amazonaws.com",
-    "elasticfilesystem.${var.region}.amazonaws.com",
-    "elasticloadbalancing.${var.region}.amazonaws.com",
-    "rds.${var.region}.amazonaws.com",
-    "servicequotas.${var.region}.amazonaws.com",
-    "pricing.${var.region}.amazonaws.com",
+    # ".s3.${var.region}.amazonaws.com",                # Not required as gateway endpoint is recommended .
+    "api.ecr.${var.region}.amazonaws.com",              # Firewall rule is recommended .
+    ".dkr.ecr.${var.region}.amazonaws.com",             # Firewall rule is recommended .
+    "ec2.${var.region}.amazonaws.com",                  # Firewall rule is recommended
+    "eks.${var.region}.amazonaws.com",                  # Firewall rule is recommended
+    "cloudformation.${var.region}.amazonaws.com",       # Cloudformation is seldom used, a firewall rule should be okay.
+    "autoscaling.${var.region}.amazonaws.com",          # why autoscaling need a private endpoint?
+    "elasticfilesystem.${var.region}.amazonaws.com",    # Firewall rule is recommended
+    "elasticloadbalancing.${var.region}.amazonaws.com", # Firewall rule is recommended
+    # "rds.${var.region}.amazonaws.com",                # not necessary. Testing result
+    "servicequotas.${var.region}.amazonaws.com",        # Firewall rule is recommended
+    "pricing.${var.region}.amazonaws.com",              # Firewall rule is recommended
   ]
   fw_domain_ep = concat(var.fw_domain_ep, local.fw_regional_domain_ep)
 }

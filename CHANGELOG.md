@@ -1,4 +1,8 @@
 # Change log
+
+## v0.2.9 AWS
+- finalize firewall rules for data service
+
 ## v0.2.8 Azure and AWS
 - Azure: Add service endpoint to PostgreSQL Flexible server delegated network to avoid removing it when re-apply the template.
 - AWS:
