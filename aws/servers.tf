@@ -182,7 +182,7 @@ resource "aws_security_group" "dns" {
     from_port        = 53
     to_port          = 53
     protocol         = "UDP"
-    cidr_blocks      = ["10.0.0.0/16"]
+    cidr_blocks      = ["10.0.0.0/8"]
   }
   egress {
     from_port        = 0

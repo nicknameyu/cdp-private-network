@@ -1,7 +1,7 @@
 ##################### VPCs ######################
 resource "aws_vpc" "core" {
   cidr_block = var.core_vpc.cidr
-  enable_dns_support = var.aws_dns
+  enable_dns_support = true
   tags = {
     Name = var.core_vpc.name
     owner = var.owner
@@ -9,7 +9,7 @@ resource "aws_vpc" "core" {
 }
 resource "aws_vpc" "cdp" {
   cidr_block = var.cdp_vpc.cidr
-  enable_dns_support = var.aws_dns
+  enable_dns_support = true
   enable_dns_hostnames = true
   tags = {
     Name = var.cdp_vpc.name
@@ -89,7 +89,8 @@ resource "aws_route_table" "igw" {
   vpc_id = aws_vpc.core.id
 
   dynamic route{
-    for_each = var.firewall_control ? ["core", "private", "nat"]:["core", "private"]
+    for_each = setsubtract(setsubtract(["core", "private", "nat"], var.firewall_control ? []:["nat"]), var.public_snet_to_firewall ? []:["core"])
+    # for_each = var.firewall_control ? ["core", "private", "nat"]:["core", "private"]
     content {
       cidr_block = var.core_subnets[route.value].cidr
       vpc_endpoint_id = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
@@ -185,7 +186,8 @@ resource "aws_route" "core-fw" {
   for_each                  = setsubtract(keys(var.core_subnets), ["firewall", "private", "nat"])
   route_table_id            = aws_route_table.core[each.key].id
   destination_cidr_block    = "0.0.0.0/0"
-  vpc_endpoint_id           = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
+  gateway_id                = var.public_snet_to_firewall ? null : aws_internet_gateway.igw.id
+  vpc_endpoint_id           = var.public_snet_to_firewall ? (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id : null
 }
 resource "aws_route" "nat-egress" {
   route_table_id            = aws_route_table.core["nat"].id
@@ -224,21 +226,69 @@ resource "aws_vpc_endpoint_route_table_association" "cdp-s3" {
    route_table_id             = aws_route_table.cdp[each.key].id
    vpc_endpoint_id            = aws_vpc_endpoint.s3.id
 }
-# Route to Dynamo DB VPC endpoint
-# https://docs.cloudera.com/data-warehouse/cloud/aws-environments/topics/dw-aws-private-networking-prerequisites.html#pnavId1
-# This is weird that CDP is not creating DynamoDB, why need VPC endpoint for DynamoDB?
-# resource "aws_vpc_endpoint" "dynamodb" {
-#   vpc_id       = aws_vpc.cdp.id
-#   service_name = "com.amazonaws.${var.region}.dynamodb"
 
-#   tags = {
-#     Name = "${var.owner}-dynamodb-endpoint"
-#     owner = var.owner
-#   }
-# }
 
-# resource "aws_vpc_endpoint_route_table_association" "cdp-dynamodb" {
-#    for_each                   = var.cdp_subnets
-#    route_table_id             = aws_route_table.cdp[each.key].id
-#    vpc_endpoint_id            = aws_vpc_endpoint.dynamodb.id
-# }
+################# DNS config for CDP VPC ###############
+resource "aws_vpc_dhcp_options" "cdp" {
+  domain_name          = "${var.region}.compute.internal"
+  domain_name_servers  = var.custom_dns ? [aws_instance.dns.private_ip] : ["AmazonProvidedDNS"]
+
+  tags = {
+    Name = "${var.owner}-cdp-dopt"
+  }
+}
+resource "aws_vpc_dhcp_options_association" "cdp" {
+  vpc_id          = aws_vpc.cdp.id
+  dhcp_options_id = aws_vpc_dhcp_options.cdp.id
+}
+
+################ DNS private resolver for CDP VPC ############
+
+resource "aws_security_group" "cdp_dns_resolver" {
+  name   = "${var.owner}-cdp-dns-resolver-sg"
+  vpc_id = aws_vpc.cdp.id
+
+  ingress {
+    description      = "DNS"
+    from_port        = 53
+    to_port          = 53
+    protocol         = "UDP"
+    cidr_blocks      = [var.core_vpc.cidr, var.cdp_vpc.cidr]
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
+  tags   = {
+    owner = var.owner
+  }
+}
+
+resource "aws_route53_resolver_endpoint" "cdp" {
+  name      = "${var.owner}-cdp-dns-resolver"
+  direction = "INBOUND"
+
+  security_group_ids = [
+    aws_security_group.cdp_dns_resolver.id,
+  ]
+
+  ip_address {
+    subnet_id = aws_subnet.cdp[values(var.cdp_subnets)[0].name].id
+  }
+
+  ip_address {
+    subnet_id = aws_subnet.cdp[values(var.cdp_subnets)[1].name].id
+  }
+
+  protocols = ["Do53", "DoH"]
+
+  tags = {
+    owner = var.owner
+  }
+}
+
+output "cdp_dns_resolver_endpoint" {
+  value = aws_route53_resolver_endpoint.cdp.ip_address[*].ip
+}
