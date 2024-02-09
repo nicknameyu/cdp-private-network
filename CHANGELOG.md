@@ -1,5 +1,8 @@
 # Change log
 
+## 0.3.0 AWS
+- Custom DNS configuration
+
 ## v0.2.9 AWS
 - finalize firewall rules for data service
 

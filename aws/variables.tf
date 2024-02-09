@@ -107,12 +107,6 @@ variable "natgw_name" {
   type = string
 }
 
-variable "aws_dns" {
-  type = bool
-  description = "A switch to control whether enabling AWS provided DNS for the VPC. Default to true. Need to be false if using custom private DNS."
-  default = true
-}
-
 variable "create_cross_account_role" {
   type = bool
   description = "A switch to control whether to create cross account role. Default to true. "
@@ -227,7 +221,7 @@ variable "fw_domain_ep" {
 
     # AWS STS
     "sts.amazonaws.com",
-    # ".rds.amazonaws.com",  # This is not required 
+    ".rds.amazonaws.com",  
     # Public domains
     ".google.com",
     "cloudera.okta.com",
@@ -290,4 +284,15 @@ variable "firewall_control" {
   type = bool
   default = true
   description = "This is to control whether CDP VPC internet traffic is controled by firewall. For testing purpose."
+}
+variable "public_snet_to_firewall" {
+  type = bool
+  default = true
+  description = "This is to control whether public subnet internet traffic is controled by firewall. For testing purpose."
+}
+
+variable "custom_dns" {
+  type = bool
+  description = "This is to control whether we use custom DNS in CDP VPC"
+  default = false
 }
