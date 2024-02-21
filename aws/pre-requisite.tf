@@ -7,6 +7,7 @@ resource "aws_key_pair" "ssh_pub" {
 ############### Storage Location Base #################
 resource "aws_s3_bucket" "cdp" {
   bucket = var.cdp_bucket_name == null ? "${var.owner}-cdp-poc-bucket" : var.cdp_bucket_name
+  force_destroy  = true
 
   tags = {
     Name        = "${var.owner}-cdp-bucket"

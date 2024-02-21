@@ -57,7 +57,7 @@ output "storage" {
     storage-location-base = "data@${azurerm_storage_account.cdp.primary_dfs_host}"
     log-location          = "logs@${azurerm_storage_account.cdp.primary_dfs_host}"
     backup-location       = "backup@${azurerm_storage_account.cdp.primary_dfs_host}"
-    nfs-file-share        = "nfs://${azurerm_storage_account.fileshare.primary_file_host}:/${azurerm_storage_share.fileshare.name}"
+    nfs-file-share        = "nfs://${azurerm_storage_account.fileshare.primary_file_host}:/${var.cdp_file_storage}/${azurerm_storage_share.fileshare.name}"
   }
 }
 ############## Managed Identity #################

@@ -1,5 +1,6 @@
 ######### universal variables #########
 variable "resource_groups" {
+  description = "The template will create 4 resource groups to hold resources: the network resource group, the prerequisite resource group, the cdp environment resource group, and the jump server resource group."
   type = object({
     network_rg      = string
     prerequisite_rg = string
@@ -7,35 +8,44 @@ variable "resource_groups" {
     vms_rg          = string
   })
 }
-variable "tags" {}
+variable "tags" {
+  description = "Tags to be applied to the resources."
+  type = map(string)
+}
 
 variable "location" {
+  description = "Azure region where the resources will be created."
   type = string
   default = "westus"
 }
 
 ############# Networks #############
 variable "hub_cidr" {
-  default = ["10.128.0.0/16"]
+  description = "The CIDR range of HUB VNET."
+  default     = ["10.128.0.0/16"]
 }
 variable "cdp_cidr" {
-  default = ["10.100.0.0/16"]
+  description = "The CIDR range of CDP VNET."
+  default     = ["10.100.0.0/16"]
 }
 variable "hub_vnet_name" {
+  description = "The name of HUB VNET."
   type = string
 }
 variable "cdp_vnet_name" {
+  description = "The name of CDP VNET"
   type = string
 }
 
 variable "hub_subnets" {
+  description = "The subnets and their CIDR in the HUB VNET"
   default = {
     AzureFirewallSubnet = ["10.128.0.0/26"]
     coresubnet          = ["10.128.1.0/24"]
-    //resolversubnet      = ["10.128.0.64/26"]
   }
 }
 variable "cdp_subnets" {
+  description = "The subnets and their CIDR in the CDP VNET"
   default = {
     subnet_26_1 = "10.100.0.0/26", 
     subnet_26_2 = "10.100.0.64/26",
@@ -47,9 +57,11 @@ variable "cdp_subnets" {
   }
 }
 variable "resolver_inbound_subnet_cidr" {
+  description = "The CIDR for the private DNS resolver in CDP VNET."
   default = "10.100.255.240/28"
 }
 variable "pg_flx_subnet_cidr" {
+  description = "The CIDR for the postgres DB delegated subnet in CDP VNET."
   default = "10.100.255.224/28"
 }
 variable "fw_app_rules" {
@@ -76,6 +88,7 @@ variable "fw_app_rules" {
         "container.repo.cloudera.com",                // Docker Image for data services
         "*.s3.us-west-2.amazonaws.com",               // Docker image for data services
         "s3.us-west-2.amazonaws.com",                 // Document doesn't have this one. But DF will fail to download flows from S3.
+        "*.s3.eu-west-1.amazonaws.com",                // Document doesn't have this one. But DW will fail to download flows from S3 in EU.
         "*.s3.eu-1.amazonaws.com",                    // Docker image for data services
         "*.s3.ap-southeast-1.amazonaws.com",          // Docker image for data services
         "s3-r-w.us-west-1.amazonaws.com",                // Docker image for data services
@@ -176,45 +189,84 @@ variable "fw_net_rules" {
 
 
 variable "firewall_name" {
+  description = "The name for the Azure Firewall"
   type = string
 }
 
 variable "dns_resolver_name" {
+  description = "The name for the private DNS resolver on CDP VNET."
   type = string
 }
 ########### prerequisites #############
-variable "managed_id" {}
+variable "managed_id" {
+  description = "The name of the required managed identities."
+  type = object({
+    assumer    = string
+    dataaccess = string
+    logger     = string
+    ranger     = string
+    raz        = string
+    dw         = string
+  })
+}
+
 variable "cdp_storage" {
   type = string
+  description = "The name of the ADLS storage account."
 }
 variable "cdp_file_storage" {
+  description = "The name of the file storage that could be used in Machine Learning."
   type = string
 }
 variable "custom_role_names" {
+  type = object({
+    dw                   = string
+    liftie               = string
+    env_single_rg_svc_ep = string
+    env_single_rg_pvt_ep = string
+    env_multi_rg_pvt_ep  = string
+    cmk                  = string
+  })
 }
 
 ########### Servers ############
 variable "dns_server_name" {
-  type = string
+  description = "The name of the DNS server."
+  type        = string
 }
 variable "hub_jump_server_name" {
-  type = string
+  description = "The name of the jump server sitting in hub VNET"
+  type        = string
 }
 variable "cdp_jump_server_name" {
-  type = string
+  description = " The name of the jump server sitting in cdp VNET"
+  type        = string
 }
 variable "admin_username" {
-  type = string
+  description = "The administrator's name for the DNS server and jump servers."
+  type        = string
+}
+variable "password" {
+  description = "The password of the DNS servers"
+  type        = string
+  default     = "Passw0rd"
 }
 
 ##################
 variable "spn_object_id" {
+  description = "The object ID of the SPN. "
   type = string
-  default = ""
 }
 
 ##################
 variable "kv_name" {
+  description = "The name of the Key Vault."
   type = string
   default = ""
+}
+
+variable "public_key" {
+  description = "Path for the ssh public key to be added to the jump servers."
+  type        = string
+  default     = "~/.ssh/id_rsa.pub"
 }
