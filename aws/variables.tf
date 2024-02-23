@@ -172,9 +172,6 @@ variable "fw_domain_ep" {
     ".execute-api.ap-southeast-1.amazonaws.com",
 
 
-
-
-
     # global endpoint
     "raw.githubusercontent.com",
     "github.com",
