@@ -107,10 +107,10 @@ variable "natgw_name" {
   type = string
 }
 
-variable "create_cross_account_role" {
-  type = bool
-  description = "A switch to control whether to create cross account role. Default to true. "
-  default = true
+variable "cross_account_role" {
+  type = string
+  description = "A switch to control whether to create cross account role. Cross account role will be created if this is null, or cross account role will be imported. Default to null. "
+  default = null
 }
 
 variable "fw_domain_ep" {
@@ -170,9 +170,6 @@ variable "fw_domain_ep" {
     "prod-ap-southeast-1-starport-layer-bucket.s3.amazonaws.com",
     "s3-r-w.ap-southeast-1.amazonaws.com",
     ".execute-api.ap-southeast-1.amazonaws.com",
-
-
-
 
 
     # global endpoint
@@ -246,6 +243,7 @@ variable "fw_domain_ep" {
 
 locals {
   fw_regional_domain_ep = [
+    # https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-outbound_access_requirements.html#pnavId2
     # these are AWS regional service endpoint. Can be converted to VPC enpoints. 
     # these are not required when creating environment and datalake and datahub. They are required for EKS based data services.
     "sts.${var.region}.amazonaws.com", 
@@ -254,6 +252,7 @@ locals {
     ".dkr.ecr.${var.region}.amazonaws.com",             # Firewall rule is recommended .
     "ec2.${var.region}.amazonaws.com",                  # Firewall rule is recommended
     "eks.${var.region}.amazonaws.com",                  # Firewall rule is recommended
+    # "UNIQUEID.*.eks.amazonaws.com",                   # This is on document for DW, but actually not required.
     "cloudformation.${var.region}.amazonaws.com",       # Cloudformation is seldom used, a firewall rule should be okay.
     "autoscaling.${var.region}.amazonaws.com",          # why autoscaling need a private endpoint?
     "elasticfilesystem.${var.region}.amazonaws.com",    # Firewall rule is recommended

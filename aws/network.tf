@@ -37,6 +37,7 @@ resource "aws_subnet" "cdp" {
   tags = {
     Name = each.value.name
     owner = var.owner
+    "kubernetes.io/role/internal-elb" = 1
   }
   lifecycle {
     ignore_changes = [ tags, tags_all ]

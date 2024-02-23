@@ -28,7 +28,7 @@ resource "azurerm_linux_virtual_machine" "hub-jump" {
 
   admin_ssh_key {
     username   = var.admin_username
-    public_key = file("~/.ssh/id_rsa.pub")
+    public_key = file(var.public_key)
   }
 
   os_disk {
@@ -69,7 +69,7 @@ resource "azurerm_linux_virtual_machine" "cdp-jump" {
 
   admin_ssh_key {
     username   = var.admin_username
-    public_key = file("~/.ssh/id_rsa.pub")
+    public_key = file(var.public_key)
   }
 
   os_disk {
@@ -107,7 +107,7 @@ resource "azurerm_windows_virtual_machine" "dns" {
   location            = azurerm_resource_group.vm.location
   size                = "Standard_DS1_v2"
   admin_username      = var.admin_username
-  admin_password      = "Passw0rd"
+  admin_password      = var.password
   network_interface_ids = [
     azurerm_network_interface.dns.id,
   ]
