@@ -249,7 +249,6 @@ variable "admin_username" {
 variable "password" {
   description = "The password of the DNS servers"
   type        = string
-  default     = "Passw0rd"
 }
 
 ##################
