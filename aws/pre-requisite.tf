@@ -31,7 +31,7 @@ resource "aws_kms_key" "cdp" {
   description             = "KMS key for CDP"
   policy = replace(
     replace(file("./policies/aws-cdp-kms-key-policy.json"), "$${AWS_ACCOUNT_ID}", data.aws_caller_identity.current.account_id),
-    "$${CDP_KMS_KEY_ARN}", aws_iam_role.cross_account[0].arn)
+    "$${CDP_CROSS_ACCOUNT_ROLE_ARN}", (var.cross_account_role == null ? aws_iam_role.cross_account[0].arn : data.aws_iam_role.cross_account[0].arn))
   tags = {
     owner = var.owner
   }
@@ -74,7 +74,7 @@ resource "aws_security_group" "kms" {
 }
 resource "aws_vpc_endpoint" "kms" {
   vpc_id            = aws_vpc.cdp.id
-  service_name      = "com.amazonaws.us-west-2.kms"
+  service_name      = "com.amazonaws.${var.region}.kms"
   vpc_endpoint_type = "Interface"
   subnet_ids        = [aws_subnet.cdp["subnet1"].id]
 

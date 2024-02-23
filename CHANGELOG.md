@@ -1,7 +1,8 @@
 # Change log
 
 ## v0.3.1 Fix issues with Europe and AP regions
-- Polish variable descriptions and format.
+- Both AWS and Azure templates have been tested with US/EU/AP regions for Environment/Datalake/Datahub/K8s based data services.
+- Optimize variable descriptions and format.
 - Fix a few bugs related to EU and AP regions.
 
 ## v0.3.0 AWS

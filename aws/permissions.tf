@@ -1,6 +1,6 @@
 ############### Cross account role #############
 resource "aws_iam_policy" "cross_account" {
-  count       = var.create_cross_account_role ? 1:0
+  count       = var.cross_account_role == null ? 1:0
   name        = "${var.owner}-poc-policy"
   path        = "/"
   description = "${upper(var.owner)} POC policy"
@@ -10,7 +10,7 @@ resource "aws_iam_policy" "cross_account" {
   }
 }
 resource "aws_iam_policy" "ec2kms" {
-  count       = var.create_cross_account_role ? 1:0
+  count       = var.cross_account_role == null ? 1:0
   name        = "${var.owner}-aws-cdp-ec2-kms-policy"
   path        = "/"
   description = "aws-cdp-ec2-kms-policy"
@@ -21,7 +21,7 @@ resource "aws_iam_policy" "ec2kms" {
 }
 
 resource "aws_iam_role" "cross_account" {
-  count               = var.create_cross_account_role ? 1:0
+  count               = var.cross_account_role == null ? 1:0
   name                = "${var.owner}-cdp-poc"
   assume_role_policy  = replace(file("./policies/cdp-cross-account-trust-policy.json"), "$${PRINCIPAL_ARN_KEY_WORD}", var.aws_sso_user_arn_keyword)
   managed_policy_arns = [
@@ -34,6 +34,10 @@ resource "aws_iam_role" "cross_account" {
   }
 }
 
+data "aws_iam_role" "cross_account" {
+  count = var.cross_account_role == null ? 0:1
+  name = var.cross_account_role
+}
 
 ############### IAM ROLES ###################
 # KMS policies

@@ -107,10 +107,10 @@ variable "natgw_name" {
   type = string
 }
 
-variable "create_cross_account_role" {
-  type = bool
-  description = "A switch to control whether to create cross account role. Default to true. "
-  default = true
+variable "cross_account_role" {
+  type = string
+  description = "A switch to control whether to create cross account role. Cross account role will be created if this is null, or cross account role will be imported. Default to null. "
+  default = null
 }
 
 variable "fw_domain_ep" {
