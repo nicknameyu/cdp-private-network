@@ -269,3 +269,9 @@ variable "public_key" {
   type        = string
   default     = "~/.ssh/id_rsa.pub"
 }
+
+variable "custom_dns" {
+  description = "A switch to control the DNS setting one the VNETs. When true, the DNS setting points to custom DNS server. When true, use Azure Default DNS."
+  type    = bool
+  default = false
+}

@@ -1,5 +1,6 @@
 # Change log
-
+## v0.3.2 Azure template
+- Add a switch to control the custom DNS setting of the VNETs. When true, the DNS setting points to custom DNS server. When true, use Azure Default DNS.
 ## v0.3.1 Fix issues with Europe and AP regions
 - Both AWS and Azure templates have been tested with US/EU/AP regions for Environment/Datalake/Datahub/K8s based data services.
 - Optimize variable descriptions and format.

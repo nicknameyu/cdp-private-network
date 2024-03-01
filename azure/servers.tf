@@ -126,11 +126,13 @@ resource "azurerm_windows_virtual_machine" "dns" {
 }
 
 resource "azurerm_virtual_network_dns_servers" "hub" {
+  count              = var.custom_dns ? 1:0
   virtual_network_id = azurerm_virtual_network.hub.id
   dns_servers        = [azurerm_windows_virtual_machine.dns.private_ip_address]
 }
 
 resource "azurerm_virtual_network_dns_servers" "cdp" {
+  count              = var.custom_dns ? 1:0
   virtual_network_id = azurerm_virtual_network.cdp.id
   dns_servers        = [azurerm_windows_virtual_machine.dns.private_ip_address]
 }
