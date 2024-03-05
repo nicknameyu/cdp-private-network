@@ -37,7 +37,7 @@ resource "aws_kms_key" "cdp" {
   }
 }
 resource "aws_kms_alias" "cdp" {
-  name          = "alias/${var.owner}-cdp-key"
+  name          = var.cmk_key_name == null ? "alias/${var.owner}-cdp-key" : "alias/${var.cmk_key_name}"
   target_key_id = aws_kms_key.cdp.key_id
 }
 output "kms_key" {
