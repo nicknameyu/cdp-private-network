@@ -1,4 +1,7 @@
 # Change log
+## v0.3.3 AWS template
+- Add a variable to control key alias.
+
 ## v0.3.2 Azure template
 - Add a switch to control the custom DNS setting of the VNETs. When true, the DNS setting points to custom DNS server. When true, use Azure Default DNS.
 ## v0.3.1 Fix issues with Europe and AP regions
