@@ -1,6 +1,7 @@
 # CDP Public Cloud Private Network
 
-This repo is to host terraform templates to create a lab networt environment for CDP public cloud deployment in a full private cloud network environment.
+The template in this repo is `NOT` to create CDP installation. It's to create a hub-spoke network, custom private DNS, Firewall, as well as jump servers to mimic the `MOST TYPICAL` customer network setup. So that internal engineers can reproduce the problems they run into or test some assumptions easier.
+
 
 ## Usage
 - Populate `terraform.tfvars` file and run terraform command to deploy the resources
