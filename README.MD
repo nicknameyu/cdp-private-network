@@ -1,6 +1,6 @@
 # CDP Public Cloud Private Network
 
-The template in this repo is <font color=red size=10> NOT </font> to create CDP installation. It's to create a hub-spoke network, custom private DNS, Firewall, as well as jump servers to mimic the <font color=red size=10> most typical</font> customer network setup. So that internal engineers can reproduce the problems we run into or test some assumptions easier.
+The template in this repo is `NOT` to create CDP installation. It's to create a hub-spoke network, custom private DNS, Firewall, as well as jump servers to mimic the `MOST TYPICAL` customer network setup. So that internal engineers can reproduce the problems they run into or test some assumptions easier.
 
 
 ## Usage
