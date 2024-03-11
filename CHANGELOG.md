@@ -1,4 +1,6 @@
 # Change log
+## v0.3.4 AWS template
+- Add two security groups, knox and default
 ## v0.3.3 AWS template
 - Add a variable to control key alias.
 
