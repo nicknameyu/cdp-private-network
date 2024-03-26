@@ -102,6 +102,7 @@ variable "fw_app_rules" {
         "quay.io",
         "quayio-production-s3.s3.amazonaws.com",
         "docker.io",
+        "*.docker.io",
         "production.cloudflare.docker.com",
         "storage.googleapis.com",
         "consoleauth.altus.cloudera.com",             // Public Signing Key Retrieval US
@@ -224,8 +225,9 @@ variable "custom_role_names" {
     liftie               = string
     env_single_rg_svc_ep = string
     env_single_rg_pvt_ep = string
-    env_multi_rg_pvt_ep  = string
+//    env_multi_rg_pvt_ep  = string              // this one is deprecated.
     cmk                  = string
+    mkt_img              = string                // new added for RHEL8 Azure Market Image
   })
 }
 
@@ -261,7 +263,6 @@ variable "spn_object_id" {
 variable "kv_name" {
   description = "The name of the Key Vault."
   type = string
-  default = ""
 }
 
 variable "public_key" {

@@ -199,6 +199,14 @@ resource "azurerm_role_definition" "env_single_rg_svc_ep" {
       "Microsoft.DBforPostgreSQL/servers/write",
       "Microsoft.DBforPostgreSQL/servers/delete",
       "Microsoft.DBforPostgreSQL/servers/virtualNetworkRules/write",
+      "Microsoft.DBforPostgreSQL/flexibleServers/read",
+      "Microsoft.DBforPostgreSQL/flexibleServers/write",
+      "Microsoft.DBforPostgreSQL/flexibleServers/delete",
+      "Microsoft.DBforPostgreSQL/flexibleServers/start/action",
+      "Microsoft.DBforPostgreSQL/flexibleServers/stop/action",
+      "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write",
+      "Microsoft.DBforPostgreSQL/flexibleServers/start/action",              // added base on testing
+      "Microsoft.DBforPostgreSQL/flexibleServers/stop/action",               // added base on testing
       "Microsoft.Resources/deployments/cancel/action"
     ]
     data_actions = [
@@ -284,6 +292,23 @@ resource "azurerm_role_definition" "env_single_rg_pvt_ep" {
       "Microsoft.DBforPostgreSQL/servers/read",
       "Microsoft.DBforPostgreSQL/servers/write",
       "Microsoft.DBforPostgreSQL/servers/delete",
+      "Microsoft.DBforPostgreSQL/flexibleServers/read",
+      "Microsoft.DBforPostgreSQL/flexibleServers/write",
+      "Microsoft.DBforPostgreSQL/flexibleServers/delete",
+      "Microsoft.DBforPostgreSQL/flexibleServers/start/action",
+      "Microsoft.DBforPostgreSQL/flexibleServers/stop/action",
+      "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write",
+      "Microsoft.DBforPostgreSQL/flexibleServers/start/action",                // added base on testing 03/25/2024
+      "Microsoft.DBforPostgreSQL/flexibleServers/stop/action",                 // added base on testing 03/25/2024
+      "Microsoft.DBforMySQL/flexibleServers/read",                             // added base on testing 03/25/2024
+      "Microsoft.DBforMySQL/flexibleServers/write",                            // added base on testing 03/25/2024
+      "Microsoft.DBforMySQL/flexibleServers/delete",                           // added base on testing 03/25/2024
+      "Microsoft.DBforMySQL/flexibleServers/start/action",                     // added base on testing 03/25/2024
+      "Microsoft.DBforMySQL/flexibleServers/stop/action",                      // added base on testing 03/25/2024
+      "Microsoft.DBforMySQL/flexibleServers/firewallRules/write",              // added base on testing 03/25/2024
+      "Microsoft.DBforMySQL/flexibleServers/start/action",                     // added base on testing 03/25/2024
+      "Microsoft.DBforMySQL/flexibleServers/stop/action",                      // added base on testing 03/25/2024
+      "Microsoft.DBforMySQL/flexibleServers/PrivateEndpointConnectionsApproval/action",
       "Microsoft.Network/privateDnsZones/read",
       "Microsoft.Network/privateEndpoints/read",
       "Microsoft.Network/privateEndpoints/write",
@@ -321,100 +346,100 @@ resource "azurerm_role_definition" "env_single_rg_pvt_ep" {
   ]
 }
 
-resource "azurerm_role_definition" "env_multi_rg_pvt_ep" {
-  name        = var.custom_role_names.env_multi_rg_pvt_ep
-  scope       = data.azurerm_subscription.current.id
-  description = var.custom_role_names.env_multi_rg_pvt_ep
+# resource "azurerm_role_definition" "env_multi_rg_pvt_ep" {            // Deprecated
+#   name        = var.custom_role_names.env_multi_rg_pvt_ep
+#   scope       = data.azurerm_subscription.current.id
+#   description = var.custom_role_names.env_multi_rg_pvt_ep
 
-  permissions {
-    actions     = [
-      "Microsoft.Storage/storageAccounts/read",
-      "Microsoft.Storage/storageAccounts/write",
-      "Microsoft.Storage/storageAccounts/blobServices/write",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/delete",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/read",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/write",
-      "Microsoft.Storage/storageAccounts/fileServices/write",
-      "Microsoft.Storage/storageAccounts/listkeys/action",
-      "Microsoft.Storage/storageAccounts/regeneratekey/action",
-      "Microsoft.Storage/storageAccounts/delete",
-      "Microsoft.Storage/locations/deleteVirtualNetworkOrSubnets/action",
-      "Microsoft.Network/virtualNetworks/read",
-      "Microsoft.Network/virtualNetworks/write",
-      "Microsoft.Network/virtualNetworks/delete",
-      "Microsoft.Network/virtualNetworks/subnets/read",
-      "Microsoft.Network/virtualNetworks/subnets/write",
-      "Microsoft.Network/virtualNetworks/subnets/delete",
-      "Microsoft.Network/virtualNetworks/subnets/join/action",
-      "Microsoft.Network/publicIPAddresses/read",
-      "Microsoft.Network/publicIPAddresses/write",
-      "Microsoft.Network/publicIPAddresses/delete",
-      "Microsoft.Network/publicIPAddresses/join/action",
-      "Microsoft.Network/networkInterfaces/read",
-      "Microsoft.Network/networkInterfaces/write",
-      "Microsoft.Network/networkInterfaces/delete",
-      "Microsoft.Network/networkInterfaces/join/action",
-      "Microsoft.Network/networkInterfaces/ipconfigurations/read",
-      "Microsoft.Network/networkSecurityGroups/read",
-      "Microsoft.Network/networkSecurityGroups/write",
-      "Microsoft.Network/networkSecurityGroups/delete",
-      "Microsoft.Network/networkSecurityGroups/join/action",
-      "Microsoft.Network/virtualNetworks/subnets/joinViaServiceEndpoint/action",
-      "Microsoft.Network/loadBalancers/delete",
-      "Microsoft.Network/loadBalancers/read",
-      "Microsoft.Network/loadBalancers/write",
-      "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
-      "Microsoft.Compute/availabilitySets/read",
-      "Microsoft.Compute/availabilitySets/write",
-      "Microsoft.Compute/availabilitySets/delete",
-      "Microsoft.Compute/disks/read",
-      "Microsoft.Compute/disks/write",
-      "Microsoft.Compute/disks/delete",
-      "Microsoft.Compute/images/read",
-      "Microsoft.Compute/images/write",
-      "Microsoft.Compute/images/delete",
-      "Microsoft.Compute/virtualMachines/read",
-      "Microsoft.Compute/virtualMachines/write",
-      "Microsoft.Compute/virtualMachines/delete",
-      "Microsoft.Compute/virtualMachines/powerOff/action",
-      "Microsoft.Compute/virtualMachines/start/action",
-      "Microsoft.Compute/virtualMachines/restart/action",
-      "Microsoft.Compute/virtualMachines/deallocate/action",
-      "Microsoft.Compute/virtualMachines/vmSizes/read",
-      "Microsoft.Authorization/roleAssignments/read",
-      "Microsoft.Resources/subscriptions/resourceGroups/read",
-      "Microsoft.Resources/subscriptions/resourceGroups/write",
-      "Microsoft.Resources/subscriptions/resourceGroups/delete",
-      "Microsoft.Resources/subscriptions/resourceGroups/deployments/read",
-      "Microsoft.Resources/subscriptions/resourceGroups/deployments/write",
-      "Microsoft.Resources/subscriptions/resourceGroups/deployments/operations/read",
-      "Microsoft.Resources/subscriptions/resourceGroups/deployments/operationstatuses/read",
-      "Microsoft.Resources/deployments/read",
-      "Microsoft.Resources/deployments/write",
-      "Microsoft.Resources/deployments/delete",
-      "Microsoft.Resources/deployments/operations/read",
-      "Microsoft.Resources/deployments/operationstatuses/read",
-      "Microsoft.Resources/deployments/exportTemplate/action",
-      "Microsoft.Resources/subscriptions/read",
-      "Microsoft.ManagedIdentity/userAssignedIdentities/read",
-      "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action",
-      "Microsoft.DBforPostgreSQL/servers/read",
-      "Microsoft.DBforPostgreSQL/servers/write",
-      "Microsoft.DBforPostgreSQL/servers/delete",
-    ]
-    data_actions = [
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action"
-    ]
+#   permissions {
+#     actions     = [
+#       "Microsoft.Storage/storageAccounts/read",
+#       "Microsoft.Storage/storageAccounts/write",
+#       "Microsoft.Storage/storageAccounts/blobServices/write",
+#       "Microsoft.Storage/storageAccounts/blobServices/containers/delete",
+#       "Microsoft.Storage/storageAccounts/blobServices/containers/read",
+#       "Microsoft.Storage/storageAccounts/blobServices/containers/write",
+#       "Microsoft.Storage/storageAccounts/fileServices/write",
+#       "Microsoft.Storage/storageAccounts/listkeys/action",
+#       "Microsoft.Storage/storageAccounts/regeneratekey/action",
+#       "Microsoft.Storage/storageAccounts/delete",
+#       "Microsoft.Storage/locations/deleteVirtualNetworkOrSubnets/action",
+#       "Microsoft.Network/virtualNetworks/read",
+#       "Microsoft.Network/virtualNetworks/write",
+#       "Microsoft.Network/virtualNetworks/delete",
+#       "Microsoft.Network/virtualNetworks/subnets/read",
+#       "Microsoft.Network/virtualNetworks/subnets/write",
+#       "Microsoft.Network/virtualNetworks/subnets/delete",
+#       "Microsoft.Network/virtualNetworks/subnets/join/action",
+#       "Microsoft.Network/publicIPAddresses/read",
+#       "Microsoft.Network/publicIPAddresses/write",
+#       "Microsoft.Network/publicIPAddresses/delete",
+#       "Microsoft.Network/publicIPAddresses/join/action",
+#       "Microsoft.Network/networkInterfaces/read",
+#       "Microsoft.Network/networkInterfaces/write",
+#       "Microsoft.Network/networkInterfaces/delete",
+#       "Microsoft.Network/networkInterfaces/join/action",
+#       "Microsoft.Network/networkInterfaces/ipconfigurations/read",
+#       "Microsoft.Network/networkSecurityGroups/read",
+#       "Microsoft.Network/networkSecurityGroups/write",
+#       "Microsoft.Network/networkSecurityGroups/delete",
+#       "Microsoft.Network/networkSecurityGroups/join/action",
+#       "Microsoft.Network/virtualNetworks/subnets/joinViaServiceEndpoint/action",
+#       "Microsoft.Network/loadBalancers/delete",
+#       "Microsoft.Network/loadBalancers/read",
+#       "Microsoft.Network/loadBalancers/write",
+#       "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
+#       "Microsoft.Compute/availabilitySets/read",
+#       "Microsoft.Compute/availabilitySets/write",
+#       "Microsoft.Compute/availabilitySets/delete",
+#       "Microsoft.Compute/disks/read",
+#       "Microsoft.Compute/disks/write",
+#       "Microsoft.Compute/disks/delete",
+#       "Microsoft.Compute/images/read",
+#       "Microsoft.Compute/images/write",
+#       "Microsoft.Compute/images/delete",
+#       "Microsoft.Compute/virtualMachines/read",
+#       "Microsoft.Compute/virtualMachines/write",
+#       "Microsoft.Compute/virtualMachines/delete",
+#       "Microsoft.Compute/virtualMachines/powerOff/action",
+#       "Microsoft.Compute/virtualMachines/start/action",
+#       "Microsoft.Compute/virtualMachines/restart/action",
+#       "Microsoft.Compute/virtualMachines/deallocate/action",
+#       "Microsoft.Compute/virtualMachines/vmSizes/read",
+#       "Microsoft.Authorization/roleAssignments/read",
+#       "Microsoft.Resources/subscriptions/resourceGroups/read",
+#       "Microsoft.Resources/subscriptions/resourceGroups/write",
+#       "Microsoft.Resources/subscriptions/resourceGroups/delete",
+#       "Microsoft.Resources/subscriptions/resourceGroups/deployments/read",
+#       "Microsoft.Resources/subscriptions/resourceGroups/deployments/write",
+#       "Microsoft.Resources/subscriptions/resourceGroups/deployments/operations/read",
+#       "Microsoft.Resources/subscriptions/resourceGroups/deployments/operationstatuses/read",
+#       "Microsoft.Resources/deployments/read",
+#       "Microsoft.Resources/deployments/write",
+#       "Microsoft.Resources/deployments/delete",
+#       "Microsoft.Resources/deployments/operations/read",
+#       "Microsoft.Resources/deployments/operationstatuses/read",
+#       "Microsoft.Resources/deployments/exportTemplate/action",
+#       "Microsoft.Resources/subscriptions/read",
+#       "Microsoft.ManagedIdentity/userAssignedIdentities/read",
+#       "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action",
+#       "Microsoft.DBforPostgreSQL/servers/read",
+#       "Microsoft.DBforPostgreSQL/servers/write",
+#       "Microsoft.DBforPostgreSQL/servers/delete",
+#     ]
+#     data_actions = [
+#       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read",
+#       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write",
+#       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
+#       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action"
+#     ]
 
-  }
+#   }
 
-  assignable_scopes = [
-    data.azurerm_subscription.current.id, # /subscriptions/00000000-0000-0000-0000-000000000000
-  ]
-}
+#   assignable_scopes = [
+#     data.azurerm_subscription.current.id, # /subscriptions/00000000-0000-0000-0000-000000000000
+#   ]
+# }
 
 resource "azurerm_role_definition" "cmk" {
   name        = var.custom_role_names.cmk
@@ -436,6 +461,24 @@ resource "azurerm_role_definition" "cmk" {
       "Microsoft.DBforPostgreSQL/servers/read",
       "Microsoft.DBforPostgreSQL/servers/keys/write",
       "Microsoft.KeyVault/vaults/accessPolicies/write"
+    ]
+
+  }
+
+  assignable_scopes = [
+    data.azurerm_subscription.current.id, # /subscriptions/00000000-0000-0000-0000-000000000000
+  ]
+}
+
+resource "azurerm_role_definition" "mkt_img" {
+  name        = var.custom_role_names.mkt_img
+  scope       = data.azurerm_subscription.current.id
+  description = var.custom_role_names.mkt_img
+
+  permissions {
+    actions     = [
+                    "Microsoft.MarketplaceOrdering/offertypes/publishers/offers/plans/agreements/read",
+                    "Microsoft.MarketplaceOrdering/offertypes/publishers/offers/plans/agreements/write" 
     ]
 
   }

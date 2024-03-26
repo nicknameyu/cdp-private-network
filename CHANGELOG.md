@@ -1,4 +1,11 @@
 # Change log
+## v0.3.5 Azure template
+- Custom role update to add postgres DB flexible server. This version is good for every service except DE.
+- Custom role update to add azure market image permission
+- Remove multiple resource group private endpoint custom role as it is deprecated.
+- Enable Key Valt perge protection as it is mandatory.
+- Add a firewall rule to allow "*.docker.io"
+
 ## v0.3.4 AWS template
 - Add two security groups, knox and default
 ## v0.3.3 AWS template

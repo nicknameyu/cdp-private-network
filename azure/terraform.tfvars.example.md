@@ -39,8 +39,9 @@ custom_role_names = {
   liftie               = "DYU CDP for Liftie"
   env_single_rg_svc_ep = "DYU CDP Single RG SvcEndpoint"
   env_single_rg_pvt_ep = "DYU CDP Single RG PvtEndpoint"
-  env_multi_rg_pvt_ep  = "DYU CDP Multiple RG PvtEndpoint"
+  // env_multi_rg_pvt_ep  = "DYU CDP Multiple RG PvtEndpoint"           // Deprecated. 
   cmk                  = "DYU CDP CMK"
+  mkt_image            = "DYU Market Image"
 }
 
 spn_object_id = "******"  //this need to be the object id of the Enterprise application instead of the application registration
