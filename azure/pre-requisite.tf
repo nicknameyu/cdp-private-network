@@ -147,10 +147,15 @@ locals {
         scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
         role  = "Managed Identity Operator"        
       },
-      spn_multi_rg = {
+      # spn_multi_rg = {                                                                          // Deprecated
+      #   principal_id = var.spn_object_id
+      #   scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
+      #   role  = azurerm_role_definition.env_multi_rg_pvt_ep.name
+      # },
+      spn_main = {
         principal_id = var.spn_object_id
         scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
-        role  = azurerm_role_definition.env_multi_rg_pvt_ep.name
+        role  = azurerm_role_definition.env_single_rg_pvt_ep.name
       },
       spn_cmk = {
         principal_id = var.spn_object_id
@@ -167,6 +172,11 @@ locals {
         scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
         role  = azurerm_role_definition.liftie.name
       },
+      spn_mkt_img = {
+        principal_id = var.spn_object_id
+        scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
+        role  = azurerm_role_definition.mkt_img.name
+      }
   }
 }
 
@@ -178,10 +188,11 @@ resource "azurerm_role_assignment" "assignment" {
   depends_on           = [ 
                             azurerm_role_definition.cmk,
                             azurerm_role_definition.dw,
-                            azurerm_role_definition.env_multi_rg_pvt_ep,
+#                            azurerm_role_definition.env_multi_rg_pvt_ep, // Deprecated
                             azurerm_role_definition.env_single_rg_pvt_ep,
                             azurerm_role_definition.env_single_rg_svc_ep,
-                            azurerm_role_definition.liftie
+                            azurerm_role_definition.liftie,
+                            azurerm_role_definition.mkt_img
                          ]
 }
 
