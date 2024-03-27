@@ -50,4 +50,5 @@ The template in this repo is `NOT` to create CDP installation. It's to create a 
     - `privatelink.blob.core.windows.net`: if service endpoint is not allowed
     - `privatelink.file.core.windows.net`: if service endpoint is not allowed
     - `privatelink.postgres.database.azure.com`: if service endpoint is not allowed
+
 ![azure architecture](images/azure.png)
