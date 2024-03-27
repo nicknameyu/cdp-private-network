@@ -155,7 +155,7 @@ locals {
       spn_main = {
         principal_id = var.spn_object_id
         scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
-        role  = azurerm_role_definition.env_single_rg_pvt_ep.name
+        role  = var.spn_permision_contributor ? "Contributor" : azurerm_role_definition.env_single_rg_pvt_ep.name
       },
       spn_cmk = {
         principal_id = var.spn_object_id

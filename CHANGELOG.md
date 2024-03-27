@@ -1,4 +1,10 @@
 # Change log
+## v0.3.6 Azure template
+- Remove variables for subnet CIDR. Calculate the subnets CIDR from VNET CIDR.
+- Add network architecture of this terraform template in readme.
+- Add a switch variable `spn_permision_contributor` to control whether to grant contribotor permission to SPN.
+- This version is tested with all Data services. 
+
 ## v0.3.5 Azure template
 - Custom role update to add postgres DB flexible server. This version is good for every service except DE.
 - Custom role update to add azure market image permission

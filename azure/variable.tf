@@ -22,11 +22,19 @@ variable "location" {
 ############# Networks #############
 variable "hub_cidr" {
   description = "The CIDR range of HUB VNET."
-  default     = ["10.128.0.0/16"]
+  default     = "10.128.0.0/16"
+  validation {
+    condition     = substr(var.hub_cidr, length(var.hub_cidr)-2, 2) == "16"
+    error_message = "\"/16\" network prefix is required."
+  }
 }
 variable "cdp_cidr" {
   description = "The CIDR range of CDP VNET."
-  default     = ["10.100.0.0/16"]
+  default     = "10.100.0.0/16"
+  validation {
+    condition     = substr(var.cdp_cidr, length(var.cdp_cidr)-2, 2) == "16"
+    error_message = "\"/16\" network prefix is required."
+  }
 }
 variable "hub_vnet_name" {
   description = "The name of HUB VNET."
@@ -36,34 +44,24 @@ variable "cdp_vnet_name" {
   description = "The name of CDP VNET"
   type = string
 }
+locals {
+  hub_subnets = {
+    AzureFirewallSubnet = [cidrsubnet(var.hub_cidr, 10, 0 )]
+    coresubnet          = [cidrsubnet(var.hub_cidr, 8, 1 )]
+  }
+  cdp_subnets = {
+    subnet_26_1 = cidrsubnet(var.cdp_cidr, 10, 0)
+    subnet_26_2 = cidrsubnet(var.cdp_cidr, 10, 1)
+    subnet_25_1 = cidrsubnet(var.cdp_cidr, 9, 1)
+    subnet_24_1 = cidrsubnet(var.cdp_cidr, 8, 1)
+    subnet_23_1 = cidrsubnet(var.cdp_cidr, 7, 1)
+    subnet_22_1 = cidrsubnet(var.cdp_cidr, 6, 1)
+    subnet_21_1 = cidrsubnet(var.cdp_cidr, 5, 1)
+  }
+  resolver_inbound_subnet_cidr = cidrsubnet(var.cdp_cidr, 12, 4095)
+  pg_flx_subnet_cidr           = cidrsubnet(var.cdp_cidr, 12, 4094)
+}
 
-variable "hub_subnets" {
-  description = "The subnets and their CIDR in the HUB VNET"
-  default = {
-    AzureFirewallSubnet = ["10.128.0.0/26"]
-    coresubnet          = ["10.128.1.0/24"]
-  }
-}
-variable "cdp_subnets" {
-  description = "The subnets and their CIDR in the CDP VNET"
-  default = {
-    subnet_26_1 = "10.100.0.0/26", 
-    subnet_26_2 = "10.100.0.64/26",
-    subnet_25_1 = "10.100.0.128/25",
-    subnet_24_1 = "10.100.1.0/24",
-    subnet_23_1 = "10.100.2.0/23",
-    subnet_22_1 = "10.100.4.0/22",
-    subnet_21_1 = "10.100.8.0/21"
-  }
-}
-variable "resolver_inbound_subnet_cidr" {
-  description = "The CIDR for the private DNS resolver in CDP VNET."
-  default = "10.100.255.240/28"
-}
-variable "pg_flx_subnet_cidr" {
-  description = "The CIDR for the postgres DB delegated subnet in CDP VNET."
-  default = "10.100.255.224/28"
-}
 variable "fw_app_rules" {
   default = {
     https_rules = {
@@ -120,6 +118,7 @@ variable "fw_app_rules" {
         "*.blob.core.windows.net",                    // MS LogAnalytics Optional
         "www.digicert.com",                           // Digicert
         "cacerts.digicert.com",                       // Digicert
+        "*.cacerts.digicert.com",                       // Digicert
         "*.hcp.westus.azmk8s.io",                     // AKS
         "mcr.microsoft.com",                          // AKS
         "*.data.mcr.microsoft.com",                   // AKS
@@ -257,6 +256,10 @@ variable "password" {
 variable "spn_object_id" {
   description = "The object ID of the SPN. "
   type = string
+}
+variable "spn_permision_contributor" {
+  description = "A switch to controle the permission of SPN on the subscription. If true, grant contributor to SPN; if false, grant minimum permision to SPN."
+  default     = false
 }
 
 ##################

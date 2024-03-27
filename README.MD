@@ -29,6 +29,8 @@ The template in this repo is `NOT` to create CDP installation. It's to create a 
     - Cross account role
     - IAM policies, roles, instance profiles
 
+![aws architecture](images/aws.png)
+
 ### Azure
 - The network environment contains
 - HUB VNET to hold the jump server, DNS server, Firewall.
@@ -48,3 +50,4 @@ The template in this repo is `NOT` to create CDP installation. It's to create a 
     - `privatelink.blob.core.windows.net`: if service endpoint is not allowed
     - `privatelink.file.core.windows.net`: if service endpoint is not allowed
     - `privatelink.postgres.database.azure.com`: if service endpoint is not allowed
+![azure architecture](images/azure.png)
