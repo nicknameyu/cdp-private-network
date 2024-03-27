@@ -8,21 +8,21 @@ resource "azurerm_virtual_network" "hub" {
   name                = var.hub_vnet_name
   location            = azurerm_resource_group.network.location
   resource_group_name = azurerm_resource_group.network.name
-  address_space       = var.hub_cidr
+  address_space       = [var.hub_cidr]
   tags                = var.tags
 }
 resource "azurerm_subnet" "firewall" {
   name                 = "AzureFirewallSubnet"
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.hub.name
-  address_prefixes     = var.hub_subnets.AzureFirewallSubnet
+  address_prefixes     = local.hub_subnets.AzureFirewallSubnet
 }
 
 resource "azurerm_subnet" "core" {
   name                 = "coresubnet"
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.hub.name
-  address_prefixes     = var.hub_subnets.coresubnet
+  address_prefixes     = local.hub_subnets.coresubnet
 }
 
 resource "azurerm_route_table" "core" {
@@ -51,11 +51,11 @@ resource "azurerm_virtual_network" "cdp" {
   name                = var.cdp_vnet_name
   location            = azurerm_resource_group.network.location
   resource_group_name = azurerm_resource_group.network.name
-  address_space       = var.cdp_cidr
+  address_space       = [var.cdp_cidr]
   tags                = var.tags
 }
 resource "azurerm_subnet" "cdp_subnets" {
-  for_each             = var.cdp_subnets
+  for_each             = local.cdp_subnets
   name                 = each.key
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.cdp.name
@@ -66,7 +66,7 @@ resource "azurerm_subnet" "dns_resolver_inbound" {
   name                 = "dns_resolver_inbound"
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.cdp.name
-  address_prefixes     = [var.resolver_inbound_subnet_cidr]
+  address_prefixes     = [local.resolver_inbound_subnet_cidr]
 
   delegation {
     name = "Microsoft.Network.dnsResolvers"
@@ -80,7 +80,7 @@ resource "azurerm_subnet" "pg_flx" {
   name                 = "pg_flexible_subnet"
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.cdp.name
-  address_prefixes     = [var.pg_flx_subnet_cidr]
+  address_prefixes     = [local.pg_flx_subnet_cidr]
   service_endpoints    = ["Microsoft.Storage"]
   delegation {
     name = "Microsoft.DBforPostgreSQL/flexibleServers"
@@ -109,7 +109,7 @@ resource "azurerm_virtual_network_peering" "cdp_hub" {
 
 ############# Route tables ##############
 resource "azurerm_route_table" "cdp_route" {
-  for_each                      = var.cdp_subnets
+  for_each                      = local.cdp_subnets
   name                          = "rt_cdp_${each.key}"
   location                      = azurerm_resource_group.network.location
   resource_group_name           = azurerm_resource_group.network.name
@@ -201,7 +201,7 @@ resource "azurerm_network_security_group" "default" {
     source_port_range          = "*"
     destination_port_range     = "22"
     source_address_prefix      = "10.0.0.0/8"
-    destination_address_prefix = var.cdp_cidr[0]
+    destination_address_prefix = var.cdp_cidr
   }
   security_rule {
     name                       = "https"
@@ -212,7 +212,7 @@ resource "azurerm_network_security_group" "default" {
     source_port_range          = "*"
     destination_port_range     = "443"
     source_address_prefix      = "10.0.0.0/8"
-    destination_address_prefix = var.cdp_cidr[0]
+    destination_address_prefix = var.cdp_cidr
   }
   security_rule {
     name                       = "mgmt"
@@ -223,7 +223,7 @@ resource "azurerm_network_security_group" "default" {
     source_port_range          = "*"
     destination_port_range     = "9443"
     source_address_prefix      = "10.0.0.0/8"
-    destination_address_prefix = var.cdp_cidr[0]
+    destination_address_prefix = var.cdp_cidr
   }
   security_rule {
     name                       = "comm-tcp"
@@ -233,8 +233,8 @@ resource "azurerm_network_security_group" "default" {
     protocol                   = "Tcp"
     source_port_range          = "*"
     destination_port_range     = "0-65535"
-    source_address_prefix      = var.cdp_cidr[0]
-    destination_address_prefix = var.cdp_cidr[0]
+    source_address_prefix      = var.cdp_cidr
+    destination_address_prefix = var.cdp_cidr
   }
   security_rule {
     name                       = "comm-udp"
@@ -244,8 +244,8 @@ resource "azurerm_network_security_group" "default" {
     protocol                   = "Udp"
     source_port_range          = "*"
     destination_port_range     = "0-65535"
-    source_address_prefix      = var.cdp_cidr[0]
-    destination_address_prefix = var.cdp_cidr[0]
+    source_address_prefix      = var.cdp_cidr
+    destination_address_prefix = var.cdp_cidr
   }
   security_rule {
     name                       = "icmp"
@@ -256,7 +256,7 @@ resource "azurerm_network_security_group" "default" {
     source_port_range          = "*"
     destination_port_range     = "22"
     source_address_prefix      = "10.0.0.0/8"
-    destination_address_prefix = var.cdp_cidr[0]
+    destination_address_prefix = var.cdp_cidr
   }
   tags = var.tags
 }
