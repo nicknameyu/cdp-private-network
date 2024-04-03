@@ -24,16 +24,16 @@ variable "hub_cidr" {
   description = "The CIDR range of HUB VNET."
   default     = "10.128.0.0/16"
   validation {
-    condition     = substr(var.hub_cidr, length(var.hub_cidr)-2, 2) == "16"
-    error_message = "\"/16\" network prefix is required."
+    condition     = tonumber(split("/", var.hub_cidr)[1]) <= 25
+    error_message = "A minimum /25 CIDR is required for HUB VNET."
   }
 }
 variable "cdp_cidr" {
   description = "The CIDR range of CDP VNET."
   default     = "10.100.0.0/16"
   validation {
-    condition     = substr(var.cdp_cidr, length(var.cdp_cidr)-2, 2) == "16"
-    error_message = "\"/16\" network prefix is required."
+    condition     = tonumber(split("/", var.cdp_cidr)[1]) <= 20
+    error_message = "A minimum /20 CIDR is required for CDP VNET."
   }
 }
 variable "hub_vnet_name" {
@@ -45,21 +45,22 @@ variable "cdp_vnet_name" {
   type = string
 }
 locals {
+  hub_vnet_masknum = tonumber(split("/", var.hub_cidr)[1])
   hub_subnets = {
-    AzureFirewallSubnet = [cidrsubnet(var.hub_cidr, 10, 0 )]
-    coresubnet          = [cidrsubnet(var.hub_cidr, 8, 1 )]
+    AzureFirewallSubnet = [cidrsubnet(var.hub_cidr, 26 - local.hub_vnet_masknum, 0 )]
+    coresubnet          = [cidrsubnet(var.hub_cidr, 26 - local.hub_vnet_masknum, 1 )]
   }
+  cdp_vnet_masknum = tonumber(split("/", var.cdp_cidr)[1])
   cdp_subnets = {
-    subnet_26_1 = cidrsubnet(var.cdp_cidr, 10, 0)
-    subnet_26_2 = cidrsubnet(var.cdp_cidr, 10, 1)
-    subnet_25_1 = cidrsubnet(var.cdp_cidr, 9, 1)
-    subnet_24_1 = cidrsubnet(var.cdp_cidr, 8, 1)
-    subnet_23_1 = cidrsubnet(var.cdp_cidr, 7, 1)
-    subnet_22_1 = cidrsubnet(var.cdp_cidr, 6, 1)
-    subnet_21_1 = cidrsubnet(var.cdp_cidr, 5, 1)
+    subnet_26_1 = cidrsubnet(var.cdp_cidr, 26 - local.cdp_vnet_masknum, 1)
+    subnet_25_1 = cidrsubnet(var.cdp_cidr, 25 - local.cdp_vnet_masknum, 1)
+    subnet_24_1 = cidrsubnet(var.cdp_cidr, 24 - local.cdp_vnet_masknum, 1)
+    subnet_23_1 = cidrsubnet(var.cdp_cidr, 23 - local.cdp_vnet_masknum, 1)
+    subnet_22_1 = cidrsubnet(var.cdp_cidr, 22 - local.cdp_vnet_masknum, 1)
+    subnet_21_1 = cidrsubnet(var.cdp_cidr, 21 - local.cdp_vnet_masknum, 1)
   }
-  resolver_inbound_subnet_cidr = cidrsubnet(var.cdp_cidr, 12, 4095)
-  pg_flx_subnet_cidr           = cidrsubnet(var.cdp_cidr, 12, 4094)
+  resolver_inbound_subnet_cidr = cidrsubnet(var.cdp_cidr, 28 - local.cdp_vnet_masknum, 0)
+  pg_flx_subnet_cidr           = cidrsubnet(var.cdp_cidr, 28 - local.cdp_vnet_masknum, 1)
 }
 
 variable "fw_app_rules" {

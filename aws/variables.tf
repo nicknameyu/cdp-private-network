@@ -15,6 +15,10 @@ variable "core_vpc" {
     name = string
     cidr = string
   })
+  validation {
+    condition     = tonumber(split("/", var.core_vpc.cidr)[1]) <= 26
+    error_message = "A minimum /26 CIDR is required for core VPC."
+  }
 }
 
 variable "cdp_vpc"{
@@ -22,6 +26,10 @@ variable "cdp_vpc"{
     name = string
     cidr = string
   })
+  validation {
+    condition     = tonumber(split("/", var.cdp_vpc.cidr)[1]) <= 22
+    error_message = "A minimum /22 CIDR is required for cdp VPC."
+  }
 }
 variable "tgw_name" {
   description = "Name of the trasit gateway."
@@ -31,57 +39,49 @@ variable "fw_name" {
   description = "Name of the firewall."
   type = string
 }
-variable "core_subnets" {
-  type = map(object({
-    name = string
-    cidr = string
-    az_sn = number 
-  }))
-  default = {
+
+locals {
+  // Subnet CIDR calculation
+  core_vpc_masknum = tonumber(split("/", var.core_vpc.cidr)[1])
+  core_subnets = {
+    
     core = {
         name = "coresubnet"
-        cidr = "10.1.0.0/28"
+        cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 0)
         az_sn   = 0
     }
     nat = {
         name = "natsubnet"
-        cidr = "10.1.0.16/28"
+        cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 1)
         az_sn   = 0
     }
     firewall = {
         name = "firewallsubnet"
-        cidr = "10.1.0.32/28"
+        cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 2)
         az_sn   = 0
     }
     private = {
         name = "privatesubnet"
-        cidr = "10.1.0.48/28"
+        cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 3)
         az_sn   = 0
     }
   }
-}
-
-variable "cdp_subnets" {
-  type = map(object({
-    name = string
-    cidr = string
-    az_sn = number // az_sn is the serial number of availability zone, indicates the numer "az_sn" AZ to deploy this subnet into.
-  }))
-  default = {
+  cdp_vpc_masknum = tonumber(split("/", var.cdp_vpc.cidr)[1])
+  cdp_subnets     = {
     subnet1 = {
         name    = "subnet1"
-        cidr    = "10.2.0.0/24"
+        cidr    = cidrsubnet(var.cdp_vpc.cidr, 24 - local.cdp_vpc_masknum, 0)
         az_sn   = 0
     }
     subnet2 = {
         name    = "subnet2"
-        cidr    = "10.2.1.0/24"
+        cidr    = cidrsubnet(var.cdp_vpc.cidr, 24 - local.cdp_vpc_masknum, 1)
         az_sn   = 1
     }
     subnet3 = {
         name    = "subnet3"
-        cidr    = "10.2.3.0/24"
-        az_sn   = 2
+        cidr    = cidrsubnet(var.cdp_vpc.cidr, 24 - local.cdp_vpc_masknum, 2)
+        az_sn   = length(data.aws_availability_zones.available.names) > 2 ? 2:0
     }
   }
 }
