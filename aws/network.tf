@@ -18,7 +18,7 @@ resource "aws_vpc" "cdp" {
 }
 
 resource "aws_subnet" "core" {
-  for_each = var.core_subnets
+  for_each = local.core_subnets
   vpc_id     = aws_vpc.core.id
   cidr_block = each.value.cidr
   availability_zone = data.aws_availability_zones.available.names[each.value.az_sn]
@@ -29,7 +29,7 @@ resource "aws_subnet" "core" {
   }
 }
 resource "aws_subnet" "cdp" {
-  for_each = var.cdp_subnets
+  for_each = local.cdp_subnets
   vpc_id = aws_vpc.cdp.id
   cidr_block = each.value.cidr
   availability_zone = data.aws_availability_zones.available.names[each.value.az_sn]
@@ -45,7 +45,7 @@ resource "aws_subnet" "cdp" {
 }
 
 resource "aws_route_table" "core" {
-  for_each = var.core_subnets
+  for_each = local.core_subnets
   vpc_id = aws_vpc.core.id
 
   tags = {
@@ -55,13 +55,13 @@ resource "aws_route_table" "core" {
 }
 
 resource "aws_route_table_association" "core" {
-  for_each       = var.core_subnets
+  for_each       = local.core_subnets
   subnet_id      = aws_subnet.core[each.key].id
   route_table_id = aws_route_table.core[each.key].id
 }
 
 resource "aws_route_table" "cdp" {
-  for_each = var.cdp_subnets
+  for_each = local.cdp_subnets
   vpc_id = aws_vpc.cdp.id
 
   tags = {
@@ -71,7 +71,7 @@ resource "aws_route_table" "cdp" {
 }
 
 resource "aws_route_table_association" "cdp" {
-  for_each       = var.cdp_subnets
+  for_each       = local.cdp_subnets
   subnet_id      = aws_subnet.cdp[each.key].id
   route_table_id = aws_route_table.cdp[each.key].id
 }
@@ -93,7 +93,7 @@ resource "aws_route_table" "igw" {
     for_each = setsubtract(setsubtract(["core", "private", "nat"], var.firewall_control ? []:["nat"]), var.public_snet_to_firewall ? []:["core"])
     # for_each = var.firewall_control ? ["core", "private", "nat"]:["core", "private"]
     content {
-      cidr_block = var.core_subnets[route.value].cidr
+      cidr_block = local.core_subnets[route.value].cidr
       vpc_endpoint_id = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
     }
   }
@@ -157,13 +157,13 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "cdp" {
 ##################### Route ######################
 # Route between CDP VPC to Core VPC
 resource "aws_route" "cdp-core" {
-  for_each                  = var.cdp_subnets
+  for_each                  = local.cdp_subnets
   route_table_id            = aws_route_table.cdp[each.key].id
   destination_cidr_block    = var.core_vpc.cidr
   transit_gateway_id        = aws_ec2_transit_gateway.tgw.id
 }
 resource "aws_route" "core-cdp" {
-  for_each                  = var.core_subnets
+  for_each                  = local.core_subnets
   route_table_id            = aws_route_table.core[each.key].id
   destination_cidr_block    = var.cdp_vpc.cidr
   transit_gateway_id        = aws_ec2_transit_gateway.tgw.id
@@ -171,7 +171,7 @@ resource "aws_route" "core-cdp" {
 
 # Route from CDP VPC to internet
 resource "aws_route" "cdp-nat" {
-  for_each                  = var.cdp_subnets
+  for_each                  = local.cdp_subnets
   route_table_id            = aws_route_table.cdp[each.key].id
   destination_cidr_block    = "0.0.0.0/0"
   transit_gateway_id        = aws_ec2_transit_gateway.tgw.id
@@ -184,7 +184,7 @@ resource "aws_ec2_transit_gateway_route" "tgw-nat" {
 
 # Route from NAT GW subnet and core subnet to Firewall
 resource "aws_route" "core-fw" {
-  for_each                  = setsubtract(keys(var.core_subnets), ["firewall", "private", "nat"])
+  for_each                  = setsubtract(keys(local.core_subnets), ["firewall", "private", "nat"])
   route_table_id            = aws_route_table.core[each.key].id
   destination_cidr_block    = "0.0.0.0/0"
   gateway_id                = var.public_snet_to_firewall ? null : aws_internet_gateway.igw.id
@@ -223,7 +223,7 @@ resource "aws_vpc_endpoint" "s3" {
 }
 
 resource "aws_vpc_endpoint_route_table_association" "cdp-s3" {
-   for_each                   = var.cdp_subnets
+   for_each                   = local.cdp_subnets
    route_table_id             = aws_route_table.cdp[each.key].id
    vpc_endpoint_id            = aws_vpc_endpoint.s3.id
 }
@@ -276,11 +276,11 @@ resource "aws_route53_resolver_endpoint" "cdp" {
   ]
 
   ip_address {
-    subnet_id = aws_subnet.cdp[values(var.cdp_subnets)[0].name].id
+    subnet_id = aws_subnet.cdp[values(local.cdp_subnets)[0].name].id
   }
 
   ip_address {
-    subnet_id = aws_subnet.cdp[values(var.cdp_subnets)[1].name].id
+    subnet_id = aws_subnet.cdp[values(local.cdp_subnets)[1].name].id
   }
 
   protocols = ["Do53", "DoH"]

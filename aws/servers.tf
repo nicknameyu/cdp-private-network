@@ -69,6 +69,9 @@ resource "aws_instance" "core-jump" {
 #!/bin/bash
 echo "Copying the SSH Key to the server"
 echo -e "${aws_key_pair.ssh_pub.public_key}" >> /home/ubuntu/.ssh/authorized_keys
+echo -e "${file(var.ssh_key.private_rsa_key_path)}" > /home/ubuntu/.ssh/id_rsa
+chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
+chmod 600 /home/ubuntu/.ssh/id_rsa
 EOF
 
   network_interface {
@@ -130,6 +133,9 @@ resource "aws_instance" "cdp-jump" {
 #!/bin/bash
 echo "Copying the SSH Key to the server"
 echo -e "${aws_key_pair.ssh_pub.public_key}" >> /home/ubuntu/.ssh/authorized_keys
+echo -e "${file(var.ssh_key.private_rsa_key_path)}" > /home/ubuntu/.ssh/id_rsa
+chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
+chmod 600 /home/ubuntu/.ssh/id_rsa
 EOF
 
   network_interface {

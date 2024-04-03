@@ -27,7 +27,7 @@ resource "aws_networkfirewall_rule_group" "fw_standard_rg" {
       stateful_rule {
         action = "PASS"
         header {
-          destination      = var.core_subnets["core"].cidr
+          destination      = local.core_subnets["core"].cidr
           destination_port = 22
           direction        = "FORWARD"
           protocol         = "SSH"
@@ -42,7 +42,7 @@ resource "aws_networkfirewall_rule_group" "fw_standard_rg" {
       stateful_rule {
         action = "PASS"
         header {
-          destination      = var.core_subnets["core"].cidr
+          destination      = local.core_subnets["core"].cidr
           destination_port = 3389
           direction        = "FORWARD"
           protocol         = "TCP"
@@ -135,7 +135,7 @@ resource "aws_networkfirewall_rule_group" "public" {
       ip_sets {
         key = "HOME_NET"
         ip_set {
-          definition = [var.core_subnets["core"].cidr]
+          definition = [local.core_subnets["core"].cidr]
         }
       }
     }

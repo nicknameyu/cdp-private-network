@@ -1,4 +1,12 @@
 # Change log
+## v0.3.7
+### AWS template
+- Remove variables for subnet CIDR. Calculate the subnets CIDR from VPC CIDR.
+- Add ssh private key to linux jump servers.
+### Azure template
+- Adjusted subnet CIDR for CDP VNET. 
+- Add azurerm provider feature to delete everyting when destroy
+
 ## v0.3.6 Azure template
 - Remove variables for subnet CIDR. Calculate the subnets CIDR from VNET CIDR.
 - Add network architecture of this terraform template in readme.
