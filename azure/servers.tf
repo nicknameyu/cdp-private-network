@@ -4,6 +4,8 @@ resource "azurerm_resource_group" "vm" {
   tags     = var.tags
 }
 
+
+############ Hub Jump Server / DNS server ##############
 resource "azurerm_network_interface" "hub-jump" {
   name                = "${var.hub_jump_server_name}-nic"
   location            = azurerm_resource_group.vm.location
@@ -15,12 +17,23 @@ resource "azurerm_network_interface" "hub-jump" {
     private_ip_address_allocation = "Dynamic"
   }
 }
+locals {
+  dns_conditional_forwarder = replace(
+                                replace(
+                                  replace(file("./conf/named.conf"), "$${AKS_PRIVATEDNS_ZONE}", "${azurerm_private_dns_zone.aks.name}"),
+                                  "$${PG_PRIVATEDNS_ZONE}", "${azurerm_private_dns_zone.pg_flx.name}"
+                                ),
+                                "$${DNS_RESOLVER_IP}", "${azurerm_private_dns_resolver_inbound_endpoint.inbound.ip_configurations[0].private_ip_address}"
+                              )
+}
 resource "azurerm_linux_virtual_machine" "hub-jump" {
   name                = "${var.hub_jump_server_name}-vm"
   resource_group_name = azurerm_resource_group.vm.name
   location            = azurerm_resource_group.vm.location
   size                = "Standard_DS1_v2"
   admin_username      = var.admin_username
+  depends_on          = [ azurerm_firewall_nat_rule_collection.dnat ]
+
   disable_password_authentication = true
   network_interface_ids = [
     azurerm_network_interface.hub-jump.id,
@@ -35,16 +48,50 @@ resource "azurerm_linux_virtual_machine" "hub-jump" {
     caching              = "ReadWrite"
     storage_account_type = "StandardSSD_LRS"
   }
-
   source_image_reference {
     publisher = "Canonical"
     offer     = "0001-com-ubuntu-server-focal"
     sku       = "20_04-lts-gen2"
     version   = "latest"
   }
+  tags = var.tags
+
+  #######  setup DNS server ########
+  connection {
+    type        = "ssh"
+    user        = var.admin_username
+    private_key = file(var.private_key)
+    host        = azurerm_public_ip.hub-jump.ip_address
+  }
+  provisioner "file" {
+    source      = var.private_key
+    destination = "/home/${var.admin_username}/.ssh/id_rsa"
+  }
+  provisioner "file" {
+    content = local.dns_conditional_forwarder
+    destination = "/tmp/named.conf"
+  }
+  provisioner "file" {
+    source      = "conf/named.conf.options"
+    destination = "/tmp/named.conf.options"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt-get update",
+      "sudo apt install bind9 -y",
+      "sudo apt install dnsutils -y",
+      "cat /tmp/named.conf | sudo tee -a /etc/bind/named.conf",
+      "sudo mv /etc/bind/named.conf.options /etc/bind/named.conf.options.backup",
+      "sudo mv /tmp/named.conf.options /etc/bind/named.conf.options",
+      "sudo chown root:bind /etc/bind/named.conf.options",
+      "sudo chmod 644 /etc/bind/named.conf.options",
+      "sudo systemctl restart bind9.service",
+      "chmod 600 /home/${var.admin_username}/.ssh/id_rsa"
+    ]
+  }
 }
 
-
+###############   CDP VNET Jump Server ################
 resource "azurerm_network_interface" "cdp-jump" {
   name                = "${var.cdp_jump_server_name}-nic"
   location            = azurerm_resource_group.vm.location
@@ -90,8 +137,8 @@ output "cdp_jump_server_private_ip" {
 }
 
 ############# DNS Server ##################
-resource "azurerm_network_interface" "dns" {
-  name                = "${var.dns_server_name}-nic"
+resource "azurerm_network_interface" "win11" {
+  name                = "${var.winclient_vm_name}-nic"
   location            = azurerm_resource_group.vm.location
   resource_group_name = azurerm_resource_group.vm.name
 
@@ -101,15 +148,15 @@ resource "azurerm_network_interface" "dns" {
     private_ip_address_allocation = "Dynamic"
   }
 }
-resource "azurerm_windows_virtual_machine" "dns" {
-  name                = "${var.dns_server_name}-vm"
+resource "azurerm_windows_virtual_machine" "win11" {
+  name                = "${var.winclient_vm_name}-vm"
   resource_group_name = azurerm_resource_group.vm.name
   location            = azurerm_resource_group.vm.location
   size                = "Standard_DS1_v2"
   admin_username      = var.admin_username
   admin_password      = var.password
   network_interface_ids = [
-    azurerm_network_interface.dns.id,
+    azurerm_network_interface.win11.id,
   ]
 
   os_disk {
@@ -118,28 +165,16 @@ resource "azurerm_windows_virtual_machine" "dns" {
   }
 
   source_image_reference {
-    publisher = "MicrosoftWindowsServer"
-    offer     = "WindowsServer"
-    sku       = "2019-Datacenter"
+    publisher = "MicrosoftWindowsDesktop"
+    offer     = "windows-11"
+    sku       = "win11-21h2-avd"
     version   = "latest"
   }
 }
 
-resource "azurerm_virtual_network_dns_servers" "hub" {
-  count              = var.custom_dns ? 1:0
-  virtual_network_id = azurerm_virtual_network.hub.id
-  dns_servers        = [azurerm_windows_virtual_machine.dns.private_ip_address]
-}
-
-resource "azurerm_virtual_network_dns_servers" "cdp" {
-  count              = var.custom_dns ? 1:0
-  virtual_network_id = azurerm_virtual_network.cdp.id
-  dns_servers        = [azurerm_windows_virtual_machine.dns.private_ip_address]
-}
-
 ################ DNAT Setting ###############
-resource "azurerm_public_ip" "dns" {
-  name                = "pip_dns"
+resource "azurerm_public_ip" "win11" {
+  name                = "pip_win11"
   resource_group_name = azurerm_resource_group.vm.name
   location            = azurerm_resource_group.vm.location
   allocation_method   = "Static"
@@ -170,22 +205,22 @@ resource "azurerm_firewall_nat_rule_collection" "dnat" {
     destination_ports = ["22",]
     destination_addresses = [azurerm_public_ip.hub-jump.ip_address]
     translated_port = 22
-    translated_address = azurerm_linux_virtual_machine.hub-jump.private_ip_address
+    translated_address = azurerm_network_interface.hub-jump.private_ip_address
     protocols = ["TCP","UDP",]
   }
   rule {
-    name = "dns"
+    name = "win11"
     source_addresses = ["*"]
     destination_ports = ["3389",]
-    destination_addresses = [azurerm_public_ip.dns.ip_address]
+    destination_addresses = [azurerm_public_ip.win11.ip_address]
     translated_port = 3389
-    translated_address = azurerm_windows_virtual_machine.dns.private_ip_address
+    translated_address = azurerm_network_interface.win11.private_ip_address
     protocols = ["TCP","UDP",]
   }
 }
 
-output "dns_server_public_ip" {
-  value = azurerm_public_ip.dns.ip_address
+output "winclient_vm_public_ip" {
+  value = azurerm_public_ip.win11.ip_address
 }
 output "hub_jump_server_public_ip" {
   value = azurerm_public_ip.hub-jump.ip_address

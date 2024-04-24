@@ -186,77 +186,15 @@ output "dns_resolver_inbound_ip" {
   value = azurerm_private_dns_resolver_inbound_endpoint.inbound.ip_configurations[0].private_ip_address
 }
 
-resource "azurerm_network_security_group" "default" {
-  for_each            = toset(["nsg-default", "nsg-knox"])
-  name                = each.key
-  location            = azurerm_resource_group.network.location
-  resource_group_name = azurerm_resource_group.network.name
+############### VNET DNS Configuration ###########
+resource "azurerm_virtual_network_dns_servers" "hub" {
+  count              = var.custom_dns ? 1:0
+  virtual_network_id = azurerm_virtual_network.hub.id
+  dns_servers        = [azurerm_linux_virtual_machine.hub-jump.private_ip_address]
+}
 
-  security_rule {
-    name                       = "ssh"
-    priority                   = 100
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "10.0.0.0/8"
-    destination_address_prefix = var.cdp_cidr
-  }
-  security_rule {
-    name                       = "https"
-    priority                   = 101
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "443"
-    source_address_prefix      = "10.0.0.0/8"
-    destination_address_prefix = var.cdp_cidr
-  }
-  security_rule {
-    name                       = "mgmt"
-    priority                   = 102
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "9443"
-    source_address_prefix      = "10.0.0.0/8"
-    destination_address_prefix = var.cdp_cidr
-  }
-  security_rule {
-    name                       = "comm-tcp"
-    priority                   = 103
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Tcp"
-    source_port_range          = "*"
-    destination_port_range     = "0-65535"
-    source_address_prefix      = var.cdp_cidr
-    destination_address_prefix = var.cdp_cidr
-  }
-  security_rule {
-    name                       = "comm-udp"
-    priority                   = 104
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Udp"
-    source_port_range          = "*"
-    destination_port_range     = "0-65535"
-    source_address_prefix      = var.cdp_cidr
-    destination_address_prefix = var.cdp_cidr
-  }
-  security_rule {
-    name                       = "icmp"
-    priority                   = 105
-    direction                  = "Inbound"
-    access                     = "Allow"
-    protocol                   = "Icmp"
-    source_port_range          = "*"
-    destination_port_range     = "22"
-    source_address_prefix      = "10.0.0.0/8"
-    destination_address_prefix = var.cdp_cidr
-  }
-  tags = var.tags
+resource "azurerm_virtual_network_dns_servers" "cdp" {
+  count              = var.custom_dns ? 1:0
+  virtual_network_id = azurerm_virtual_network.cdp.id
+  dns_servers        = [azurerm_linux_virtual_machine.hub-jump.private_ip_address]
 }

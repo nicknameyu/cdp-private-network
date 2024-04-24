@@ -1,4 +1,10 @@
 # Change log
+
+## v0.3.8 Azure template
+- Use hub-jump Linux server as DNS server.
+  - Automatically configure the DNS server on the Linux VM.
+- Create a Win11 VM as client.
+- Remove the Windows Server as DNS server.
 ## v0.3.7
 ### AWS template
 - Remove variables for subnet CIDR. Calculate the subnets CIDR from VPC CIDR.

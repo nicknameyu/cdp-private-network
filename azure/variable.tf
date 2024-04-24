@@ -140,7 +140,6 @@ variable "fw_app_rules" {
         "mirrorlist.centos.org",                      // Centos tools
         "apt.releases.hashicorp.com",                 // hashicorp terraform
       ]
-      source_addresses = ["10.0.0.0/8"]
       type = "Https"
       port = "443"
     },
@@ -151,7 +150,6 @@ variable "fw_app_rules" {
         "changelogs.ubuntu.com",                      // AKS
         "archive.ubuntu.com",                         // AKS
       ]
-      source_addresses = ["10.0.0.0/8"]
       type = "Http"
       port = "80"
     }
@@ -175,15 +173,8 @@ variable "fw_net_rules" {
         "3.65.246.128/27",   // EU based Control Plane
         "3.26.127.64/27",    // AP based control plane
       ]
-      source_addresses  = ["10.0.0.0/8"]
       destination_ports = ["443",]
       protocols         = ["TCP",]
-    },
-    public_subnet = {
-      ip_prefix         = ["*"]
-      source_addresses  = ["10.128.1.0/24"]
-      destination_ports = ["*"]
-      protocols         = ["TCP", "UDP"]
     }
   }
 }
@@ -232,8 +223,8 @@ variable "custom_role_names" {
 }
 
 ########### Servers ############
-variable "dns_server_name" {
-  description = "The name of the DNS server."
+variable "winclient_vm_name" {
+  description = "The name of the windows11 VM."
   type        = string
 }
 variable "hub_jump_server_name" {
@@ -273,6 +264,11 @@ variable "public_key" {
   description = "Path for the ssh public key to be added to the jump servers."
   type        = string
   default     = "~/.ssh/id_rsa.pub"
+}
+variable "private_key" {
+  description = "Path for the ssh private key. This is being used to bootstrap servers."
+  type        = string
+  default     = "~/.ssh/id_rsa"
 }
 
 variable "custom_dns" {

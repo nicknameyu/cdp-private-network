@@ -36,19 +36,21 @@ The template in this repo is `NOT` to create CDP installation. It's to create a 
 - HUB VNET to hold the jump server, DNS server, Firewall.
   - Firewall subnet
   - core subnet
-    - DNS server
-    - jump server
+    - A Windows 11 VM
+    - A Ubuntu Linux server as a custom DNS server and also a jump VM.
 - CDP VNET
-  - a few subnets with different CIDR range for testing
-  - a Linux jump server
-- Configure to use the DNS server public IP to rdp into the DNS server
-  - Create DNS services
-  - Create conditional forward to `dns_resolver_inbound_ip` for privatelink domains.
-    - `privatelink.mysql.database.azure.com`
+  - A few subnets with different CIDR range for testing. All subnets have service endpoint enabled for storage, SQL, and KeyVault.
+  - A DNS resolver subnet
+  - A Postgres DB Flexible server delegated subnet
+  - A Linux jump server
+- DNS server forward setting.
+  - DNS server is automatically configured to forward DNS request to Azure Default DNS
+  - Conditional forward is configured to `dns_resolver_inbound_ip` for privatelink domains.
+    - `mysql.database.azure.com`
     - `privatelink.<region>.azmk8s.io`
-    - `<region>.postgres.database.azure.com`: if postgres flexible servier is used.
+    - `<region>.postgres.database.azure.com`
+  - Below conditional forward settings are not configured by default.
     - `privatelink.blob.core.windows.net`: if service endpoint is not allowed
     - `privatelink.file.core.windows.net`: if service endpoint is not allowed
-    - `privatelink.postgres.database.azure.com`: if service endpoint is not allowed
 
 ![azure architecture](images/azure.png)
