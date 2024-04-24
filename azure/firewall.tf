@@ -23,13 +23,11 @@ resource "azurerm_firewall" "firewall" {
     public_ip_address_id = azurerm_public_ip.firewall.id
   }
   ip_configuration {
-    name                 = "dns"
-    #subnet_id            = azurerm_subnet.firewall.id
-    public_ip_address_id = azurerm_public_ip.dns.id
+    name                 = "win11"
+    public_ip_address_id = azurerm_public_ip.win11.id
   }
   ip_configuration {
     name                 = "jump"
-    #subnet_id            = azurerm_subnet.firewall.id
     public_ip_address_id = azurerm_public_ip.hub-jump.id
   }
 }
@@ -46,7 +44,7 @@ resource "azurerm_firewall_application_rule_collection" "app_rules" {
     for_each = var.fw_app_rules 
     content {
       name = rule.key
-      source_addresses = rule.value.source_addresses
+      source_addresses = [var.cdp_cidr, var.hub_cidr]
       target_fqdns     = rule.value.target_fqdns
       protocol {
         port = rule.value.port
@@ -66,10 +64,25 @@ resource "azurerm_firewall_network_rule_collection" "network_rules" {
     for_each = var.fw_net_rules 
     content {
       name                  = rule.key
-      source_addresses      = rule.value.source_addresses
+      source_addresses      = [var.hub_cidr, var.cdp_cidr]
       destination_ports     = rule.value.destination_ports
       destination_addresses = rule.value.ip_prefix
       protocols             = rule.value.protocols
     }
+  }
+}
+
+resource "azurerm_firewall_network_rule_collection" "public_subnet" {
+  name                = "public_subnet_rules"
+  azure_firewall_name = azurerm_firewall.firewall.name
+  resource_group_name = azurerm_resource_group.network.name
+  priority            = 131
+  action              = "Allow"
+  rule {
+    name                  = "public_subnet_rules"
+    source_addresses      = [var.hub_cidr, var.cdp_cidr]
+    destination_ports     = ["*"]
+    destination_addresses = ["*"]
+    protocols             = ["TCP", "UDP"]
   }
 }
