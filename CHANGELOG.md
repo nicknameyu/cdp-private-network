@@ -1,4 +1,10 @@
 # Change log
+## v0.3.9 AWS template and Azure template
+### Azure template
+- New managed identity for database encryption with CMK.
+### AWS template
+- Use the Linux jump server as DNS server. Cause this can be automatically configured with terraform user data and provisioniner. 
+- Remove the original Windows DNS server.
 
 ## v0.3.8 Azure template
 - Use hub-jump Linux server as DNS server.

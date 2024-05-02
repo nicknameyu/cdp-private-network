@@ -199,6 +199,7 @@ variable "managed_id" {
     ranger     = string
     raz        = string
     dw         = string
+    dbcmk      = string
   })
 }
 

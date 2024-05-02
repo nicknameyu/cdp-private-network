@@ -232,7 +232,7 @@ resource "aws_vpc_endpoint_route_table_association" "cdp-s3" {
 ################# DNS config for CDP VPC ###############
 resource "aws_vpc_dhcp_options" "cdp" {
   domain_name          = "${var.region}.compute.internal"
-  domain_name_servers  = var.custom_dns ? [aws_instance.dns.private_ip] : ["AmazonProvidedDNS"]
+  domain_name_servers  = var.custom_dns ? [aws_instance.core-jump.private_ip] : ["AmazonProvidedDNS"]
 
   tags = {
     Name = "${var.owner}-cdp-dopt"
@@ -243,6 +243,19 @@ resource "aws_vpc_dhcp_options_association" "cdp" {
   dhcp_options_id = aws_vpc_dhcp_options.cdp.id
 }
 
+################# DNS config for CORE VPC ###############
+resource "aws_vpc_dhcp_options" "core" {
+  domain_name          = "${var.region}.compute.internal"
+  domain_name_servers  = var.custom_dns ? [aws_instance.core-jump.private_ip] : ["AmazonProvidedDNS"]
+
+  tags = {
+    Name = "${var.owner}-core-dopt"
+  }
+}
+resource "aws_vpc_dhcp_options_association" "core" {
+  vpc_id          = aws_vpc.core.id
+  dhcp_options_id = aws_vpc_dhcp_options.core.id
+}
 ################ DNS private resolver for CDP VPC ############
 
 resource "aws_security_group" "cdp_dns_resolver" {
