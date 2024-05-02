@@ -26,6 +26,20 @@ resource "aws_security_group" "core-jump" {
     protocol         = "TCP"
     cidr_blocks      = ["0.0.0.0/0"]
   }
+  ingress {
+    description      = "DNS"
+    from_port        = 53
+    to_port          = 53
+    protocol         = "UDP"
+    cidr_blocks      = [var.cdp_vpc.cidr, var.core_vpc.cidr]
+  }
+  ingress {
+    description      = "VNC"
+    from_port        = 5901
+    to_port          = 5901
+    protocol         = "TCP"
+    cidr_blocks      = ["0.0.0.0/0"]
+  }
   egress {
     from_port        = 0
     to_port          = 0
@@ -60,18 +74,55 @@ resource "aws_network_interface" "core-jump" {
     owner = var.owner
   }
 }
+locals {
+  named_conf         = replace(
+                          replace(file("conf/named.conf"), "$${REGION}", var.region), 
+                          "$${DNS_RESOLVER_IP}", tolist(aws_route53_resolver_endpoint.cdp.ip_address)[0].ip)
+  named_conf_options = file("conf/named.conf.options")
+}
 
+# replace(file("./conf/named.conf"), "$${AKS_PRIVATEDNS_ZONE}", "${azurerm_private_dns_zone.aks.name}"),
+#                                   "$${PG_PRIVATEDNS_ZONE}", "${azurerm_private_dns_zone.pg_flx.name}"
+                                
 resource "aws_instance" "core-jump" {
   ami           =  data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
-
-  user_data = <<EOF
-#!/bin/bash
-echo "Copying the SSH Key to the server"
-echo -e "${aws_key_pair.ssh_pub.public_key}" >> /home/ubuntu/.ssh/authorized_keys
-echo -e "${file(var.ssh_key.private_rsa_key_path)}" > /home/ubuntu/.ssh/id_rsa
+  key_name      = aws_key_pair.ssh_pub.key_name
+  depends_on    = [ aws_networkfirewall_firewall.fw ]
+  connection {
+    type = "ssh"
+    user = "ubuntu"
+    private_key = file(var.ssh_key.private_rsa_key_path)
+    host        = aws_eip.core-jump.public_ip
+  }
+  provisioner "file" {
+    content     = local.named_conf
+    destination = "/tmp/named.conf"
+  }
+  provisioner "file" {
+    source      = "conf/named.conf.options"
+    destination = "/tmp/named.conf.options"
+  }
+  provisioner "file" {
+    source      = var.ssh_key.private_rsa_key_path
+    destination = "/home/ubuntu/.ssh/id_rsa"
+  }
+  user_data     = <<EOF
+#!/usr/bin/bash
 chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
 chmod 600 /home/ubuntu/.ssh/id_rsa
+echo "################ DNS Configuration ##################"
+sudo apt install bind9 -y
+sudo apt install dnsutils -y
+sudo mv /etc/bind/named.conf.options /etc/bind/named.conf.options.backup
+sudo mv /etc/bind/named.conf /etc/bind/named.conf.backup
+sudo mv /tmp/named.conf /etc/bind/named.conf
+sudo mv /tmp/named.conf.options /etc/bind/named.conf.options
+sudo chown root:bind /etc/bind/named.conf.options
+sudo chown root:bind /etc/bind/named.conf
+sudo chmod 644 /etc/bind/named.conf.options
+sudo chmod 644 /etc/bind/named.conf
+sudo systemctl restart bind9.service
 EOF
 
   network_interface {
@@ -159,93 +210,93 @@ output "cdp_jump_private_ip" {
   value = aws_network_interface.cdp-jump.private_ip
 }
 
-################### Windows Server ################
-data "aws_ami" "windows" {
-     most_recent = true
-     filter {
-        name   = "name"
-        values = ["Windows_Server-2022-English-Full-Base-*"]
- }
-     filter {
-       name   = "virtualization-type"
-       values = ["hvm"]
- }
-     owners = ["801119661308"] # Canonical
- }
-resource "aws_security_group" "dns" {
-  name   = "${var.owner}-dns-sg"
-  vpc_id = aws_vpc.core.id
+# ################### Windows Server ################
+# data "aws_ami" "windows" {
+#      most_recent = true
+#      filter {
+#         name   = "name"
+#         values = ["Windows_Server-2022-English-Full-Base-*"]
+#  }
+#      filter {
+#        name   = "virtualization-type"
+#        values = ["hvm"]
+#  }
+#      owners = ["801119661308"] # Canonical
+#  }
+# resource "aws_security_group" "dns" {
+#   name   = "${var.owner}-dns-sg"
+#   vpc_id = aws_vpc.core.id
 
-  ingress {
-    description      = "RDP"
-    from_port        = 3389
-    to_port          = 3389
-    protocol         = "TCP"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
-  ingress {
-    description      = "DNS"
-    from_port        = 53
-    to_port          = 53
-    protocol         = "UDP"
-    cidr_blocks      = ["10.0.0.0/8"]
-  }
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
-  tags   = {
-    owner = var.owner
-  }
-}
-resource "aws_eip" "dns" {
-  network_interface = aws_network_interface.dns.id
-  domain   = "vpc"
-  tags = {
-    Name = "${var.owner}-dns-eip"
-    owner = var.owner
-  }
-}
-output "dns_public_ip" {
-  value = aws_eip.dns.public_ip
-}
-output "dns_private_ip" {
-  value = aws_network_interface.dns.private_ip
-}
+#   ingress {
+#     description      = "RDP"
+#     from_port        = 3389
+#     to_port          = 3389
+#     protocol         = "TCP"
+#     cidr_blocks      = ["0.0.0.0/0"]
+#   }
+#   ingress {
+#     description      = "DNS"
+#     from_port        = 53
+#     to_port          = 53
+#     protocol         = "UDP"
+#     cidr_blocks      = ["10.0.0.0/8"]
+#   }
+#   egress {
+#     from_port        = 0
+#     to_port          = 0
+#     protocol         = "-1"
+#     cidr_blocks      = ["0.0.0.0/0"]
+#   }
+#   tags   = {
+#     owner = var.owner
+#   }
+# }
+# resource "aws_eip" "dns" {
+#   network_interface = aws_network_interface.dns.id
+#   domain   = "vpc"
+#   tags = {
+#     Name = "${var.owner}-dns-eip"
+#     owner = var.owner
+#   }
+# }
+# output "dns_public_ip" {
+#   value = aws_eip.dns.public_ip
+# }
+# output "dns_private_ip" {
+#   value = aws_network_interface.dns.private_ip
+# }
 
-resource "aws_network_interface" "dns" {
-  subnet_id   = aws_subnet.core["core"].id
-  security_groups = [ aws_security_group.dns.id ]
+# resource "aws_network_interface" "dns" {
+#   subnet_id   = aws_subnet.core["core"].id
+#   security_groups = [ aws_security_group.dns.id ]
 
-  tags = {
-    Name = "${var.owner}-dns-nic"
-    owner = var.owner
-  }
-}
+#   tags = {
+#     Name = "${var.owner}-dns-nic"
+#     owner = var.owner
+#   }
+# }
 
-resource "aws_instance" "dns" {
-  ami = data.aws_ami.windows.id
-  instance_type = "t2.micro"
-  key_name = aws_key_pair.ssh_pub.key_name
-  network_interface {
-    network_interface_id = aws_network_interface.dns.id
-    device_index         = 0
-  }
-  get_password_data = true
-  credit_specification {
-    cpu_credits = "unlimited"
-  }
-  tags = {
-    Name = "${var.owner}-dns"
-    owner = var.owner
-  }
-  lifecycle {
-    ignore_changes = [ ami ]
-  }
- }
+# resource "aws_instance" "dns" {
+#   ami = data.aws_ami.windows.id
+#   instance_type = "t2.micro"
+#   key_name = aws_key_pair.ssh_pub.key_name
+#   network_interface {
+#     network_interface_id = aws_network_interface.dns.id
+#     device_index         = 0
+#   }
+#   get_password_data = true
+#   credit_specification {
+#     cpu_credits = "unlimited"
+#   }
+#   tags = {
+#     Name = "${var.owner}-dns"
+#     owner = var.owner
+#   }
+#   lifecycle {
+#     ignore_changes = [ ami ]
+#   }
+#  }
 
- output "dns_server_password" {
-   value = rsadecrypt(aws_instance.dns.password_data, file(var.ssh_key.private_rsa_key_path))
- }
+#  output "dns_server_password" {
+#    value = rsadecrypt(aws_instance.dns.password_data, file(var.ssh_key.private_rsa_key_path))
+#  }

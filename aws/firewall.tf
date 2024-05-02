@@ -54,6 +54,21 @@ resource "aws_networkfirewall_rule_group" "fw_standard_rg" {
           settings = ["3"]
         }
       }
+      stateful_rule {
+        action = "PASS"
+        header {
+          destination      = local.core_subnets["core"].cidr
+          destination_port = 5901
+          direction        = "FORWARD"
+          protocol         = "TCP"
+          source           = "ANY"
+          source_port      = "ANY"
+        }
+        rule_option {
+          keyword  = "sid"
+          settings = ["4"]
+        }
+      }
     }
 
   }

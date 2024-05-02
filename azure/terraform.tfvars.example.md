@@ -12,6 +12,7 @@ managed_id = {
   ranger     = "dyu-cdp-ranger"
   raz        = "dyu-cdp-raz"
   dw         = "dyu-cdp-dw"
+  dbcmk      = "dyu-cdp-db-cmk"
 }
 
  resource_groups = {

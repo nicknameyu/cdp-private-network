@@ -94,7 +94,7 @@ variable "ssh_key" {
   })
   default = {
     public_key_path      = "~/.ssh/id_rsa.pub"
-    private_rsa_key_path = "~/.ssh/id_rsa.rsa"
+    private_rsa_key_path = "~/.ssh/id_rsa"
   }
 }
 
