@@ -259,6 +259,7 @@ variable "spn_permision_contributor" {
 variable "kv_name" {
   description = "The name of the Key Vault."
   type = string
+  default = ""
 }
 
 variable "public_key" {

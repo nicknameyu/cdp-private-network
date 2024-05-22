@@ -28,8 +28,8 @@ resource "azurerm_key_vault" "kv" {
     key_permissions = [
       "List",
       "Get",
-      "Unwrap Key",
-      "Wrap Key"
+      "UnwrapKey",
+      "WrapKey"
     ]
   }
   access_policy {
