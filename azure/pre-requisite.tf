@@ -24,6 +24,24 @@ resource "azurerm_storage_container" "containers" {
   container_access_type = "private"
 }
 
+resource "azurerm_private_endpoint" "cdp" {
+  name                = "${var.cdp_storage}-pe"
+  location            = azurerm_resource_group.prerequisite.location
+  resource_group_name = azurerm_resource_group.prerequisite.name
+  subnet_id           = azurerm_subnet.cdp_subnets["subnet_26_1"].id
+
+  private_service_connection {
+    name                           = "${var.cdp_storage}-psc"
+    is_manual_connection           = false
+    private_connection_resource_id = azurerm_storage_account.cdp.id
+    subresource_names              = ["dfs"]
+  }
+  private_dns_zone_group {
+    name                 = "dns-zone-group"
+    private_dns_zone_ids = [azurerm_private_dns_zone.storage.id]
+  }
+}
+
 # Get the public ip of this terraform client
 data "http" "myip" {
   url = "http://ipv4.icanhazip.com"

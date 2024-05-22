@@ -1,4 +1,11 @@
 # Change log
+## v0.3.10 Azure template
+- Create private dns zone for dfs storage and link hub vnet to the private dns zone
+- Create private end point for dfs storage.
+- remove space in the key vault access policy permission `Wrap Key` -> `WrapKey`; `Unwrap Key` -> `UnwrapKey`. 
+- Keyvault name variable default to "".
+- azurerm provider updated to latest version.
+
 ## v0.3.9 AWS template and Azure template
 ### Azure template
 - New managed identity for database encryption with CMK.

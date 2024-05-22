@@ -156,7 +156,17 @@ resource "azurerm_private_dns_zone_virtual_network_link" "pg_flx" {
   private_dns_zone_name = azurerm_private_dns_zone.pg_flx.name
   virtual_network_id    = azurerm_virtual_network.cdp.id
 }
-
+resource "azurerm_private_dns_zone" "storage" {
+  name                = "privatelink.dfs.core.windows.net"
+  resource_group_name = azurerm_resource_group.network.name
+  tags                = var.tags
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "storage" {
+  name                  = "hub_vnet"
+  resource_group_name   = azurerm_resource_group.network.name
+  private_dns_zone_name = azurerm_private_dns_zone.storage.name
+  virtual_network_id    = azurerm_virtual_network.hub.id
+}
 output "private_dns_zones" {
   value = {
     aksPrivateDNSZoneID      = azurerm_private_dns_zone.aks.id
