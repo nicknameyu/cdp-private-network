@@ -11,6 +11,7 @@ variable "resource_groups" {
 variable "tags" {
   description = "Tags to be applied to the resources."
   type = map(string)
+  default = null
 }
 
 variable "location" {
@@ -237,7 +238,7 @@ variable "cdp_jump_server_name" {
   type        = string
 }
 variable "admin_username" {
-  description = "The administrator's name for the DNS server and jump servers."
+  description = "The administrator's name for the Windows 11 server."
   type        = string
 }
 variable "password" {

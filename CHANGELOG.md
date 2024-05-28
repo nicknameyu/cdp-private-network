@@ -1,4 +1,6 @@
 # Change log
+
+## v0.3.10-1 Provide an instruction file for the paramenters of each template
 ## v0.3.10 Azure template
 - Create private dns zone for dfs storage and link hub vnet to the private dns zone
 - Create private end point for dfs storage.
