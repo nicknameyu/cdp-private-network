@@ -293,7 +293,7 @@ variable "public_snet_to_firewall" {
 variable "custom_dns" {
   type = bool
   description = "This is to control whether we use custom DNS in CDP VPC"
-  default = false
+  default = true
 }
 variable "cmk_key_name" {
   type = string
