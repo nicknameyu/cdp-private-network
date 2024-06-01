@@ -300,3 +300,8 @@ variable "cmk_key_name" {
   default = null
   description = "The alias of KMS key to be created. Default to null. If null, a key with alias \"<owner>-cdp-key\" is created. If not null, the value will be used to create the alias."
 }
+variable "default_permission" {
+  type = bool
+  default = true
+  description = "A switch to control whether to use default permission or reduced permission. Default to true."
+}
