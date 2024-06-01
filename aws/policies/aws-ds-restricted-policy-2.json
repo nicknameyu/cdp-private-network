@@ -1,0 +1,36 @@
+{
+    "Version": "2012-10-17",
+    "Id": "ComputePolicy_v9",
+    "Statement": [
+        {
+            "Sid": "ForAutoscalingLinkedRole",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateServiceLinkedRole"
+            ],
+            "Resource": [
+                "arn:aws:iam::${YOUR-ACCOUNT-ID}:role/aws-service-role/autoscaling-plans.amazonaws.com/AWSServiceRoleForAutoScalingPlans_EC2AutoScaling"
+            ],
+            "Condition": {
+                "StringLike": {
+                    "iam:AWSServiceName": "autoscaling-plans.amazonaws.com"
+                }
+            }
+        },
+        {
+            "Sid": "ForEksLinkedRole",
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateServiceLinkedRole"
+            ],
+            "Resource": [
+                "arn:aws:iam::${YOUR-ACCOUNT-ID}:role/aws-service-role/eks.amazonaws.com/AWSServiceRoleForEKS"
+            ],
+            "Condition": {
+                "StringLike": {
+                    "iam:AWSServiceName": "eks.amazonaws.com"
+                }
+            }
+        }
+    ]
+}

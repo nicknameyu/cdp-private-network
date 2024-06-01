@@ -70,6 +70,9 @@ This repository contains Terraform configurations for setting up an AWS infrastr
 
 - **`cmk_key_name`** (string): Alias for the KMS key to be created. If `null`, a key with the alias `<owner>-cdp-key` is created. Default is `null`.
 
+### Permission
+- **`default_permission`** (bool): switch for whether default permission should be used for cross account role. Default to true. If set to false, the tempalted will created a role pair for Liftie EKS cluster and assign reduced policies to the cross account role.
+
 ## Usage
 
 To use this Terraform configuration, ensure you have Terraform installed and configured with AWS credentials. Clone the repository, customize the variables as needed, and run the following commands:

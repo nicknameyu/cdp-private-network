@@ -1,5 +1,8 @@
 # Change log
 
+## v0.3.11 aws minimum policy update
+- Added minimum permission policy to aws template
+
 ## v0.3.10-1 Provide an instruction file for the paramenters of each template
 ## v0.3.10 Azure template
 - Create private dns zone for dfs storage and link hub vnet to the private dns zone
