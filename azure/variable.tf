@@ -218,7 +218,6 @@ variable "custom_role_names" {
     liftie               = string
     env_single_rg_svc_ep = string
     env_single_rg_pvt_ep = string
-//    env_multi_rg_pvt_ep  = string              // this one is deprecated.
     cmk                  = string
     mkt_img              = string                // new added for RHEL8 Azure Market Image
   })
@@ -242,7 +241,7 @@ variable "admin_username" {
   type        = string
 }
 variable "password" {
-  description = "The password of the DNS servers"
+  description = "The password of the Win Client"
   type        = string
 }
 

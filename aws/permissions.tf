@@ -62,7 +62,7 @@ locals {
   liftie_policy_1   = replace(local.liftie_policy_raw, "$${YOUR-ACCOUNT-ID}", data.aws_caller_identity.current.account_id)
   liftie_policy_2   = replace(local.liftie_policy_1, "$${YOUR-IAM-ROLE-NAME}", local.cross_account_role)
   liftie_policy_3   = replace(local.liftie_policy_2, "$${YOUR-IDBROKER-ROLE-NAME}", "${var.owner}-IDBROKER")
-  liftie_policy_4   = replace(local.liftie_policy_3, "$${YOUR-LOG-ROLE-NAME}", "${var.owner}-IDBROKER")
+  liftie_policy_4   = replace(local.liftie_policy_3, "$${YOUR-LOG-ROLE-NAME}", "${var.owner}-LOG_ROLE")
   liftie_policy_5   = replace(local.liftie_policy_4, "$${YOUR-KMS-CUSTOMER-MANAGED-KEY-ARN}", aws_kms_key.cdp.arn)
   liftie_min_policy = replace(local.liftie_policy_5, "$${YOUR-SUBNET-REGION}", var.region)
   
