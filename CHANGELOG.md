@@ -1,5 +1,5 @@
 # Change log
-
+## v0.3.11-1 a few description bugs
 ## v0.3.11 aws minimum policy update
 - Added minimum permission policy to aws template
 

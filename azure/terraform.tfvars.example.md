@@ -22,7 +22,7 @@ managed_id = {
     vms_rg          = "dyu-vms"
   }
 
-dns_server_name      = "dyu-dns"
+winclient_vm_name      = "dyu-win11"
 cdp_jump_server_name = "dyu-cdp-jump"
 hub_jump_server_name = "dyu-hub-jump"
 
@@ -31,6 +31,7 @@ tags = {
       usecase = "testing"
     }
 
+// Please make sure the names for storage account do not exceed 24 charactors. 
 cdp_storage = "dyucdpstorage"
 cdp_file_storage = "dyucdpfilestorage"
 
@@ -40,11 +41,11 @@ custom_role_names = {
   liftie               = "DYU CDP for Liftie"
   env_single_rg_svc_ep = "DYU CDP Single RG SvcEndpoint"
   env_single_rg_pvt_ep = "DYU CDP Single RG PvtEndpoint"
-  // env_multi_rg_pvt_ep  = "DYU CDP Multiple RG PvtEndpoint"           // Deprecated. 
   cmk                  = "DYU CDP CMK"
-  mkt_image            = "DYU Market Image"
+  mkt_img              = "DYU Market Image"
 }
 
+// An Application registration is required before setting this.
 spn_object_id = "******"  //this need to be the object id of the Enterprise application instead of the application registration
 kv_name = "dyucdpkeyvault"
 ```
