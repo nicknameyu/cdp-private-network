@@ -1,4 +1,7 @@
 # Change log
+## v0.3.12 aws template
+- add variable `create_eks_role` to control whether to create EKS role cloudformation stack under reduced permission scenario.
+
 ## v0.3.11-1 a few description bugs
 ## v0.3.11 aws minimum policy update
 - Added minimum permission policy to aws template

@@ -73,6 +73,11 @@ This repository contains Terraform configurations for setting up an AWS infrastr
 ### Permission
 - **`default_permission`** (bool): switch for whether default permission should be used for cross account role. Default to true. If set to false, the tempalted will created a role pair for Liftie EKS cluster and assign reduced policies to the cross account role.
 
+- **`create_eks_role`** (bool): This is a switch to control whether to create Cloudformation stack for EKS role/instance profile under reduced permission.
+  - When using default permission, this variable is ignored.
+  - When using reduced permission, this variable default to true. 
+    - When conflicting with an existing role, that means the cloudformation stack has been created in this AWS account, please set this variable to false to avoid the conflict.
+
 ## Usage
 
 To use this Terraform configuration, ensure you have Terraform installed and configured with AWS credentials. Clone the repository, customize the variables as needed, and run the following commands:
