@@ -305,3 +305,9 @@ variable "default_permission" {
   default = true
   description = "A switch to control whether to use default permission or reduced permission. Default to true."
 }
+
+variable "create_eks_role" {
+  type = bool
+  default = true
+  description = "This is a switch to control whether to create Cloudformation stack for EKS role/instance profile under reduced permission."
+}
