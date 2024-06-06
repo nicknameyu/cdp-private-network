@@ -21,7 +21,9 @@ resource "aws_iam_policy" "ec2kms" {
 resource "aws_iam_role" "cross_account" {
   count               = var.cross_account_role == null ? 1:0
   name                = "${var.owner}-cdp-poc"
-  assume_role_policy  = replace(file("./policies/cdp-cross-account-trust-policy.json"), "$${PRINCIPAL_ARN_KEY_WORD}", var.aws_sso_user_arn_keyword)
+  assume_role_policy  = replace(replace(replace(file("./policies/cdp-cross-account-trust-policy.json"), "$${PRINCIPAL_ARN_KEY_WORD}", var.aws_sso_user_arn_keyword),
+                                        "$${CLDR_ACCOUNT_ID}", var.cdp_xaccount_account_id),
+                                "$${CLDR_EXTERNAL_ID}", var.cdp_xaccount_external_id)
 
   tags = {
     owner = var.owner
@@ -35,7 +37,6 @@ data "aws_iam_role" "cross_account" {
   name  = var.cross_account_role
 }
 resource "aws_iam_role_policy_attachment" "default" {
-  count = var.default_permission ? 1:0
   role = local.cross_account_role
   policy_arn = aws_iam_policy.cross_account.arn
 }

@@ -311,3 +311,20 @@ variable "create_eks_role" {
   default = true
   description = "This is a switch to control whether to create Cloudformation stack for EKS role/instance profile under reduced permission."
 }
+variable "cdp_xaccount_account_id" {
+  type = string
+  default = "387553343826"
+  description = "This is the AWS account ID to be trused by the cross account role. Default to NA Sandbox tenant AWS account. Please customize it when using different tenant."
+}
+
+variable "cdp_xaccount_external_id" {
+  type = string
+  default = null
+  description = "This is the AWS External ID to be trused by the cross account role. Default to null. Please customize it when using existing cross account role."
+}
+
+variable "create_windows_jumpserver" {
+  type = bool
+  default = false
+  description = "This is a switch to control whether to create a windows server as a jump server in public subnet. Default to false."
+}

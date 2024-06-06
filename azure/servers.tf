@@ -32,7 +32,11 @@ resource "azurerm_linux_virtual_machine" "hub-jump" {
   location            = azurerm_resource_group.vm.location
   size                = "Standard_DS1_v2"
   admin_username      = var.admin_username
-  depends_on          = [ azurerm_firewall_nat_rule_collection.dnat ]
+  depends_on          = [ azurerm_firewall_nat_rule_collection.dnat, 
+                          azurerm_firewall_application_rule_collection.app_rules, 
+                          azurerm_firewall_network_rule_collection.network_rules,
+                          azurerm_firewall_network_rule_collection.public_subnet
+                          ]
 
   disable_password_authentication = true
   network_interface_ids = [

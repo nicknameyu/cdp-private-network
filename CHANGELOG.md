@@ -1,4 +1,12 @@
 # Change log
+## v0.3.13 aws & azure template
+### AWS
+- Add variable `cdp_xaccount_account_id` and `cdp_xaccount_external_id` so that these two variable can be customized. 
+- Fix a bug for reduced permission policy.
+- Enable a windows server as the windows jump server in public subnet.
+### Azure
+- Add firewall rule resource as the dependency for jump server to avoid bootstraping server without firewall rules.
+
 ## v0.3.12 aws template
 - add variable `create_eks_role` to control whether to create EKS role cloudformation stack under reduced permission scenario.
 
