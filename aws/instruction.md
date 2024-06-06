@@ -47,6 +47,8 @@ This repository contains Terraform configurations for setting up an AWS infrastr
 ### Cross Account Role
 
 - **`cross_account_role`** (string): Switch to control the creation of a cross account role. If `null`, the role will be created. If set, the role will be imported. Default is `null`.
+- **`cdp_xaccount_account_id`** (string): ross account role trust policy account ID. Default to NA Sandbox Tenant external ID. When changing tenant, please customize it. This variable can't be `null` when `cross_account_role` is `null`, cause when the template will need it to create cross account role with the trust relationship to CDP control plane account.
+- **`cdp_xaccount_external_id`** (string): cross account role trust policy external ID. Default to nulll. When changing tenant, please customize it. This variable can't be `null` when `cross_account_role` is `null`, cause when the template will need it to create cross account role with the trust relationship to CDP control plane account.
 
 ### Firewall Domains and Endpoints
 
@@ -77,6 +79,9 @@ This repository contains Terraform configurations for setting up an AWS infrastr
   - When using default permission, this variable is ignored.
   - When using reduced permission, this variable default to true. 
     - When conflicting with an existing role, that means the cloudformation stack has been created in this AWS account, please set this variable to false to avoid the conflict.
+
+### Windows jump server 
+- **`create_windows_jumpserver`** (bool): This is a switch to control whether to create a windows server as a jump server in public subnet. Default to false.
 
 ## Usage
 

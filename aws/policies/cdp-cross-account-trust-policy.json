@@ -4,12 +4,12 @@
         {
             "Effect": "Allow",
             "Principal": {
-                "AWS": "arn:aws:iam::387553343826:root"
+                "AWS": "arn:aws:iam::${CLDR_ACCOUNT_ID}:root"
             },
             "Action": "sts:AssumeRole",
             "Condition": {
                 "StringEquals": {
-                    "sts:ExternalId": "1ad3f7e3-0b0c-4644-81af-169bca32c77b"
+                    "sts:ExternalId": "${CLDR_EXTERNAL_ID}"
                 }
             }
         },
