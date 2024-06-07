@@ -72,9 +72,7 @@ resource "aws_networkfirewall_rule_group" "fw_standard_rg" {
     }
 
   }
-  tags = {
-    owner = var.owner
-  }
+  tags = var.tags
 }
 resource "aws_networkfirewall_rule_group" "fw_domain_rg" {
   capacity = 100
@@ -102,9 +100,7 @@ resource "aws_networkfirewall_rule_group" "fw_domain_rg" {
     }
 
   }
-  tags = {
-    owner = var.owner
-  }
+  tags = var.tags
 }
 
 resource "aws_networkfirewall_rule_group" "fw_http_ep" {
@@ -133,9 +129,7 @@ resource "aws_networkfirewall_rule_group" "fw_http_ep" {
     }
 
   }
-  tags = {
-    owner = var.owner
-  }
+  tags = var.tags
 }
 resource "aws_networkfirewall_rule_group" "public" {
   capacity = 100
@@ -163,9 +157,7 @@ resource "aws_networkfirewall_rule_group" "public" {
     }
 
   }
-  tags = {
-    owner = var.owner
-  }
+  tags = var.tags
 }
 resource "aws_networkfirewall_firewall_policy" "fw" {
   name = "${var.fw_name}-policy"
@@ -192,9 +184,7 @@ resource "aws_networkfirewall_firewall_policy" "fw" {
     }
   }
 
-  tags = {
-    owner = var.owner
-  }
+  tags = var.tags
 }
 resource "aws_networkfirewall_firewall" "fw" {
   name                = var.fw_name
@@ -204,7 +194,5 @@ resource "aws_networkfirewall_firewall" "fw" {
     subnet_id = aws_subnet.core["firewall"].id
   }
 
-  tags = {
-    owner = var.owner
-  }
+  tags = var.tags
 }

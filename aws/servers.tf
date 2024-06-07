@@ -46,17 +46,14 @@ resource "aws_security_group" "core-jump" {
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
   }
-  tags   = {
-    owner = var.owner
-  }
+  tags   = var.tags
 }
 resource "aws_eip" "core-jump" {
   network_interface = aws_network_interface.core-jump.id
   domain   = "vpc"
-  tags = {
+  tags = merge({
     Name = "${var.owner}-core-jump-eip"
-    owner = var.owner
-  }
+  }, var.tags)
 }
 output "core_jump_public_ip" {
   value = aws_eip.core-jump.public_ip
@@ -69,10 +66,9 @@ resource "aws_network_interface" "core-jump" {
   subnet_id   = aws_subnet.core["core"].id
   security_groups = [ aws_security_group.core-jump.id ]
 
-  tags = {
+  tags = merge({
     Name = "${var.owner}-core-jump-nic"
-    owner = var.owner
-  }
+  }, var.tags)
 }
 locals {
   named_conf         = replace(
@@ -80,9 +76,6 @@ locals {
                           "$${DNS_RESOLVER_IP}", tolist(aws_route53_resolver_endpoint.cdp.ip_address)[0].ip)
   named_conf_options = file("conf/named.conf.options")
 }
-
-# replace(file("./conf/named.conf"), "$${AKS_PRIVATEDNS_ZONE}", "${azurerm_private_dns_zone.aks.name}"),
-#                                   "$${PG_PRIVATEDNS_ZONE}", "${azurerm_private_dns_zone.pg_flx.name}"
                                 
 resource "aws_instance" "core-jump" {
   ami           =  data.aws_ami.ubuntu.id
@@ -133,10 +126,9 @@ EOF
   credit_specification {
     cpu_credits = "unlimited"
   }
-  tags = {
+  tags = merge({
     Name = "${var.owner}-core-jump"
-    owner = var.owner
-  }
+  }, var.tags)
   lifecycle {
     ignore_changes = [ ami ]
   }
@@ -161,19 +153,16 @@ resource "aws_security_group" "cdp-jump" {
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
   }
-  tags   = {
-    owner = var.owner
-  }
+  tags   = var.tags
 }
 
 resource "aws_network_interface" "cdp-jump" {
   subnet_id   = aws_subnet.cdp["subnet1"].id
   security_groups = [ aws_security_group.cdp-jump.id ]
 
-  tags = {
+  tags = merge({
     Name = "${var.owner}-cdp-jump-nic"
-    owner = var.owner
-  }
+  }, var.tags)
 }
 
 resource "aws_instance" "cdp-jump" {
@@ -197,10 +186,9 @@ EOF
   credit_specification {
     cpu_credits = "unlimited"
   }
-  tags = {
+  tags = merge({
     Name = "${var.owner}-cdp-jump"
-    owner = var.owner
-  }
+  }, var.tags)
   lifecycle {
     ignore_changes = [ ami ]
   }
@@ -248,18 +236,15 @@ resource "aws_security_group" "win" {
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
   }
-  tags   = {
-    owner = var.owner
-  }
+  tags   = var.tags
 }
 resource "aws_eip" "win" {
   count             = var.create_windows_jumpserver ? 1:0
   network_interface = aws_network_interface.win[0].id
   domain            = "vpc"
-  tags = {
+  tags = merge({
     Name = "${var.owner}-win-eip"
-    owner = var.owner
-  }
+  }, var.tags)
 }
 
 resource "aws_network_interface" "win" {
@@ -267,10 +252,9 @@ resource "aws_network_interface" "win" {
   subnet_id       = aws_subnet.core["core"].id
   security_groups = [ aws_security_group.win[0].id ]
 
-  tags = {
+  tags = merge({
     Name = "${var.owner}-win-nic"
-    owner = var.owner
-  }
+  }, var.tags)
 }
 
 resource "aws_instance" "win" {
@@ -286,10 +270,9 @@ resource "aws_instance" "win" {
   credit_specification {
     cpu_credits = "unlimited"
   }
-  tags = {
+  tags = merge({
     Name = "${var.owner}-win"
-    owner = var.owner
-  }
+  }, var.tags)
   lifecycle {
     ignore_changes = [ ami ]
   }

@@ -1,4 +1,6 @@
 # Change log
+## v0.3.14 
+- tag policy
 ## v0.3.13 aws & azure template
 ### AWS
 - Add variable `cdp_xaccount_account_id` and `cdp_xaccount_external_id` so that these two variable can be customized. 

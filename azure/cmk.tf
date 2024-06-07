@@ -55,6 +55,7 @@ resource "azurerm_key_vault" "kv" {
   lifecycle {
     ignore_changes = [ access_policy ]
   }
+  tags = var.tags
   
 }
 
@@ -82,6 +83,7 @@ resource "azurerm_key_vault_key" "default" {
     expire_after         = "P90D"
     notify_before_expiry = "P29D"
   }
+  tags = var.tags
 }
 
 output "cmk_key_id" {

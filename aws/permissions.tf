@@ -4,18 +4,14 @@ resource "aws_iam_policy" "cross_account" {
   path        = "/"
   description = "${upper(var.owner)} POC policy"
   policy      = var.default_permission ? file("./policies/cdp-cross-account-policy.json") : file("./policies/cdp-cross-account-reduced-policy.json")
-  tags        = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 resource "aws_iam_policy" "ec2kms" {
   name        = "${var.owner}-aws-cdp-ec2-kms-policy"
   path        = "/"
   description = "aws-cdp-ec2-kms-policy"
   policy      = file("./policies/aws-cdp-ec2-kms-policy.json")
-  tags        = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 
 resource "aws_iam_role" "cross_account" {
@@ -25,9 +21,7 @@ resource "aws_iam_role" "cross_account" {
                                         "$${CLDR_ACCOUNT_ID}", var.cdp_xaccount_account_id),
                                 "$${CLDR_EXTERNAL_ID}", var.cdp_xaccount_external_id)
 
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 locals {
   cross_account_role = var.cross_account_role == null ? aws_iam_role.cross_account[0].name : var.cross_account_role
@@ -56,6 +50,7 @@ resource "aws_cloudformation_stack" "liftie" {
     TelemetryLoggingRootDir = "cluster-logs"
     TelemetryLoggingEnabled = "true"
   }
+  tags          = var.tags
 }
 
 locals {
@@ -131,9 +126,7 @@ resource "aws_iam_policy" "reduced" {
   path        = "/"
   description = each.value.description
   policy      = each.value.policy
-  tags        = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "reduced_liftie1" {
@@ -150,9 +143,7 @@ resource "aws_iam_policy" "kms_ro" {
   description = "aws-cdp-sse-kms-read-only-policy"
 
   policy = replace(file("./policies/aws-cdp-sse-kms-read-only-policy.json"), "$${KEY_ARN}", aws_kms_alias.cdp.arn)
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 resource "aws_iam_policy" "kms_rw" {
   name        = "${var.owner}-aws-cdp-sse-kms-read-write-policy"
@@ -160,9 +151,7 @@ resource "aws_iam_policy" "kms_rw" {
   description = "aws-cdp-sse-kms-read-write-policy"
 
   policy = replace(file("./policies/aws-cdp-sse-kms-read-write-policy.json"), "$${KEY_ARN}", aws_kms_alias.cdp.arn)
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 # IDBROKER role
 resource "aws_iam_policy" "assume" {
@@ -171,9 +160,7 @@ resource "aws_iam_policy" "assume" {
   description = "aws-cdp-idbroker-assume-role-policy"
 
   policy = file("./policies/aws-cdp-idbroker-assume-role-policy.json")
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 resource "aws_iam_policy" "log" {
   name        = "${var.owner}-aws-cdp-log-policy"
@@ -184,9 +171,7 @@ resource "aws_iam_policy" "log" {
     replace(file("./policies/aws-cdp-log-policy.json"), "$${LOGS_BUCKET_ARN}", aws_s3_bucket.cdp.arn), 
     "$${LOGS_LOCATION_BASE}", 
     "${aws_s3_bucket.cdp.arn}/${aws_s3_object.folders["logs"].key}") 
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 
 resource "aws_iam_role" "idbroker" {
@@ -194,9 +179,7 @@ resource "aws_iam_role" "idbroker" {
   assume_role_policy  = file("./policies/aws-cdp-ec2-role-trust-policy.json")
   managed_policy_arns = [aws_iam_policy.assume.arn, aws_iam_policy.log.arn]
 
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 
 # LOG ROLE
@@ -207,9 +190,7 @@ resource "aws_iam_policy" "restore" {
 
   policy      = replace(file("./policies/aws-datalake-restore-policy.json"), "$${CDP_BUCKET_ARN}", 
     "${aws_s3_bucket.cdp.arn}") 
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 resource "aws_iam_policy" "cdp_backup" {
   name        = "${var.owner}-aws-cdp-backup-policy"
@@ -218,9 +199,7 @@ resource "aws_iam_policy" "cdp_backup" {
 
   policy      = replace(file("./policies/aws-cdp-backup-policy.json"), "$${BACKUP_LOCATION_BASE}", 
                         "${aws_s3_bucket.cdp.arn}/${aws_s3_object.folders["backups"].key}") 
-  tags        = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 
 resource "aws_iam_role" "log" {
@@ -233,9 +212,7 @@ resource "aws_iam_role" "log" {
     aws_iam_policy.kms_rw.arn
     ]
 
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 
 # RANGER_AUDIT_ROLE
@@ -246,9 +223,7 @@ resource "aws_iam_policy" "ranger" {
 
   policy = replace(file("./policies/aws-cdp-ranger-audit-s3-policy.json"), "$${CDP_BUCKET_ARN}", 
     aws_s3_bucket.cdp.arn) 
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 resource "aws_iam_policy" "bkt_access" {
   name        = "${var.owner}-aws-cdp-bucket-access-policy"
@@ -257,9 +232,7 @@ resource "aws_iam_policy" "bkt_access" {
 
   policy = replace(file("./policies/aws-cdp-bucket-access-policy.json"), "$${CDP_BUCKET_ARN}", 
     aws_s3_bucket.cdp.arn) 
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 resource "aws_iam_policy" "dl_backup" {
   name        = "${var.owner}-aws-datalake-backup-policy"
@@ -268,9 +241,7 @@ resource "aws_iam_policy" "dl_backup" {
 
   policy = replace(file("./policies/aws-datalake-backup-policy.json"), "$${BACKUP_LOCATION_BASE}", 
      "${aws_s3_bucket.cdp.arn}/${aws_s3_object.folders["backups"].key}") 
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 
 resource "aws_iam_role" "ranger" {
@@ -284,9 +255,7 @@ resource "aws_iam_role" "ranger" {
     aws_iam_policy.kms_rw.arn
     ]
 
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 
 # DATALAKE_ADMIN_ROLE
@@ -297,9 +266,7 @@ resource "aws_iam_policy" "dl_admin" {
 
   policy = replace(file("./policies/aws-cdp-datalake-admin-s3-policy.json"), "$${STORAGE_LOCATION_BASE}", 
     "${aws_s3_bucket.cdp.arn}/data") 
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 resource "aws_iam_role" "dl_admin" {
   name = "${var.owner}-DATALAKE_ADMIN_ROLE"
@@ -312,9 +279,7 @@ resource "aws_iam_role" "dl_admin" {
     aws_iam_policy.kms_rw.arn
     ]
 
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 
 output "roles" {
@@ -329,17 +294,13 @@ output "roles" {
 resource "aws_iam_instance_profile" "data_access" {
   name = "${var.owner}-data-access-instance-profile"
   role = aws_iam_role.idbroker.name
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 
 resource "aws_iam_instance_profile" "log_access" {
   name = "${var.owner}-log-access-instance-profile"
   role = aws_iam_role.log.name
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 output "Profiles" {
   value = [aws_iam_instance_profile.data_access.name, aws_iam_instance_profile.log_access.name]

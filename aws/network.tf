@@ -2,10 +2,7 @@
 resource "aws_vpc" "core" {
   cidr_block = var.core_vpc.cidr
   enable_dns_support = true
-  tags = {
-    Name = var.core_vpc.name
-    owner = var.owner
-  }
+  tags = merge({ Name = var.core_vpc.name }, var.tags)
 }
 resource "aws_vpc" "cdp" {
   cidr_block = var.cdp_vpc.cidr
@@ -23,10 +20,9 @@ resource "aws_subnet" "core" {
   cidr_block = each.value.cidr
   availability_zone = data.aws_availability_zones.available.names[each.value.az_sn]
 
-  tags = {
+  tags = merge({
     Name = each.value.name
-    owner = var.owner
-  }
+  }, var.tags)
 }
 resource "aws_subnet" "cdp" {
   for_each = local.cdp_subnets
@@ -34,11 +30,11 @@ resource "aws_subnet" "cdp" {
   cidr_block = each.value.cidr
   availability_zone = data.aws_availability_zones.available.names[each.value.az_sn]
 
-  tags = {
+  tags = merge({
     Name = each.value.name
-    owner = var.owner
     "kubernetes.io/role/internal-elb" = 1
-  }
+  }, var.tags)
+
   lifecycle {
     ignore_changes = [ tags, tags_all ]
   }
@@ -48,10 +44,10 @@ resource "aws_route_table" "core" {
   for_each = local.core_subnets
   vpc_id = aws_vpc.core.id
 
-  tags = {
+  tags = merge({
     Name = "rt_${each.value.name}"
-    owner = var.owner
-  }
+  }, var.tags)
+
 }
 
 resource "aws_route_table_association" "core" {
@@ -64,10 +60,9 @@ resource "aws_route_table" "cdp" {
   for_each = local.cdp_subnets
   vpc_id = aws_vpc.cdp.id
 
-  tags = {
+  tags = merge({
     Name = "rt_${each.value.name}"
-    owner = var.owner
-  }
+  }, var.tags)
 }
 
 resource "aws_route_table_association" "cdp" {
@@ -80,10 +75,9 @@ resource "aws_route_table_association" "cdp" {
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.core.id
 
-  tags = {
+  tags = merge({
     Name = var.igw_name
-    owner = var.owner
-  }
+  }, var.tags)
 }
 
 resource "aws_route_table" "igw" {
@@ -97,10 +91,9 @@ resource "aws_route_table" "igw" {
       vpc_endpoint_id = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
     }
   }
-  tags = {
+  tags = merge({
     Name = "rt_igw"
-    owner = var.owner
-  }
+  }, var.tags)
 }
 
 resource "aws_route_table_association" "igw" {
@@ -111,27 +104,25 @@ resource "aws_route_table_association" "igw" {
 ##################### NAT GW ######################
 resource "aws_eip" "nat" {
   domain   = "vpc"
-  tags = {
+  tags = merge({
     Name = "eip-nat-gw"
-    owner = var.owner
-  }
+  }, var.tags)
 }
 resource "aws_nat_gateway" "nat" {
   allocation_id     = aws_eip.nat.id
   subnet_id         = aws_subnet.core["nat"].id
-  tags = {
+  tags = merge({
     Name = var.natgw_name
     owner = var.owner
-  }
+  }, var.tags)
 }
 
 ##################### TGW ######################
 resource "aws_ec2_transit_gateway" "tgw" {
   dns_support = "disable"
-  tags = {
+  tags = merge({
     Name = var.tgw_name
-    owner = var.owner
-  }
+  }, var.tags)
 }
 
 resource "aws_ec2_transit_gateway_vpc_attachment" "core" {
@@ -139,20 +130,18 @@ resource "aws_ec2_transit_gateway_vpc_attachment" "core" {
   transit_gateway_id = aws_ec2_transit_gateway.tgw.id
   vpc_id             = aws_vpc.core.id
   dns_support        = "disable"
-  tags = {
+  tags = merge({
     Name = "tgwa-core-vpc"
-    owner = var.owner
-  }
+  }, var.tags)
 }
 resource "aws_ec2_transit_gateway_vpc_attachment" "cdp" {
   subnet_ids         = [ for snet in aws_subnet.cdp: snet.id ]
   transit_gateway_id = aws_ec2_transit_gateway.tgw.id
   vpc_id             = aws_vpc.cdp.id
   dns_support        = "disable"
-  tags = {
+  tags = merge({
     Name = "tgwa-cdp-vpc"
-    owner = var.owner
-  }
+  }, var.tags)
 }
 ##################### Route ######################
 # Route between CDP VPC to Core VPC
@@ -216,10 +205,9 @@ resource "aws_vpc_endpoint" "s3" {
   vpc_id       = aws_vpc.cdp.id
   service_name = "com.amazonaws.${var.region}.s3"
 
-  tags = {
+  tags = merge({
     Name = "${var.owner}-s3-endpoint"
-    owner = var.owner
-  }
+  }, var.tags)
 }
 
 resource "aws_vpc_endpoint_route_table_association" "cdp-s3" {
@@ -234,9 +222,9 @@ resource "aws_vpc_dhcp_options" "cdp" {
   domain_name          = "${var.region}.compute.internal"
   domain_name_servers  = var.custom_dns ? [aws_instance.core-jump.private_ip] : ["AmazonProvidedDNS"]
 
-  tags = {
+  tags = merge({
     Name = "${var.owner}-cdp-dopt"
-  }
+  }, var.tags)
 }
 resource "aws_vpc_dhcp_options_association" "cdp" {
   vpc_id          = aws_vpc.cdp.id
@@ -248,9 +236,9 @@ resource "aws_vpc_dhcp_options" "core" {
   domain_name          = "${var.region}.compute.internal"
   domain_name_servers  = var.custom_dns ? [aws_instance.core-jump.private_ip] : ["AmazonProvidedDNS"]
 
-  tags = {
+  tags = merge({
     Name = "${var.owner}-core-dopt"
-  }
+  }, var.tags)
 }
 resource "aws_vpc_dhcp_options_association" "core" {
   vpc_id          = aws_vpc.core.id
@@ -275,9 +263,7 @@ resource "aws_security_group" "cdp_dns_resolver" {
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
   }
-  tags   = {
-    owner = var.owner
-  }
+  tags   = var.tags
 }
 
 resource "aws_route53_resolver_endpoint" "cdp" {
@@ -298,9 +284,7 @@ resource "aws_route53_resolver_endpoint" "cdp" {
 
   protocols = ["Do53", "DoH"]
 
-  tags = {
-    owner = var.owner
-  }
+  tags = var.tags
 }
 
 output "cdp_dns_resolver_endpoint" {

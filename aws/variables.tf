@@ -328,3 +328,9 @@ variable "create_windows_jumpserver" {
   default = false
   description = "This is a switch to control whether to create a windows server as a jump server in public subnet. Default to false."
 }
+
+variable "tags" {
+  description = "Tags to be applied to the resources."
+  type = map(string)
+  default = null
+}
