@@ -2,6 +2,7 @@
 resource "aws_key_pair" "ssh_pub" {
   key_name   = "${var.owner}-ssh-key"
   public_key = file(var.ssh_key.public_key_path)
+  tags        = var.tags
 }
 
 ############### Storage Location Base #################
@@ -9,10 +10,9 @@ resource "aws_s3_bucket" "cdp" {
   bucket = var.cdp_bucket_name == null ? "${var.owner}-cdp-poc-bucket" : var.cdp_bucket_name
   force_destroy  = true
 
-  tags = {
+  tags = merge({
     Name        = "${var.owner}-cdp-bucket"
-    owner       = var.owner
-  }
+  }, var.tags)
 }
 
 resource "aws_s3_object" "folders" {
@@ -20,6 +20,7 @@ resource "aws_s3_object" "folders" {
   bucket = aws_s3_bucket.cdp.id
   key    = "${each.value}/"
   source = "/dev/null"
+  tags   = var.tags
 }
 
 output "storage_locations" {
@@ -32,9 +33,7 @@ resource "aws_kms_key" "cdp" {
   policy = replace(
     replace(file("./policies/aws-cdp-kms-key-policy.json"), "$${AWS_ACCOUNT_ID}", data.aws_caller_identity.current.account_id),
     "$${CDP_CROSS_ACCOUNT_ROLE_ARN}", (var.cross_account_role == null ? aws_iam_role.cross_account[0].arn : data.aws_iam_role.cross_account[0].arn))
-  tags = {
-    owner = var.owner
-  }
+  tags        = var.tags
 }
 resource "aws_kms_alias" "cdp" {
   name          = var.cmk_key_name == null ? "alias/${var.owner}-cdp-key" : "alias/${var.cmk_key_name}"
@@ -68,9 +67,9 @@ resource "aws_security_group" "kms" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
-  tags = {
+  tags = merge({
     Name = "${var.owner}-kms-ep-sg"
-  }
+  }, var.tags)
 }
 resource "aws_vpc_endpoint" "kms" {
   vpc_id            = aws_vpc.cdp.id
@@ -82,7 +81,7 @@ resource "aws_vpc_endpoint" "kms" {
     aws_security_group.kms.id,
   ]
   private_dns_enabled = true
-  tags = {
+  tags = merge({
     Name = "${var.owner}-kms-ep"
-  }
+  }, var.tags)
 }

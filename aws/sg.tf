@@ -9,9 +9,7 @@ resource "aws_security_group" "default" {
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
   }
-  tags   = {
-    owner = var.owner
-  }
+  tags   = var.tags
 }
 locals{
   default_security_group_rules = {
@@ -74,9 +72,7 @@ resource "aws_security_group" "knox" {
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
   }
-  tags   = {
-    owner = var.owner
-  }
+  tags   = var.tags
 }
 locals{
   knox_security_group_rules = {

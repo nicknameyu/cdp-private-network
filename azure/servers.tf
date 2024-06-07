@@ -16,6 +16,7 @@ resource "azurerm_network_interface" "hub-jump" {
     subnet_id                     = azurerm_subnet.core.id
     private_ip_address_allocation = "Dynamic"
   }
+  tags = var.tags
 }
 locals {
   dns_conditional_forwarder = replace(
@@ -106,6 +107,7 @@ resource "azurerm_network_interface" "cdp-jump" {
     subnet_id                     = azurerm_subnet.cdp_subnets["subnet_26_1"].id
     private_ip_address_allocation = "Dynamic"
   }
+  tags = var.tags
 }
 resource "azurerm_linux_virtual_machine" "cdp-jump" {
   name                = "${var.cdp_jump_server_name}-vm"
@@ -134,6 +136,7 @@ resource "azurerm_linux_virtual_machine" "cdp-jump" {
     sku       = "20_04-lts-gen2"
     version   = "latest"
   }
+  tags = var.tags
 }
 
 output "cdp_jump_server_private_ip" {
@@ -151,6 +154,7 @@ resource "azurerm_network_interface" "win11" {
     subnet_id                     = azurerm_subnet.core.id
     private_ip_address_allocation = "Dynamic"
   }
+  tags = var.tags
 }
 resource "azurerm_windows_virtual_machine" "win11" {
   name                = "${var.winclient_vm_name}-vm"
@@ -174,6 +178,7 @@ resource "azurerm_windows_virtual_machine" "win11" {
     sku       = "win11-21h2-avd"
     version   = "latest"
   }
+  tags = var.tags
 }
 
 ################ DNAT Setting ###############
