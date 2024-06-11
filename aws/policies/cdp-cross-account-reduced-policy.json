@@ -163,6 +163,8 @@
           "iam:GetInstanceProfile",
           "iam:SimulatePrincipalPolicy",
           "iam:GetRole",
+          "iam:TagRole",
+          "iam:UntagRole",
           "rds:AddTagsToResource",
           "rds:CreateDBInstance",
           "rds:CreateDBSubnetGroup",
