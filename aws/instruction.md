@@ -77,7 +77,7 @@ This repository contains Terraform configurations for setting up an AWS infrastr
 
 - **`create_eks_role`** (bool): This is a switch to control whether to create Cloudformation stack for EKS role/instance profile under reduced permission.
   - When using default permission, this variable is ignored.
-  - When using reduced permission, this variable default to true. 
+  - When using reduced permission, this variable default to false. 
     - When conflicting with an existing role, that means the cloudformation stack has been created in this AWS account, please set this variable to false to avoid the conflict.
 
 ### Windows jump server 
