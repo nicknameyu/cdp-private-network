@@ -308,7 +308,7 @@ variable "default_permission" {
 
 variable "create_eks_role" {
   type = bool
-  default = true
+  default = false
   description = "This is a switch to control whether to create Cloudformation stack for EKS role/instance profile under reduced permission."
 }
 variable "cdp_xaccount_account_id" {

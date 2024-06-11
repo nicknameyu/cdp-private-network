@@ -1,4 +1,7 @@
 # Change log
+## v0.3.14-1
+- change default value of `create_eks_role` to false.
+
 ## v0.3.14 
 - tag policy
 ## v0.3.13 aws & azure template
