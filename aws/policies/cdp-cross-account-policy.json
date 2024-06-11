@@ -189,7 +189,10 @@
                 "iam:DetachRolePolicy",
                 "iam:DeleteRolePolicy",
                 "iam:SimulatePrincipalPolicy",
-                "iam:ListRoles"
+                "iam:ListRoles",
+                "iam:TagRole",
+                "iam:UntagRole"
+
             ],
             "Effect": "Allow",
             "Resource": [

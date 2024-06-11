@@ -1,4 +1,6 @@
 # Change log
+## v0.3.15 aws permission
+- adding tagrole permission
 ## v0.3.14-1
 - change default value of `create_eks_role` to false.
 
