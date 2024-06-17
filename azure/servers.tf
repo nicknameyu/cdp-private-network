@@ -1,13 +1,16 @@
 resource "azurerm_resource_group" "vm" {
-  name     = var.resource_groups.vms_rg
+  name     = var.resource_groups != null ? var.resource_groups.vms_rg : "${var.owner}-vms"
   location = var.location
   tags     = var.tags
 }
 
+locals {
+  admin_username = var.admin_username == null ? var.owner : var.admin_username
+}
 
 ############ Hub Jump Server / DNS server ##############
 resource "azurerm_network_interface" "hub-jump" {
-  name                = "${var.hub_jump_server_name}-nic"
+  name                = var.hub_jump_server_name == null ? "${var.owner}HubJump-nic" : "${var.hub_jump_server_name}-nic"
   location            = azurerm_resource_group.vm.location
   resource_group_name = azurerm_resource_group.vm.name
 
@@ -28,11 +31,11 @@ locals {
                               )
 }
 resource "azurerm_linux_virtual_machine" "hub-jump" {
-  name                = "${var.hub_jump_server_name}-vm"
+  name                = var.hub_jump_server_name == null ? "${var.owner}HubJump" : var.hub_jump_server_name
   resource_group_name = azurerm_resource_group.vm.name
   location            = azurerm_resource_group.vm.location
   size                = "Standard_DS1_v2"
-  admin_username      = var.admin_username
+  admin_username      = local.admin_username
   depends_on          = [ azurerm_firewall_nat_rule_collection.dnat, 
                           azurerm_firewall_application_rule_collection.app_rules, 
                           azurerm_firewall_network_rule_collection.network_rules,
@@ -45,7 +48,7 @@ resource "azurerm_linux_virtual_machine" "hub-jump" {
   ]
 
   admin_ssh_key {
-    username   = var.admin_username
+    username   = local.admin_username
     public_key = file(var.public_key)
   }
 
@@ -64,13 +67,13 @@ resource "azurerm_linux_virtual_machine" "hub-jump" {
   #######  setup DNS server ########
   connection {
     type        = "ssh"
-    user        = var.admin_username
+    user        = local.admin_username
     private_key = file(var.private_key)
     host        = azurerm_public_ip.hub-jump.ip_address
   }
   provisioner "file" {
     source      = var.private_key
-    destination = "/home/${var.admin_username}/.ssh/id_rsa"
+    destination = "/home/${local.admin_username}/.ssh/id_rsa"
   }
   provisioner "file" {
     content = local.dns_conditional_forwarder
@@ -91,14 +94,14 @@ resource "azurerm_linux_virtual_machine" "hub-jump" {
       "sudo chown root:bind /etc/bind/named.conf.options",
       "sudo chmod 644 /etc/bind/named.conf.options",
       "sudo systemctl restart bind9.service",
-      "chmod 600 /home/${var.admin_username}/.ssh/id_rsa"
+      "chmod 600 /home/${local.admin_username}/.ssh/id_rsa"
     ]
   }
 }
 
 ###############   CDP VNET Jump Server ################
 resource "azurerm_network_interface" "cdp-jump" {
-  name                = "${var.cdp_jump_server_name}-nic"
+  name                = var.cdp_jump_server_name == null ? "${var.owner}CdpJump-nic" : "${var.cdp_jump_server_name}-nic"
   location            = azurerm_resource_group.vm.location
   resource_group_name = azurerm_resource_group.vm.name
 
@@ -110,18 +113,18 @@ resource "azurerm_network_interface" "cdp-jump" {
   tags = var.tags
 }
 resource "azurerm_linux_virtual_machine" "cdp-jump" {
-  name                = "${var.cdp_jump_server_name}-vm"
+  name                = var.cdp_jump_server_name == null ? "${var.owner}CdpJump" : var.cdp_jump_server_name
   resource_group_name = azurerm_resource_group.vm.name
   location            = azurerm_resource_group.vm.location
   size                = "Standard_DS1_v2"
-  admin_username      = var.admin_username
+  admin_username      = local.admin_username
   disable_password_authentication = true
   network_interface_ids = [
     azurerm_network_interface.cdp-jump.id,
   ]
 
   admin_ssh_key {
-    username   = var.admin_username
+    username   = local.admin_username
     public_key = file(var.public_key)
   }
 
@@ -145,7 +148,7 @@ output "cdp_jump_server_private_ip" {
 
 ############# DNS Server ##################
 resource "azurerm_network_interface" "win11" {
-  name                = "${var.winclient_vm_name}-nic"
+  name                = var.winclient_vm_name == null ? "${var.owner}WinClient-nic":"${var.winclient_vm_name}-nic"
   location            = azurerm_resource_group.vm.location
   resource_group_name = azurerm_resource_group.vm.name
 
@@ -157,11 +160,11 @@ resource "azurerm_network_interface" "win11" {
   tags = var.tags
 }
 resource "azurerm_windows_virtual_machine" "win11" {
-  name                = "${var.winclient_vm_name}-vm"
+  name                = var.winclient_vm_name == null ? "${var.owner}WinClient" : var.winclient_vm_name
   resource_group_name = azurerm_resource_group.vm.name
   location            = azurerm_resource_group.vm.location
   size                = "Standard_DS1_v2"
-  admin_username      = var.admin_username
+  admin_username      = local.admin_username
   admin_password      = var.password
   network_interface_ids = [
     azurerm_network_interface.win11.id,

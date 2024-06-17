@@ -10,7 +10,7 @@ resource "azurerm_public_ip" "firewall" {
 }
 
 resource "azurerm_firewall" "firewall" {
-  name                = var.firewall_name
+  name                = var.firewall_name == null ? "${var.owner}-fw" : var.firewall_name
   location            = azurerm_resource_group.network.location
   resource_group_name = azurerm_resource_group.network.name
   sku_name            = "AZFW_VNet"

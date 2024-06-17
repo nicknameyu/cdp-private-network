@@ -23,7 +23,7 @@ resource "azurerm_key_vault" "kv" {
   }
   access_policy {
     tenant_id = data.azurerm_subscription.current.tenant_id
-    object_id = azurerm_user_assigned_identity.managed_id["dbcmk"].principal_id
+    object_id = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
 
     key_permissions = [
       "List",

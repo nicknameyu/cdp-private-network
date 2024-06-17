@@ -1,12 +1,13 @@
 ######### universal variables #########
 variable "resource_groups" {
-  description = "The template will create 4 resource groups to hold resources: the network resource group, the prerequisite resource group, the cdp environment resource group, and the jump server resource group."
+  description = "The template will create 4 resource groups to hold resources: the network resource group, the prerequisite resource group, the cdp environment resource group, and the jump server resource group. Default to null, and a list of default names with the $owner as the prefix will be created."
   type = object({
     network_rg      = string
     prerequisite_rg = string
     cdp_rg          = string
     vms_rg          = string
   })
+  default = null
 }
 variable "tags" {
   description = "Tags to be applied to the resources."
@@ -38,11 +39,13 @@ variable "cdp_cidr" {
   }
 }
 variable "hub_vnet_name" {
-  description = "The name of HUB VNET."
+  description = "The name of HUB VNET. Default to $owner-hub-vnet"
+  default = null
   type = string
 }
 variable "cdp_vnet_name" {
-  description = "The name of CDP VNET"
+  description = "The name of CDP VNET. Default to $owner-cdp-vnet"
+  default = null
   type = string
 }
 locals {
@@ -182,26 +185,27 @@ variable "fw_net_rules" {
 
 
 variable "firewall_name" {
-  description = "The name for the Azure Firewall"
+  description = "The name for the Azure Firewall. Default to $owner-fw"
   type = string
+  default = null
 }
 
 variable "dns_resolver_name" {
-  description = "The name for the private DNS resolver on CDP VNET."
+  description = "The name for the private DNS resolver on CDP VNET. Default to $owner-dns-resolver"
+  default = null
   type = string
 }
 ########### prerequisites #############
 variable "managed_id" {
-  description = "The name of the required managed identities."
+  description = "The name of the required managed identities. Default to null and a list of default names will be assigned."
   type = object({
     assumer    = string
     dataaccess = string
     logger     = string
     ranger     = string
     raz        = string
-    dw         = string
-    dbcmk      = string
   })
+  default = null
 }
 
 variable "cdp_storage" {
@@ -221,28 +225,46 @@ variable "custom_role_names" {
     cmk                  = string
     mkt_img              = string                // new added for RHEL8 Azure Market Image
   })
+  default = null
 }
 
 ########### Servers ############
 variable "winclient_vm_name" {
   description = "The name of the windows11 VM."
   type        = string
+  default     = null
+  validation {
+    condition     = var.winclient_vm_name == null ? true : length(var.winclient_vm_name) < 15
+    error_message = "Lenght of a VM name must be shorter than 15."
+  }
 }
 variable "hub_jump_server_name" {
-  description = "The name of the jump server sitting in hub VNET"
+  description = "The name of the jump server sitting in hub VNET. Default to $ownerHubJump"
   type        = string
+  default     = null
+  validation {
+    condition     = var.hub_jump_server_name == null ? true : length(var.hub_jump_server_name) < 15
+    error_message = "Lenght of a VM name must be shorter than 15."
+  }
 }
 variable "cdp_jump_server_name" {
-  description = " The name of the jump server sitting in cdp VNET"
+  description = " The name of the jump server sitting in cdp VNET. Default to $ownerCdpJump"
   type        = string
+  default     = null
+  validation {
+    condition     = var.cdp_jump_server_name == null ? true : length(var.cdp_jump_server_name) < 15
+    error_message = "Lenght of a VM name must be shorter than 15."
+  }
 }
 variable "admin_username" {
-  description = "The administrator's name for the Windows 11 server."
+  description = "The administrator's name for the jump servers. Default to $owner."
   type        = string
+  default     = null
 }
 variable "password" {
   description = "The password of the Win Client"
   type        = string
+  default     = "Passw0rd"
 }
 
 ##################
@@ -274,7 +296,12 @@ variable "private_key" {
 }
 
 variable "custom_dns" {
-  description = "A switch to control the DNS setting one the VNETs. When true, the DNS setting points to custom DNS server. When true, use Azure Default DNS."
+  description = "A switch to control the DNS setting one the VNETs. When true, the DNS setting points to custom DNS server. When true, using the Linux jump server in hub VNET as the DNS server; when false, using Azure Default DNS server."
   type    = bool
-  default = false
+  default = true
+}
+
+variable "owner" {
+  type = string
+  description = "A string representing the owner. Will be used as prefix of many parameters."
 }

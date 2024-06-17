@@ -1,11 +1,11 @@
 ############### Hub VNET #############
 resource "azurerm_resource_group" "network" {
-  name     = var.resource_groups.network_rg
+  name     = var.resource_groups != null ? var.resource_groups.network_rg : "${var.owner}-network"
   location = var.location
   tags = var.tags
 }
 resource "azurerm_virtual_network" "hub" {
-  name                = var.hub_vnet_name
+  name                = var.hub_vnet_name == null ? "${var.owner}-hub-vnet" : var.hub_vnet_name
   location            = azurerm_resource_group.network.location
   resource_group_name = azurerm_resource_group.network.name
   address_space       = [var.hub_cidr]
@@ -48,7 +48,7 @@ resource "azurerm_subnet_route_table_association" "hub_core" {
 
 ################ CDP VNET #############
 resource "azurerm_virtual_network" "cdp" {
-  name                = var.cdp_vnet_name
+  name                = var.cdp_vnet_name == null ? "${var.owner}-cdp-vnet" : var.cdp_vnet_name
   location            = azurerm_resource_group.network.location
   resource_group_name = azurerm_resource_group.network.name
   address_space       = [var.cdp_cidr]
@@ -175,7 +175,7 @@ output "private_dns_zones" {
 }
 ########## Private DNS Resolver ##############
 resource "azurerm_private_dns_resolver" "dns_resolver" {
-  name                = var.dns_resolver_name
+  name                = var.dns_resolver_name == null ? "${var.owner}-dns-resolver" : var.dns_resolver_name
   resource_group_name = azurerm_resource_group.network.name
   location            = azurerm_resource_group.network.location
   virtual_network_id  = azurerm_virtual_network.cdp.id
