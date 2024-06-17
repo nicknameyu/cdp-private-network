@@ -1,4 +1,9 @@
 # Change log
+## v0.3.16 Azure
+- create default values for many variables to reduce the required parameters in `tfvars` file
+- Create delay for role assignment after custom roles are created to avoid failures. 
+- removed two manage identities, `db_cmk` and `dw`, as the `dataaccess` MI can be used for this purpose.
+
 ## v0.3.15 aws permission
 - adding tagrole permission
 ## v0.3.14-1

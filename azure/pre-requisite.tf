@@ -1,5 +1,5 @@
 resource "azurerm_resource_group" "prerequisite" {
-  name     = var.resource_groups.prerequisite_rg
+  name     = var.resource_groups != null ? var.resource_groups.prerequisite_rg : "${var.owner}-cdp-prerequisite"
   location = var.location
   tags = var.tags
 }
@@ -80,7 +80,13 @@ output "storage" {
 }
 ############## Managed Identity #################
 resource "azurerm_user_assigned_identity" "managed_id" {
-  for_each            = var.managed_id
+  for_each            = var.managed_id != null ? var.managed_id : {
+                                                                    assumer    = "${var.owner}-cdp-assumer"
+                                                                    dataaccess = "${var.owner}-cdp-dataaccess"
+                                                                    logger     = "${var.owner}-cdp-logger"
+                                                                    ranger     = "${var.owner}-cdp-ranger"
+                                                                    raz        = "${var.owner}-cdp-raz"
+                                                                  }
   location            = azurerm_resource_group.prerequisite.location
   name                = each.value
   resource_group_name = azurerm_resource_group.prerequisite.name
@@ -156,20 +162,15 @@ locals {
         role  = "Storage Blob Delegator"
       },
       dw1  = {
-        principal_id = azurerm_user_assigned_identity.managed_id["dw"].principal_id
+        principal_id = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
         scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
         role  = azurerm_role_definition.dw.name
       },
       dw2 = {                                                                                     // Attention: this one is not listed in document, but it is necessary
-        principal_id = azurerm_user_assigned_identity.managed_id["dw"].principal_id
+        principal_id = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
         scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
         role  = "Managed Identity Operator"        
       },
-      # spn_multi_rg = {                                                                          // Deprecated
-      #   principal_id = var.spn_object_id
-      #   scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
-      #   role  = azurerm_role_definition.env_multi_rg_pvt_ep.name
-      # },
       spn_main = {
         principal_id = var.spn_object_id
         scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
@@ -198,25 +199,31 @@ locals {
   }
 }
 
+resource "time_sleep" "custom_role" {
+  // Adding this sleep resource to create a delay between creating the custom roles and role assignment.
+  depends_on =  [
+                  azurerm_role_definition.cmk,
+                  azurerm_role_definition.dw,
+                  azurerm_role_definition.env_single_rg_pvt_ep,
+                  azurerm_role_definition.env_single_rg_svc_ep,
+                  azurerm_role_definition.liftie,
+                  azurerm_role_definition.mkt_img
+                ]
+
+  create_duration = "180s"
+}
+
 resource "azurerm_role_assignment" "assignment" {
   for_each             = local.role_assignment
   scope                = each.value["scope"]
   role_definition_name = each.value["role"]
   principal_id         = each.value["principal_id"]
-  depends_on           = [ 
-                            azurerm_role_definition.cmk,
-                            azurerm_role_definition.dw,
-#                            azurerm_role_definition.env_multi_rg_pvt_ep, // Deprecated
-                            azurerm_role_definition.env_single_rg_pvt_ep,
-                            azurerm_role_definition.env_single_rg_svc_ep,
-                            azurerm_role_definition.liftie,
-                            azurerm_role_definition.mkt_img
-                         ]
+  depends_on           = [ time_sleep.custom_role ]
 }
 
 ############### CDP Security Group ####################
 resource "azurerm_network_security_group" "default" {
-  for_each            = toset(["nsg-default", "nsg-knox"])
+  for_each            = toset(["${var.owner}-nsg-default", "${var.owner}-nsg-knox"])
   name                = each.key
   location            = azurerm_resource_group.network.location
   resource_group_name = azurerm_resource_group.network.name

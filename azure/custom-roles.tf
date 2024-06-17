@@ -1,7 +1,7 @@
 resource "azurerm_role_definition" "dw" {
-  name        = var.custom_role_names.dw
+  name        = var.custom_role_names == null ? "${var.owner} CDP DW" : var.custom_role_names.dw
   scope       = data.azurerm_subscription.current.id
-  description = var.custom_role_names.dw
+  description = var.custom_role_names == null ? "${var.owner} CDP DW" : var.custom_role_names.dw
 
   permissions {
     actions     = [                   
@@ -90,9 +90,9 @@ resource "azurerm_role_definition" "dw" {
 # }
 
 resource "azurerm_role_definition" "liftie" {
-  name        = var.custom_role_names.liftie
+  name        = var.custom_role_names == null ? "${var.owner} CDP Liftie" : var.custom_role_names.liftie
   scope       = data.azurerm_subscription.current.id
-  description = var.custom_role_names.liftie
+  description = var.custom_role_names == null ? "${var.owner} CDP Liftie" : var.custom_role_names.liftie
 
   permissions {
     actions     = [                   
@@ -125,9 +125,9 @@ resource "azurerm_role_definition" "liftie" {
 }
 
 resource "azurerm_role_definition" "env_single_rg_svc_ep" {
-  name        = var.custom_role_names.env_single_rg_svc_ep
+  name        = var.custom_role_names == null ? "${var.owner} CDP Single RG Svc Endpoint" : var.custom_role_names.env_single_rg_svc_ep
   scope       = data.azurerm_subscription.current.id
-  description = var.custom_role_names.env_single_rg_svc_ep
+  description = var.custom_role_names == null ? "${var.owner} CDP Single RG Svc Endpoint" : var.custom_role_names.env_single_rg_svc_ep
 
   permissions {
     actions     = [                   
@@ -224,9 +224,9 @@ resource "azurerm_role_definition" "env_single_rg_svc_ep" {
 }
 
 resource "azurerm_role_definition" "env_single_rg_pvt_ep" {
-  name        = var.custom_role_names.env_single_rg_pvt_ep
+  name        = var.custom_role_names == null ? "${var.owner} CDP Single RG pvt Endpoint" : var.custom_role_names.env_single_rg_pvt_ep
   scope       = data.azurerm_subscription.current.id
-  description = var.custom_role_names.env_single_rg_pvt_ep
+  description = var.custom_role_names == null ? "${var.owner} CDP Single RG pvt Endpoint" : var.custom_role_names.env_single_rg_pvt_ep
 
   permissions {
     actions     = [
@@ -347,9 +347,9 @@ resource "azurerm_role_definition" "env_single_rg_pvt_ep" {
 }
 
 resource "azurerm_role_definition" "cmk" {
-  name        = var.custom_role_names.cmk
+  name        = var.custom_role_names == null ? "${var.owner} CDP CMK" : var.custom_role_names.cmk
   scope       = data.azurerm_subscription.current.id
-  description = var.custom_role_names.cmk
+  description = var.custom_role_names == null ? "${var.owner} CDP CMK" : var.custom_role_names.cmk
 
   permissions {
     actions     = [
@@ -376,9 +376,9 @@ resource "azurerm_role_definition" "cmk" {
 }
 
 resource "azurerm_role_definition" "mkt_img" {
-  name        = var.custom_role_names.mkt_img
+  name        = var.custom_role_names == null ? "${var.owner} CDP Mkt Image" : var.custom_role_names.mkt_img
   scope       = data.azurerm_subscription.current.id
-  description = var.custom_role_names.mkt_img
+  description = var.custom_role_names == null ? "${var.owner} CDP Mkt Image" : var.custom_role_names.mkt_img
 
   permissions {
     actions     = [

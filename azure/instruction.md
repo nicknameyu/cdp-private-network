@@ -43,8 +43,12 @@ This repository contains Terraform configurations to deploy and manage Azure res
 
 ### Universal Variables
 
+- **owner** (string)
+  - This is used as the prefix of the default value of the name of many resources.
+
 - **resource_groups** (object)
   - Description: The template will create 4 resource groups to hold resources: the network resource group, the prerequisite resource group, the CDP environment resource group, and the jump server resource group.
+  - The default value is `null`. When set to `null`, default values with prefix of `$owner` will be created. 
   - Structure:
     ```hcl
     {
@@ -75,10 +79,10 @@ This repository contains Terraform configurations to deploy and manage Azure res
   - Validation: Minimum /20 CIDR is required for CDP VNET.
 
 - **hub_vnet_name** (string)
-  - Description: The name of HUB VNET.
+  - Description: The name of HUB VNET. When set to null, default to `$owner-hub-vnet`
 
 - **cdp_vnet_name** (string)
-  - Description: The name of CDP VNET.
+  - Description: The name of CDP VNET. When set to null, default to `$owner-cdp-vnet`
 
 ### Firewall Rules
 
@@ -117,6 +121,7 @@ This repository contains Terraform configurations to deploy and manage Azure res
 
 - **managed_id** (object)
   - Description: The names of the required managed identities.
+  - When set to `null`, default values with prefix `$owner` will be created.
   - Structure:
     ```hcl
     {
@@ -125,8 +130,6 @@ This repository contains Terraform configurations to deploy and manage Azure res
       logger     = string
       ranger     = string
       raz        = string
-      dw         = string
-      dbcmk      = string
     }
     ```
 
@@ -138,6 +141,7 @@ This repository contains Terraform configurations to deploy and manage Azure res
 
 - **custom_role_names** (object)
   - Description: Custom role names.
+  - When set to `null`, default values with prefix `$owner` will be created.
   - Structure:
     ```hcl
     {
@@ -153,16 +157,20 @@ This repository contains Terraform configurations to deploy and manage Azure res
 ### Servers
 
 - **winclient_vm_name** (string)
-  - Description: The name of the Windows 11 VM.
+  - Description: The name of the Windows 11 VM. 
+  - When set to `null`, default values with prefix `$owner` will be created.
 
 - **hub_jump_server_name** (string)
   - Description: The name of the jump server in the HUB VNET.
+  - When set to `null`, default values with prefix `$owner` will be created.
 
 - **cdp_jump_server_name** (string)
   - Description: The name of the jump server in the CDP VNET.
+  - When set to `null`, default values with prefix `$owner` will be created.
 
 - **admin_username** (string)
-  - Description: The administrator's username for the DNS server and jump servers.
+  - Description: The administrator's username for the jump servers.
+  - Default to `null`. When set to null, will use the `$owner` as the administrator name.
 
 - **password** (string)
   - Description: The password for the Windows 11 servers.
@@ -190,7 +198,7 @@ This repository contains Terraform configurations to deploy and manage Azure res
 
 - **custom_dns** (bool)
   - Description: Controls the DNS setting on the VNETs. When true, the DNS setting points to a custom DNS server. When false, uses Azure Default DNS.
-  - Default: `false`
+  - Default: `true`
 
 
 ---
