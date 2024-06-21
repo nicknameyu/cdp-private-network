@@ -93,8 +93,8 @@ resource "azurerm_linux_virtual_machine" "hub-jump" {
       "sudo mv /tmp/named.conf.options /etc/bind/named.conf.options",
       "sudo chown root:bind /etc/bind/named.conf.options",
       "sudo chmod 644 /etc/bind/named.conf.options",
-      "sudo systemctl restart bind9.service",
-      "chmod 600 /home/${local.admin_username}/.ssh/id_rsa"
+      "chmod 600 /home/${local.admin_username}/.ssh/id_rsa",
+      "sudo systemctl restart bind9.service"
     ]
   }
 }

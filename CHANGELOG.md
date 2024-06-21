@@ -1,4 +1,8 @@
 # Change log
+## v0.3.17 Azure
+- Use `azurerm_key_vault_access_policy` to create key vault access policy for SPN and dataaccess MI, instead of embed them in the `azurerm_key_vault` resource. 
+- Adjust the bootstrap script for the DNS server, so that the terraform apply will fail out if the DNS service cannot be started successfully.
+
 ## v0.3.16 Azure
 - create default values for many variables to reduce the required parameters in `tfvars` file
 - Create delay for role assignment after custom roles are created to avoid failures. 
