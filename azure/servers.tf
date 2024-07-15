@@ -58,8 +58,8 @@ resource "azurerm_linux_virtual_machine" "hub-jump" {
   }
   source_image_reference {
     publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-focal"
-    sku       = "20_04-lts-gen2"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
     version   = "latest"
   }
   tags = var.tags
@@ -135,8 +135,8 @@ resource "azurerm_linux_virtual_machine" "cdp-jump" {
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "0001-com-ubuntu-server-focal"
-    sku       = "20_04-lts-gen2"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
     version   = "latest"
   }
   tags = var.tags
@@ -178,7 +178,7 @@ resource "azurerm_windows_virtual_machine" "win11" {
   source_image_reference {
     publisher = "MicrosoftWindowsDesktop"
     offer     = "windows-11"
-    sku       = "win11-21h2-avd"
+    sku       = "win11-23h2-pro"
     version   = "latest"
   }
   tags = var.tags

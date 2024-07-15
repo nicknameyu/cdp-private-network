@@ -1,4 +1,7 @@
 # Change log
+## v0.3.18 Azure
+- VM image update due to Azure end of life.
+
 ## v0.3.17 Azure
 - Use `azurerm_key_vault_access_policy` to create key vault access policy for SPN and dataaccess MI, instead of embed them in the `azurerm_key_vault` resource. 
 - Adjust the bootstrap script for the DNS server, so that the terraform apply will fail out if the DNS service cannot be started successfully.
