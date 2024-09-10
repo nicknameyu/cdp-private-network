@@ -172,6 +172,14 @@ This repository contains Terraform configurations to deploy and manage Azure res
   - Description: The administrator's username for the jump servers.
   - Default to `null`. When set to null, will use the `$owner` as the administrator name.
 
+- **create_cdp_jump_server** (bool)
+  - Description: a switch to control whether to create jump server in CDP VNET
+  - Default to `false`
+
+- **create_win_client** (boll)
+  - Description: a switch to control whether to create a windows client
+  - Default to `false`
+
 - **password** (string)
   - Description: The password for the Windows 11 servers.
 
@@ -200,7 +208,13 @@ This repository contains Terraform configurations to deploy and manage Azure res
   - Description: Controls the DNS setting on the VNETs. When true, the DNS setting points to a custom DNS server. When false, uses Azure Default DNS.
   - Default: `true`
 
+- **public_env** (bool)
+  - Description: A switch to control the default route on the route tables. When set to false, the default route is pointed to firewall. Default to false.
+  - Default: `false`
 
+-- **subscription_id** (string)
+  - Descriptopm: Azure Subscription ID. Mandatory option after AzreuRM 4.0.
+  - Default: `add825b2-c306-43b7-b0a0-ce307b5076ed` `azure-fs-cdp-sandbox-env`
 ---
 
 Adjust the variables in the `variables.tf` file to match your desired configuration. For more details on each variable, refer to the inline comments and descriptions within the file.

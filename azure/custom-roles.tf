@@ -289,6 +289,7 @@ resource "azurerm_role_definition" "env_single_rg_pvt_ep" {
       "Microsoft.Resources/subscriptions/read",
       "Microsoft.ManagedIdentity/userAssignedIdentities/read",
       "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action",
+      "Microsoft.DBforPostgreSQL/flexibleServers/PrivateEndpointConnectionsApproval/action",  // added base on testing 09/04/2024 for supporting privatelink for postgres db flexible server
       "Microsoft.DBforPostgreSQL/servers/read",
       "Microsoft.DBforPostgreSQL/servers/write",
       "Microsoft.DBforPostgreSQL/servers/delete",
@@ -330,7 +331,8 @@ resource "azurerm_role_definition" "env_single_rg_pvt_ep" {
       "Microsoft.Network/loadBalancers/read",
       "Microsoft.Network/loadBalancers/write",
       "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
-      "Microsoft.Resources/deployments/cancel/action"
+      "Microsoft.Resources/deployments/cancel/action",
+      "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/write",            // Added 9/10/2024 with testing for DE service
     ]
     data_actions = [
       "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read",

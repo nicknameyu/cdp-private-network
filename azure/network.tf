@@ -29,7 +29,7 @@ resource "azurerm_route_table" "core" {
   name                          = "rt_hub_coresubnet"
   location                      = azurerm_resource_group.network.location
   resource_group_name           = azurerm_resource_group.network.name
-  disable_bgp_route_propagation = false
+  bgp_route_propagation_enabled = false
 
   route {
     name           = "internet"
@@ -108,12 +108,12 @@ resource "azurerm_virtual_network_peering" "cdp_hub" {
 
 
 ############# Route tables ##############
-resource "azurerm_route_table" "cdp_route" {
-  for_each                      = local.cdp_subnets
+resource "azurerm_route_table" "cdp_route_pvt" {
+  for_each                      = var.public_env ? {} : local.cdp_subnets
   name                          = "rt_cdp_${each.key}"
   location                      = azurerm_resource_group.network.location
   resource_group_name           = azurerm_resource_group.network.name
-  disable_bgp_route_propagation = false
+  bgp_route_propagation_enabled = false
 
   route {
     name           = "internet"
@@ -126,10 +126,23 @@ resource "azurerm_route_table" "cdp_route" {
   }
 }
 
+resource "azurerm_route_table" "cdp_route_pub" {
+  for_each                      = var.public_env ? local.cdp_subnets : {}
+  name                          = "rt_cdp_pub_${each.key}"
+  location                      = azurerm_resource_group.network.location
+  resource_group_name           = azurerm_resource_group.network.name
+  bgp_route_propagation_enabled = false
+
+  lifecycle {
+    ignore_changes = [ route, tags ]
+  }
+}
+
+
 resource "azurerm_subnet_route_table_association" "cdp_rt_associate" {
   for_each       = azurerm_subnet.cdp_subnets
   subnet_id      = azurerm_subnet.cdp_subnets[each.key].id
-  route_table_id = azurerm_route_table.cdp_route[each.key].id
+  route_table_id = var.public_env ? azurerm_route_table.cdp_route_pub[each.key].id : azurerm_route_table.cdp_route_pvt[each.key].id
 }
 
 ############# Private DNS Zone ############
@@ -146,7 +159,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "cdp_aks" {
 }
 
 resource "azurerm_private_dns_zone" "pg_flx" {
-  name                = "${var.location}.postgres.database.azure.com"
+  name                = "privatelink.postgres.database.azure.com"
   resource_group_name = azurerm_resource_group.network.name
   tags                = var.tags
 }
@@ -167,10 +180,22 @@ resource "azurerm_private_dns_zone_virtual_network_link" "storage" {
   private_dns_zone_name = azurerm_private_dns_zone.storage.name
   virtual_network_id    = azurerm_virtual_network.hub.id
 }
+resource "azurerm_private_dns_zone" "mysql" {
+  name                = "privatelink.mysql.database.azure.com"
+  resource_group_name = azurerm_resource_group.network.name
+  tags                = var.tags
+}
+resource "azurerm_private_dns_zone_virtual_network_link" "mysql" {
+  name                  = "cdp_vnet"
+  resource_group_name   = azurerm_resource_group.network.name
+  private_dns_zone_name = azurerm_private_dns_zone.mysql.name
+  virtual_network_id    = azurerm_virtual_network.cdp.id
+}
 output "private_dns_zones" {
   value = {
     aksPrivateDNSZoneID      = azurerm_private_dns_zone.aks.id
     postgresPrivateDNSZoneID = azurerm_private_dns_zone.pg_flx.id
+    mysqlPrivateDNSZoneID     = azurerm_private_dns_zone.mysql.id
   }
 }
 ########## Private DNS Resolver ##############

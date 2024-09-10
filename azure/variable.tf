@@ -229,6 +229,11 @@ variable "custom_role_names" {
 }
 
 ########### Servers ############
+variable "create_win_client" {
+  default = false
+  type = bool
+  description = "A switch to control whether to create windows client."
+}
 variable "winclient_vm_name" {
   description = "The name of the windows11 VM."
   type        = string
@@ -246,6 +251,11 @@ variable "hub_jump_server_name" {
     condition     = var.hub_jump_server_name == null ? true : length(var.hub_jump_server_name) < 15
     error_message = "Lenght of a VM name must be shorter than 15."
   }
+}
+variable "create_cdp_jump_server" {
+  default = false
+  type = bool
+  description = "A switch to control whether to create a linux jump server in CDP VNET."
 }
 variable "cdp_jump_server_name" {
   description = " The name of the jump server sitting in cdp VNET. Default to $ownerCdpJump"
@@ -304,4 +314,15 @@ variable "custom_dns" {
 variable "owner" {
   type = string
   description = "A string representing the owner. Will be used as prefix of many parameters."
+}
+
+variable "public_env" {
+  type    = bool
+  default = false
+  description = "A switch to control the default route on the route tables. When set to false, the default route is pointed to firewall. Default to false."
+}
+
+variable "subscription_id" {
+  description = "Azure Subscription ID. Mandatory option after AzreuRM 4.0."
+  type    = string
 }
