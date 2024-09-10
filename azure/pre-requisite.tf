@@ -53,7 +53,6 @@ resource "azurerm_storage_account" "fileshare" {
   account_tier             = "Premium"
   account_replication_type = "LRS"
   account_kind             = "FileStorage"
-  enable_https_traffic_only= false
 
   network_rules {
     default_action             = "Deny"
@@ -295,4 +294,9 @@ resource "azurerm_network_security_group" "default" {
     destination_address_prefix = var.cdp_cidr
   }
   tags = var.tags
+}
+
+
+output "ssh_public_key" {
+  value = file(var.public_key)
 }

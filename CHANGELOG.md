@@ -1,4 +1,12 @@
 # Change log
+## v0.3.19 Azure
+- Add a variable `public_env` to control the default route on the route tables for CDP VNET.
+- Change terraform AzureRM provider version, refactor the deprecated features.
+- Introduce variables to control creating windows jump server and CDP jump server per request instead of creating by default
+- Change Postgres DB Private DNS zone name to privatelink to accomondate both privatelink and delegated subnet.
+- Add MySql private DNS zone for Data Engineering
+- Update custom role permission to for above changes.
+
 ## v0.3.18 Azure
 - VM image update due to Azure end of life.
 

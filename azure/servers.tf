@@ -101,6 +101,7 @@ resource "azurerm_linux_virtual_machine" "hub-jump" {
 
 ###############   CDP VNET Jump Server ################
 resource "azurerm_network_interface" "cdp-jump" {
+  count               = var.create_cdp_jump_server ? 1:0
   name                = var.cdp_jump_server_name == null ? "${var.owner}CdpJump-nic" : "${var.cdp_jump_server_name}-nic"
   location            = azurerm_resource_group.vm.location
   resource_group_name = azurerm_resource_group.vm.name
@@ -113,6 +114,7 @@ resource "azurerm_network_interface" "cdp-jump" {
   tags = var.tags
 }
 resource "azurerm_linux_virtual_machine" "cdp-jump" {
+  count               = var.create_cdp_jump_server ? 1:0
   name                = var.cdp_jump_server_name == null ? "${var.owner}CdpJump" : var.cdp_jump_server_name
   resource_group_name = azurerm_resource_group.vm.name
   location            = azurerm_resource_group.vm.location
@@ -120,7 +122,7 @@ resource "azurerm_linux_virtual_machine" "cdp-jump" {
   admin_username      = local.admin_username
   disable_password_authentication = true
   network_interface_ids = [
-    azurerm_network_interface.cdp-jump.id,
+    azurerm_network_interface.cdp-jump[0].id,
   ]
 
   admin_ssh_key {
@@ -142,12 +144,9 @@ resource "azurerm_linux_virtual_machine" "cdp-jump" {
   tags = var.tags
 }
 
-output "cdp_jump_server_private_ip" {
-  value = azurerm_network_interface.cdp-jump.ip_configuration[0].private_ip_address
-}
-
-############# DNS Server ##################
+############# windows client ##################
 resource "azurerm_network_interface" "win11" {
+  count               = var.create_win_client ? 1:0
   name                = var.winclient_vm_name == null ? "${var.owner}WinClient-nic":"${var.winclient_vm_name}-nic"
   location            = azurerm_resource_group.vm.location
   resource_group_name = azurerm_resource_group.vm.name
@@ -160,6 +159,7 @@ resource "azurerm_network_interface" "win11" {
   tags = var.tags
 }
 resource "azurerm_windows_virtual_machine" "win11" {
+  count               = var.create_win_client ? 1:0
   name                = var.winclient_vm_name == null ? "${var.owner}WinClient" : var.winclient_vm_name
   resource_group_name = azurerm_resource_group.vm.name
   location            = azurerm_resource_group.vm.location
@@ -167,7 +167,7 @@ resource "azurerm_windows_virtual_machine" "win11" {
   admin_username      = local.admin_username
   admin_password      = var.password
   network_interface_ids = [
-    azurerm_network_interface.win11.id,
+    azurerm_network_interface.win11[0].id,
   ]
 
   os_disk {
@@ -220,20 +220,34 @@ resource "azurerm_firewall_nat_rule_collection" "dnat" {
     translated_address = azurerm_network_interface.hub-jump.private_ip_address
     protocols = ["TCP","UDP",]
   }
+}
+resource "azurerm_firewall_nat_rule_collection" "dnat-win" {
+  count               = var.create_win_client ? 1:0
+  name                = "win-client"
+  azure_firewall_name = azurerm_firewall.firewall.name
+  resource_group_name = azurerm_resource_group.network.name
+  priority            = 111
+  action              = "Dnat"
+
   rule {
     name = "win11"
     source_addresses = ["*"]
     destination_ports = ["3389",]
     destination_addresses = [azurerm_public_ip.win11.ip_address]
     translated_port = 3389
-    translated_address = azurerm_network_interface.win11.private_ip_address
+    translated_address = azurerm_network_interface.win11[0].private_ip_address
     protocols = ["TCP","UDP",]
   }
 }
-
-output "winclient_vm_public_ip" {
-  value = azurerm_public_ip.win11.ip_address
-}
-output "hub_jump_server_public_ip" {
-  value = azurerm_public_ip.hub-jump.ip_address
+output "server_ips" {
+  value = {
+    public_ips = {
+      windows_client = var.create_win_client ? azurerm_public_ip.win11.ip_address : null
+      hub_jump_server = azurerm_public_ip.hub-jump.ip_address
+    }
+    private_ips = {
+      DNS_IP = azurerm_network_interface.hub-jump.ip_configuration[0].private_ip_address
+      cdp_jump_serve = var.create_cdp_jump_server ? azurerm_network_interface.cdp-jump[0].ip_configuration[0].private_ip_address : null
+    }
+  }
 }
