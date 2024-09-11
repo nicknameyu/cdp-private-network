@@ -4,7 +4,6 @@ options {
   directory "/var/cache/bind";
   forwarders { 169.254.169.253; };
   dnssec-validation yes;
-  dnssec-enable yes;
   listen-on-v6 { any; };
   allow-query { any; };
 };

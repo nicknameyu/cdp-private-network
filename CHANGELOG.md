@@ -1,4 +1,8 @@
 # Change log
+## v0.3.20 AWS
+- Fix logic bug for `create_eks_role`
+- fix issue introduced by new version of bind9 on dns server.
+
 ## v0.3.19 Azure
 - Add a variable `public_env` to control the default route on the route tables for CDP VNET.
 - Change terraform AzureRM provider version, refactor the deprecated features.
