@@ -41,7 +41,7 @@ resource "aws_iam_role_policy_attachment" "ec2kms" {
 
 ############# Reduced Permission ################
 resource "aws_cloudformation_stack" "liftie" {
-  count         = var.default_permission || (! var.create_eks_role) ? 0:1
+  count         = var.default_permission || ((! var.default_permission) && (! var.create_eks_role)) ? 0:1
   name          = "${var.owner}-liftie-role-pair"
   capabilities  = ["CAPABILITY_NAMED_IAM"]
   template_body = file("./cf/aws-liftie-role-pair.yaml")
