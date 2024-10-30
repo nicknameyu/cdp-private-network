@@ -60,7 +60,9 @@ resource "azurerm_key_vault_access_policy" "dataaccess" {
       "List",
       "Get",
       "UnwrapKey",
-      "WrapKey"
+      "WrapKey",
+      "Encrypt",            // Datalake doesn't need this, DW doesn't need this. But DF needs it. DF didn't need this a few months before. added on 10/16/2024
+      "Decrypt",            // Datalake doesn't need this, DW doesn't need this. But DF needs it. DF didn't need this a few months before. added on 10/16/2024
   ]
 }
 

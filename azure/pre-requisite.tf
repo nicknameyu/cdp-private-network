@@ -53,6 +53,7 @@ resource "azurerm_storage_account" "fileshare" {
   account_tier             = "Premium"
   account_replication_type = "LRS"
   account_kind             = "FileStorage"
+  https_traffic_only_enabled = false
 
   network_rules {
     default_action             = "Deny"
@@ -124,6 +125,11 @@ locals {
         principal_id = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
         scope = azurerm_storage_container.containers["backup"].resource_manager_id
         role  = "Storage Blob Data Owner"     //Storage Blob Data Owner role
+      },
+      dataaccess4 = {
+        principal_id = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
+        scope = azurerm_resource_group.cdp.id
+        role  = azurerm_role_definition.cmk.name
       },
       logger1 = {
         principal_id = azurerm_user_assigned_identity.managed_id["logger"].principal_id
