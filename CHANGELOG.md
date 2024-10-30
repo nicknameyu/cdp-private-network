@@ -1,4 +1,8 @@
 # Change log
+## v0.3.21 Azure
+- CMK permission update. DF needs `Encrypt` and `Dycrypt` permissions for `data admin` managed identity.
+- CMK custom role needs to be assigned to `data admin` managed identity. 
+
 ## v0.3.20 AWS
 - Fix logic bug for `create_eks_role`
 - fix issue introduced by new version of bind9 on dns server.
