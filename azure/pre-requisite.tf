@@ -20,7 +20,7 @@ resource "azurerm_storage_account" "cdp" {
 resource "azurerm_storage_container" "containers" {
   for_each              = toset(["data", "logs", "backup"])
   name                  = each.key
-  storage_account_name  = azurerm_storage_account.cdp.name
+  storage_account_id = azurerm_storage_account.cdp.id
   container_access_type = "private"
 }
 
@@ -65,7 +65,7 @@ resource "azurerm_storage_account" "fileshare" {
 }
 resource "azurerm_storage_share" "fileshare" {
   name                 = "cdp-ml-share"
-  storage_account_name = azurerm_storage_account.fileshare.name
+  storage_account_id = azurerm_storage_account.fileshare.id
   quota                = 101                                      // this value must be greater than 100 for premium file storage
   enabled_protocol     = "NFS"
 
