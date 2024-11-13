@@ -20,7 +20,7 @@ resource "azurerm_storage_account" "cdp" {
 resource "azurerm_storage_container" "containers" {
   for_each              = toset(["data", "logs", "backup"])
   name                  = each.key
-  storage_account_id = azurerm_storage_account.cdp.id
+  storage_account_id = azurerm_storage_account.cdp.id            // storage_account_name is deprecated --> storage_account_id new attribute.
   container_access_type = "private"
 }
 
@@ -65,7 +65,7 @@ resource "azurerm_storage_account" "fileshare" {
 }
 resource "azurerm_storage_share" "fileshare" {
   name                 = "cdp-ml-share"
-  storage_account_id = azurerm_storage_account.fileshare.id
+  storage_account_id = azurerm_storage_account.fileshare.id       // storage_account_name is deprecated --> storage_account_id new attribute. 
   quota                = 101                                      // this value must be greater than 100 for premium file storage
   enabled_protocol     = "NFS"
 
@@ -108,22 +108,22 @@ locals {
       },
       assumer3 = {
         principal_id = azurerm_user_assigned_identity.managed_id["assumer"].principal_id
-        scope = azurerm_storage_container.containers["logs"].resource_manager_id
+        scope = "${azurerm_storage_account.cdp.id}/blobServices/default/containers/logs"     // resource_manager_id no longer supported, changed to this format as per Dongkai's suggestion.
         role  = "Storage Blob Data Contributor"     //Storage Blob Data Contributor role
       },
       dataaccess1 = {
         principal_id = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
-        scope = azurerm_storage_container.containers["logs"].resource_manager_id
+        scope = "${azurerm_storage_account.cdp.id}/blobServices/default/containers/logs"     // resource_manager_id no longer supported, changed to this format as per Dongkai's suggestion.
         role  = "Storage Blob Data Owner"     //Storage Blob Data Owner role
       },
       dataaccess2 = {
         principal_id = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
-        scope = azurerm_storage_container.containers["data"].resource_manager_id
+        scope = "${azurerm_storage_account.cdp.id}/blobServices/default/containers/data"     // resource_manager_id no longer supported, changed to this format as per Dongkai's suggestion.
         role  = "Storage Blob Data Owner"     //Storage Blob Data Owner role
       },
       dataaccess3 = {
         principal_id = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
-        scope = azurerm_storage_container.containers["backup"].resource_manager_id
+        scope = "${azurerm_storage_account.cdp.id}/blobServices/default/containers/backup"   // resource_manager_id no longer supported, changed to this format as per Dongkai's suggestion.
         role  = "Storage Blob Data Owner"     //Storage Blob Data Owner role
       },
       dataaccess4 = {
@@ -133,27 +133,27 @@ locals {
       },
       logger1 = {
         principal_id = azurerm_user_assigned_identity.managed_id["logger"].principal_id
-        scope = azurerm_storage_container.containers["logs"].resource_manager_id
+        scope = "${azurerm_storage_account.cdp.id}/blobServices/default/containers/logs"    // resource_manager_id no longer supported, changed to this format as per Dongkai's suggestion.
         role  = "Storage Blob Data Contributor"     //Storage Blob Data Contributor role
       },
       logger2 = {
         principal_id = azurerm_user_assigned_identity.managed_id["logger"].principal_id
-        scope = azurerm_storage_container.containers["backup"].resource_manager_id
+        scope = "${azurerm_storage_account.cdp.id}/blobServices/default/containers/backup"  // resource_manager_id no longer supported, changed to this format as per Dongkai's suggestion.
         role  = "Storage Blob Data Contributor"     //Storage Blob Data Contributor role
       },
       ranger1 = {
         principal_id = azurerm_user_assigned_identity.managed_id["ranger"].principal_id
-        scope = azurerm_storage_container.containers["data"].resource_manager_id
+        scope = "${azurerm_storage_account.cdp.id}/blobServices/default/containers/data"    // resource_manager_id no longer supported, changed to this format as per Dongkai's suggestion.
         role  = "Storage Blob Data Contributor"     //Storage Blob Data Contributor role
       },
       ranger2 = {
         principal_id = azurerm_user_assigned_identity.managed_id["ranger"].principal_id
-        scope = azurerm_storage_container.containers["logs"].resource_manager_id
+        scope = "${azurerm_storage_account.cdp.id}/blobServices/default/containers/logs"    // resource_manager_id no longer supported, changed to this format as per Dongkai's suggestion.
         role  = "Storage Blob Data Contributor"     //Storage Blob Data Contributor role
       },
       ranger3 = {
         principal_id = azurerm_user_assigned_identity.managed_id["ranger"].principal_id
-        scope = azurerm_storage_container.containers["backup"].resource_manager_id
+        scope = "${azurerm_storage_account.cdp.id}/blobServices/default/containers/backup"  // resource_manager_id no longer supported, changed to this format as per Dongkai's suggestion.
         role  = "Storage Blob Data Contributor"     //Storage Blob Data Contributor role
       },
       raz1 = {
