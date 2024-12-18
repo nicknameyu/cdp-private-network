@@ -16,6 +16,7 @@ resource "azurerm_subnet" "firewall" {
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.hub.name
   address_prefixes     = local.hub_subnets.AzureFirewallSubnet
+  default_outbound_access_enabled = false
 }
 
 resource "azurerm_subnet" "core" {
@@ -23,6 +24,7 @@ resource "azurerm_subnet" "core" {
   resource_group_name  = azurerm_resource_group.network.name
   virtual_network_name = azurerm_virtual_network.hub.name
   address_prefixes     = local.hub_subnets.coresubnet
+  default_outbound_access_enabled = var.public_env ? true : false
 }
 
 resource "azurerm_route_table" "core" {
@@ -61,6 +63,7 @@ resource "azurerm_subnet" "cdp_subnets" {
   virtual_network_name = azurerm_virtual_network.cdp.name
   address_prefixes     = [each.value]
   service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage", "Microsoft.KeyVault"]
+  default_outbound_access_enabled = var.public_env ? true : false
 }
 resource "azurerm_subnet" "dns_resolver_inbound" {
   name                 = "dns_resolver_inbound"

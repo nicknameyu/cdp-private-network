@@ -215,7 +215,7 @@ resource "time_sleep" "custom_role" {
                   azurerm_role_definition.mkt_img
                 ]
 
-  create_duration = "180s"
+  create_duration = "300s"
 }
 
 resource "azurerm_role_assignment" "assignment" {

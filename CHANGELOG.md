@@ -1,4 +1,10 @@
 # Change log
+## v0.3.22 Azure
+- For private environment, disable public routing on the subnets in CDP VNET.
+- Increase delay interval to 5min for the custom role assignment. 
+- Remove storage account endpoints from firewall. They are not required when service endpoint is enabled.
+- Fix bug of firewall allowing everything.
+
 ## v0.3.21 Azure
 - CMK permission update. DF needs `Encrypt` and `Dycrypt` permissions for `data admin` managed identity.
 - CMK custom role needs to be assigned to `data admin` managed identity. 
