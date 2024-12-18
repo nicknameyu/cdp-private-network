@@ -114,13 +114,13 @@ variable "fw_app_rules" {
         "console.eu-1.cdp.cloudera.com",              // Public Signing Key Retrieval EU
         "console.ap-1.cdp.cloudera.com",              // Public Signing Key Retrieval AP
         "pypi.org",                                   // SQL Stream builder, postgreSQL driver install
-        "*.dfs.core.windows.net",                     // Azure storage account
-        "*.postgres.database.azure.com",              // PostgresDB
+        # "*.dfs.core.windows.net",                     // Azure storage account
+        # "*.postgres.database.azure.com",              // PostgresDB
         "management.azure.com",                       // Azure	
         "*.agentsvc.azure-automation.net",            // MS LogAnalytics Optional
         "*.ods.opinsights.azure.com",                 // MS LogAnalytics Optional
         "*.oms.opinsights.azure.com",                 // MS LogAnalytics Optional
-        "*.blob.core.windows.net",                    // MS LogAnalytics Optional
+        # "*.blob.core.windows.net",                    // MS LogAnalytics Optional
         "www.digicert.com",                           // Digicert
         "cacerts.digicert.com",                       // Digicert
         "*.cacerts.digicert.com",                       // Digicert

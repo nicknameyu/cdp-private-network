@@ -80,7 +80,7 @@ resource "azurerm_firewall_network_rule_collection" "public_subnet" {
   action              = "Allow"
   rule {
     name                  = "public_subnet_rules"
-    source_addresses      = [var.hub_cidr, var.cdp_cidr]
+    source_addresses      = azurerm_subnet.core.address_prefixes
     destination_ports     = ["*"]
     destination_addresses = ["*"]
     protocols             = ["TCP", "UDP"]

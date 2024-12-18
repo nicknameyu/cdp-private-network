@@ -191,6 +191,7 @@ variable "fw_domain_ep" {
     "consoleauth.us-west-1.core.altus.cloudera.com",
     "consoleauth.altus.cloudera.com",
     "pypi.org",
+    "download.postgresql.org",
     # regional endpoint
     # US
     ".s3.us-west-1.amazonaws.com",
