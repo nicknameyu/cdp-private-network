@@ -26,8 +26,8 @@ variable "hub_cidr" {
   description = "The CIDR range of HUB VNET."
   default     = "10.128.0.0/16"
   validation {
-    condition     = tonumber(split("/", var.hub_cidr)[1]) <= 25
-    error_message = "A minimum /25 CIDR is required for HUB VNET."
+    condition     = tonumber(split("/", var.hub_cidr)[1]) <= 20
+    error_message = "A minimum /20 CIDR is required for HUB VNET."
   }
 }
 variable "cdp_cidr" {
@@ -53,6 +53,12 @@ locals {
   hub_subnets = {
     AzureFirewallSubnet = [cidrsubnet(var.hub_cidr, 26 - local.hub_vnet_masknum, 0 )]
     coresubnet          = [cidrsubnet(var.hub_cidr, 26 - local.hub_vnet_masknum, 1 )]
+  }
+  hub_pub_subnets = {
+    pub_subnet_1        = [cidrsubnet(var.hub_cidr, 24 - local.hub_vnet_masknum, 1 )]
+    pub_subnet_2        = [cidrsubnet(var.hub_cidr, 24 - local.hub_vnet_masknum, 2 )]
+    pub_subnet_3        = [cidrsubnet(var.hub_cidr, 24 - local.hub_vnet_masknum, 3 )]
+    pub_subnet_4        = [cidrsubnet(var.hub_cidr, 24 - local.hub_vnet_masknum, 4 )]
   }
   cdp_vnet_masknum = tonumber(split("/", var.cdp_cidr)[1])
   cdp_subnets = {

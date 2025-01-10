@@ -71,7 +71,7 @@ This repository contains Terraform configurations to deploy and manage Azure res
 - **hub_cidr** (string)
   - Description: The CIDR range of HUB VNET.
   - Default: `10.128.0.0/16`
-  - Validation: Minimum /25 CIDR is required for HUB VNET.
+  - Validation: Minimum /20 CIDR is required for HUB VNET.
 
 - **cdp_cidr** (string)
   - Description: The CIDR range of CDP VNET.

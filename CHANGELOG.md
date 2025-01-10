@@ -1,4 +1,8 @@
 # Change log
+## v0.3.23 Azure
+- Add 4 public subnets in hub VNET for the convience of creating full public environment.
+- Add new permissions based on testing on Jan 10, 2025.
+
 ## v0.3.22 Azure
 - For private environment, disable public routing on the subnets in CDP VNET.
 - Increase delay interval to 5min for the custom role assignment. 

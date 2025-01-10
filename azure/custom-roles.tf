@@ -207,6 +207,10 @@ resource "azurerm_role_definition" "env_single_rg_svc_ep" {
       "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write",
       "Microsoft.DBforPostgreSQL/flexibleServers/start/action",              // added base on testing
       "Microsoft.DBforPostgreSQL/flexibleServers/stop/action",               // added base on testing
+      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action",    // Added base on testing 01/10/2025
+      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/read",              // Added base on testing 01/10/2025
+      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/delete",            // Added base on testing 01/10/2025
+      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/write",             // Added base on testing 01/10/2025
       "Microsoft.Resources/deployments/cancel/action"
     ]
     data_actions = [
@@ -317,6 +321,10 @@ resource "azurerm_role_definition" "env_single_rg_pvt_ep" {
       "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/read",
       "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/write",
       "Microsoft.DBforPostgreSQL/servers/privateEndpointConnectionsApproval/action",
+      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action",    // Added base on testing 01/10/2025
+      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/read",
+      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/delete",
+      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/write",
       "Microsoft.Network/privateDnsZones/A/read",
       "Microsoft.Network/privateDnsZones/A/write",
       "Microsoft.Network/privateDnsZones/A/delete",
