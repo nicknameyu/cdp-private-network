@@ -62,7 +62,7 @@ locals {
   liftie_policy_5   = replace(local.liftie_policy_4, "$${YOUR-KMS-CUSTOMER-MANAGED-KEY-ARN}", aws_kms_key.cdp.arn)
   liftie_min_policy = replace(local.liftie_policy_5, "$${YOUR-SUBNET-REGION}", var.region)
   
-  # DE policy cannot be put into on policy file. Using two policy file for DE permissions.
+  # DE policy cannot be put into one policy file. Using two policy file for DE permissions.
   reduced_policies  = {
     de1       = {
       name         = "${var.owner}-de-reduced-policy-1"
@@ -75,7 +75,7 @@ locals {
       policy       = file("./policies/aws-de-restricted-policy-part2.json")
     }
 
-    # Liftie policy cannot be put into on policy file. Using two policy file for Liftie permissions.
+    # Liftie policy cannot be put into one policy file. Using two policy file for Liftie permissions.
     liftie1 = {
       name         = "${var.owner}-liftie-reduced-policy1"
       description  = "${upper(var.owner)} reduced policy for Liftie1"

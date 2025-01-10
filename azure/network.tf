@@ -48,6 +48,32 @@ resource "azurerm_subnet_route_table_association" "hub_core" {
   route_table_id = azurerm_route_table.core.id
 }
 
+
+resource "azurerm_subnet" "pub" {
+  for_each             = local.hub_pub_subnets
+  name                 = each.key
+  resource_group_name  = azurerm_resource_group.network.name
+  virtual_network_name = azurerm_virtual_network.hub.name
+  address_prefixes     = each.value
+  service_endpoints    = ["Microsoft.Sql", "Microsoft.Storage", "Microsoft.KeyVault"]
+}
+resource "azurerm_route_table" "pub" {
+  for_each                      = local.hub_pub_subnets
+  name                          = "rt_${each.key}"
+  location                      = azurerm_resource_group.network.location
+  resource_group_name           = azurerm_resource_group.network.name
+  bgp_route_propagation_enabled = false
+
+  lifecycle {
+    ignore_changes = [ route, tags ]
+  }
+}
+resource "azurerm_subnet_route_table_association" "pub" {
+  for_each       = azurerm_subnet.pub
+  subnet_id      = azurerm_subnet.pub[each.key].id
+  route_table_id = azurerm_route_table.pub[each.key].id
+}
+
 ################ CDP VNET #############
 resource "azurerm_virtual_network" "cdp" {
   name                = var.cdp_vnet_name == null ? "${var.owner}-cdp-vnet" : var.cdp_vnet_name
