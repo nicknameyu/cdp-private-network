@@ -226,10 +226,10 @@ variable "custom_role_names" {
   type = object({
     dw                   = string
     liftie               = string
-    env_single_rg_svc_ep = string
-    env_single_rg_pvt_ep = string
+    datalake             = string
     cmk                  = string
     mkt_img              = string                // new added for RHEL8 Azure Market Image
+    dns_zone             = string
   })
   default = null
 }
@@ -331,4 +331,8 @@ variable "public_env" {
 variable "subscription_id" {
   description = "Azure Subscription ID. Mandatory option after AzreuRM 4.0."
   type    = string
+}
+variable "dns_zone_subscription_id" {
+  description = "The subscription id for the private DNS zone subscription."
+  default     = null
 }

@@ -179,7 +179,7 @@ locals {
       spn_main = {
         principal_id = var.spn_object_id
         scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}"
-        role  = var.spn_permision_contributor ? "Contributor" : azurerm_role_definition.env_single_rg_pvt_ep.name
+        role  = var.spn_permision_contributor ? "Contributor" : azurerm_role_definition.datalake.name
       },
       spn_cmk = {
         principal_id = var.spn_object_id
@@ -202,6 +202,18 @@ locals {
         role  = azurerm_role_definition.mkt_img.name
       }
   }
+  role_assignment_2nd_subscription = {
+    spn_dns = {
+      principal_id = var.spn_object_id
+      scope = var.dns_zone_subscription_id == null ? azurerm_resource_group.network.id : azurerm_resource_group.dns[0].id
+      role  = azurerm_role_definition.dns_zone.name
+    },
+    dataaccess_dns = {
+      principal_id = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
+      scope = var.dns_zone_subscription_id == null ? azurerm_resource_group.network.id : azurerm_resource_group.dns[0].id
+      role  = azurerm_role_definition.dns_zone.name
+    }
+  }
 }
 
 resource "time_sleep" "custom_role" {
@@ -209,19 +221,27 @@ resource "time_sleep" "custom_role" {
   depends_on =  [
                   azurerm_role_definition.cmk,
                   azurerm_role_definition.dw,
-                  azurerm_role_definition.env_single_rg_pvt_ep,
-                  azurerm_role_definition.env_single_rg_svc_ep,
+                  azurerm_role_definition.datalake,
                   azurerm_role_definition.liftie,
-                  azurerm_role_definition.mkt_img
+                  azurerm_role_definition.mkt_img,
+                  azurerm_role_definition.dns_zone
                 ]
 
-  create_duration = "300s"
+  create_duration = "600s"
 }
 
 resource "azurerm_role_assignment" "assignment" {
   for_each             = local.role_assignment
   scope                = each.value["scope"]
   role_definition_name = each.value["role"]
+  principal_id         = each.value["principal_id"]
+  depends_on           = [ time_sleep.custom_role ]
+}
+resource "azurerm_role_assignment" "dns_zone" {
+  for_each             = (var.dns_zone_subscription_id == null) || (var.dns_zone_subscription_id == data.azurerm_subscription.current.subscription_id) ? {} : local.role_assignment_2nd_subscription
+  scope                = each.value["scope"]
+  role_definition_name = each.value["role"]
+  provider             = azurerm.secondary
   principal_id         = each.value["principal_id"]
   depends_on           = [ time_sleep.custom_role ]
 }

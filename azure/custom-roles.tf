@@ -60,7 +60,25 @@ resource "azurerm_role_definition" "dw" {
   ]
 }
 
-
+resource "azurerm_role_definition" "dns_zone" {
+  name        = var.custom_role_names == null ? "${var.owner} DNS Zone" : var.custom_role_names.dns_zone
+  scope       = var.dns_zone_subscription_id != null ? "/subscriptions/${var.dns_zone_subscription_id}" : data.azurerm_subscription.current.id
+  provider    = azurerm.secondary
+  description = var.custom_role_names == null ? "${var.owner} DNS Zone" : var.custom_role_names.dns_zone
+  permissions {
+    actions     = [                   
+      "Microsoft.Network/privateDnsZones/A/read",
+      "Microsoft.Network/privateDnsZones/A/write",
+      "Microsoft.Network/privateDnsZones/A/delete",
+      "Microsoft.Network/privateDnsZones/virtualNetworkLinks/read",
+      "Microsoft.Network/privateDnsZones/read",
+      "Microsoft.Network/privateDnsZones/write"
+    ]
+  }
+  assignable_scopes = [
+    var.dns_zone_subscription_id != null ? "/subscriptions/${var.dns_zone_subscription_id}" : data.azurerm_subscription.current.id # /subscriptions/00000000-0000-0000-0000-000000000000
+  ]
+}
 
 
 # Normally customer would agree to assign Azure native blob storage native roles, "Storage Blob Data Owner" and 
@@ -124,113 +142,11 @@ resource "azurerm_role_definition" "liftie" {
   ]
 }
 
-resource "azurerm_role_definition" "env_single_rg_svc_ep" {
-  name        = var.custom_role_names == null ? "${var.owner} CDP Single RG Svc Endpoint" : var.custom_role_names.env_single_rg_svc_ep
+
+resource "azurerm_role_definition" "datalake" {
+  name        = var.custom_role_names == null ? "${var.owner} datalake" : var.custom_role_names.datalake
   scope       = data.azurerm_subscription.current.id
-  description = var.custom_role_names == null ? "${var.owner} CDP Single RG Svc Endpoint" : var.custom_role_names.env_single_rg_svc_ep
-
-  permissions {
-    actions     = [                   
-      "Microsoft.Storage/storageAccounts/read",
-      "Microsoft.Storage/storageAccounts/write",
-      "Microsoft.Storage/storageAccounts/blobServices/write",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/delete",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/read",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/write",
-      "Microsoft.Storage/storageAccounts/fileServices/write",
-      "Microsoft.Storage/storageAccounts/listkeys/action",
-      "Microsoft.Storage/storageAccounts/regeneratekey/action",
-      "Microsoft.Storage/storageAccounts/delete",
-      "Microsoft.Storage/locations/deleteVirtualNetworkOrSubnets/action",
-      "Microsoft.Network/virtualNetworks/read",
-      "Microsoft.Network/virtualNetworks/write",
-      "Microsoft.Network/virtualNetworks/delete",
-      "Microsoft.Network/virtualNetworks/subnets/read",
-      "Microsoft.Network/virtualNetworks/subnets/write",
-      "Microsoft.Network/virtualNetworks/subnets/delete",
-      "Microsoft.Network/virtualNetworks/subnets/join/action",
-      "Microsoft.Network/publicIPAddresses/read",
-      "Microsoft.Network/publicIPAddresses/write",
-      "Microsoft.Network/publicIPAddresses/delete",
-      "Microsoft.Network/publicIPAddresses/join/action",
-      "Microsoft.Network/networkInterfaces/read",
-      "Microsoft.Network/networkInterfaces/write",
-      "Microsoft.Network/networkInterfaces/delete",
-      "Microsoft.Network/networkInterfaces/join/action",
-      "Microsoft.Network/networkInterfaces/ipconfigurations/read",
-      "Microsoft.Network/networkSecurityGroups/read",
-      "Microsoft.Network/networkSecurityGroups/write",
-      "Microsoft.Network/networkSecurityGroups/delete",
-      "Microsoft.Network/networkSecurityGroups/join/action",
-      "Microsoft.Network/virtualNetworks/subnets/joinViaServiceEndpoint/action",
-      "Microsoft.Network/loadBalancers/delete",
-      "Microsoft.Network/loadBalancers/read",
-      "Microsoft.Network/loadBalancers/write",
-      "Microsoft.Network/loadBalancers/backendAddressPools/join/action",
-      "Microsoft.Compute/availabilitySets/read",
-      "Microsoft.Compute/availabilitySets/write",
-      "Microsoft.Compute/availabilitySets/delete",
-      "Microsoft.Compute/disks/read",
-      "Microsoft.Compute/disks/write",
-      "Microsoft.Compute/disks/delete",
-      "Microsoft.Compute/images/read",
-      "Microsoft.Compute/images/write",
-      "Microsoft.Compute/images/delete",
-      "Microsoft.Compute/virtualMachines/read",
-      "Microsoft.Compute/virtualMachines/write",
-      "Microsoft.Compute/virtualMachines/delete",
-      "Microsoft.Compute/virtualMachines/start/action",
-      "Microsoft.Compute/virtualMachines/restart/action",
-      "Microsoft.Compute/virtualMachines/deallocate/action",
-      "Microsoft.Compute/virtualMachines/powerOff/action",
-      "Microsoft.Compute/virtualMachines/vmSizes/read",
-      "Microsoft.Authorization/roleAssignments/read",
-      "Microsoft.Resources/subscriptions/resourceGroups/read",
-      "Microsoft.Resources/deployments/read",
-      "Microsoft.Resources/deployments/write",
-      "Microsoft.Resources/deployments/delete",
-      "Microsoft.Resources/deployments/operations/read",
-      "Microsoft.Resources/deployments/operationstatuses/read",
-      "Microsoft.Resources/deployments/exportTemplate/action",
-      "Microsoft.Resources/subscriptions/read",
-      "Microsoft.ManagedIdentity/userAssignedIdentities/read",
-      "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action",
-      "Microsoft.DBforPostgreSQL/servers/read",
-      "Microsoft.DBforPostgreSQL/servers/write",
-      "Microsoft.DBforPostgreSQL/servers/delete",
-      "Microsoft.DBforPostgreSQL/servers/virtualNetworkRules/write",
-      "Microsoft.DBforPostgreSQL/flexibleServers/read",
-      "Microsoft.DBforPostgreSQL/flexibleServers/write",
-      "Microsoft.DBforPostgreSQL/flexibleServers/delete",
-      "Microsoft.DBforPostgreSQL/flexibleServers/start/action",
-      "Microsoft.DBforPostgreSQL/flexibleServers/stop/action",
-      "Microsoft.DBforPostgreSQL/flexibleServers/firewallRules/write",
-      "Microsoft.DBforPostgreSQL/flexibleServers/start/action",              // added base on testing
-      "Microsoft.DBforPostgreSQL/flexibleServers/stop/action",               // added base on testing
-      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action",    // Added base on testing 01/10/2025
-      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/read",              // Added base on testing 01/10/2025
-      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/delete",            // Added base on testing 01/10/2025
-      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/write",             // Added base on testing 01/10/2025
-      "Microsoft.Resources/deployments/cancel/action"
-    ]
-    data_actions = [
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/read",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/write",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/delete",
-      "Microsoft.Storage/storageAccounts/blobServices/containers/blobs/add/action"
-    ]
-
-  }
-
-  assignable_scopes = [
-    data.azurerm_subscription.current.id, # /subscriptions/00000000-0000-0000-0000-000000000000
-  ]
-}
-
-resource "azurerm_role_definition" "env_single_rg_pvt_ep" {
-  name        = var.custom_role_names == null ? "${var.owner} CDP Single RG pvt Endpoint" : var.custom_role_names.env_single_rg_pvt_ep
-  scope       = data.azurerm_subscription.current.id
-  description = var.custom_role_names == null ? "${var.owner} CDP Single RG pvt Endpoint" : var.custom_role_names.env_single_rg_pvt_ep
+  description = var.custom_role_names == null ? "${var.owner} datalake" : var.custom_role_names.datalake
 
   permissions {
     actions     = [
@@ -322,9 +238,9 @@ resource "azurerm_role_definition" "env_single_rg_pvt_ep" {
       "Microsoft.Network/privateEndpoints/privateDnsZoneGroups/write",
       "Microsoft.DBforPostgreSQL/servers/privateEndpointConnectionsApproval/action",
       "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnectionsApproval/action",    // Added base on testing 01/10/2025
-      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/read",
-      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/delete",
-      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/write",
+      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/read",              // Added base on testing 01/10/2025
+      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/delete",            // Added base on testing 01/10/2025
+      "Microsoft.DBforPostgreSQL/flexibleServers/privateEndpointConnections/write",             // Added base on testing 01/10/2025
       "Microsoft.Network/privateDnsZones/A/read",
       "Microsoft.Network/privateDnsZones/A/write",
       "Microsoft.Network/privateDnsZones/A/delete",
