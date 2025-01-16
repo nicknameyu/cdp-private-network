@@ -147,12 +147,13 @@ This repository contains Terraform configurations to deploy and manage Azure res
     {
       dw                   = string
       liftie               = string
-      env_single_rg_svc_ep = string
-      env_single_rg_pvt_ep = string
+      datalake             = string
       cmk                  = string
       mkt_img              = string
+      dns_zone             = string
     }
     ```
+  - Default: null
 
 ### Servers
 
@@ -217,4 +218,7 @@ This repository contains Terraform configurations to deploy and manage Azure res
   - Default: `add825b2-c306-43b7-b0a0-ce307b5076ed` `azure-fs-cdp-sandbox-env`
 ---
 
+-- **dns_zone_subscription_id** (string)
+  - Description: The subscription id for the private DNS zone subscription. When set to `null`, the private DNS zone will be created in the same subscription as other resources. 
+  - Default: `null`.  
 Adjust the variables in the `variables.tf` file to match your desired configuration. For more details on each variable, refer to the inline comments and descriptions within the file.

@@ -19,3 +19,10 @@ provider "azurerm" {
     }
   }
 }
+
+# In many customer setup, private DNS zone is centrally managed in a different subscription. This provider definition enable the template to create private DNS zone resources in another subscription.
+provider "azurerm" {
+  alias           = "secondary"
+  subscription_id = var.dns_zone_subscription_id == null ? var.subscription_id : var.dns_zone_subscription_id
+  features {}
+}

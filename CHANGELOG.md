@@ -1,4 +1,10 @@
 # Change log
+## v0.3.24 Azure
+- Adding feature to enable creating private DNS zone in another subscription.
+- Adding custom role definition for private DNS zones to be created in another subscription so that it can be used to grant permission to SPN and MI in another subscription to enable them to manupulate the records in the private DNS zones in that subscription.
+- Removing custom role `env_single_rg_svc_ep` because it is nolonger required.
+- Renaming custom role `env_single_rg_pvt_ep` to `datalake`.
+
 ## v0.3.23 Azure
 - Add 4 public subnets in hub VNET for the convience of creating full public environment.
 - Add new permissions based on testing on Jan 10, 2025.
