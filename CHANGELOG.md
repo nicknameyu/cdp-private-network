@@ -1,4 +1,18 @@
 # Change log
+## v0.3.6 Azure
+- Allow hub VNET to access the file storage.
+- Additional permission for liftie base on doc update.
+
+## v0.3.5 AWS
+- Add a couple of firewall rules for NIFI operator
+- Add a couple s3 bucket policies for ranger audit role to allow ranger audit role:
+```
+          "s3:ListBucketMultipartUploads",
+          "s3:PutObject",
+          "s3:DeleteObject"
+```
+- move kms interface endpoint to network file.
+
 ## v0.3.24 Azure
 - Adding feature to enable creating private DNS zone in another subscription.
 - Adding custom role definition for private DNS zones to be created in another subscription so that it can be used to grant permission to SPN and MI in another subscription to enable them to manupulate the records in the private DNS zones in that subscription.

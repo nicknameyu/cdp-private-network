@@ -58,7 +58,10 @@ resource "azurerm_storage_account" "fileshare" {
   network_rules {
     default_action             = "Deny"
     ip_rules                   = [ chomp(data.http.myip.response_body) ]             // Public ip of this terraform client need to be in the storage account firewall
-    virtual_network_subnet_ids = [ for subnet in azurerm_subnet.cdp_subnets: subnet.id ]
+    virtual_network_subnet_ids = concat(
+                                    [ for subnet in azurerm_subnet.cdp_subnets: subnet.id ],
+                                    [ for subnet in azurerm_subnet.pub: subnet.id ],
+                                  )
   }
 
   tags = var.tags

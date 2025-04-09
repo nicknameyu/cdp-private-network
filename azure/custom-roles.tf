@@ -126,6 +126,9 @@ resource "azurerm_role_definition" "liftie" {
       "Microsoft.Storage/storageAccounts/read",
       "Microsoft.Storage/storageAccounts/write",
       "Microsoft.ManagedIdentity/userAssignedIdentities/assign/action",
+      "Microsoft.ManagedIdentity/userAssignedIdentities/federatedIdentityCredentials/*",   # added base on doc update on 04/08/2025
+      "Microsoft.Insights/metrics/read",                                                   # added base on doc update on 04/08/2025
+      "Microsoft.Insights/metricDefinitions/read",                                         # added base on doc update on 04/08/2025
       "Microsoft.Compute/virtualMachineScaleSets/write",
       "Microsoft.Network/virtualNetworks/subnets/join/action",
       "Microsoft.Network/virtualNetworks/subnets/read",

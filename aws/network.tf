@@ -216,6 +216,46 @@ resource "aws_vpc_endpoint_route_table_association" "cdp-s3" {
    vpc_endpoint_id            = aws_vpc_endpoint.s3.id
 }
 
+############### KMS private endpoint ##############
+resource "aws_security_group" "kms" {
+  name        = "${var.owner}-kms-ep-sg"
+  description = "Security group for KMS VPC endpoint"
+  vpc_id      = aws_vpc.cdp.id
+
+  ingress {
+    description      = "TLS from VPC"
+    from_port        = 443
+    to_port          = 443
+    protocol         = "TCP"
+    cidr_blocks      = [aws_vpc.cdp.cidr_block]
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = merge({
+    Name = "${var.owner}-kms-ep-sg"
+  }, var.tags)
+}
+resource "aws_vpc_endpoint" "kms" {
+  vpc_id            = aws_vpc.cdp.id
+  service_name      = "com.amazonaws.${var.region}.kms"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [aws_subnet.cdp["subnet1"].id]
+
+  security_group_ids = [
+    aws_security_group.kms.id,
+  ]
+  private_dns_enabled = true
+  tags = merge({
+    Name = "${var.owner}-kms-ep"
+  }, var.tags)
+}
 
 ################# DNS config for CDP VPC ###############
 resource "aws_vpc_dhcp_options" "cdp" {
