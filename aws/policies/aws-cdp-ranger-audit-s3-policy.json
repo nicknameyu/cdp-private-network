@@ -16,9 +16,11 @@
         "Action": [
           "s3:AbortMultipartUpload",
           "s3:ListBucket",
-          "s3:ListBucketMultipartUploads"
+          "s3:ListBucketMultipartUploads",
+          "s3:PutObject",
+          "s3:DeleteObject"
         ],
-        "Resource": "${CDP_BUCKET_ARN}"
+        "Resource": ["${CDP_BUCKET_ARN}", "${CDP_BUCKET_ARN}/*"]
       }
     ]
   }

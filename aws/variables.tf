@@ -239,6 +239,13 @@ variable "fw_domain_ep" {
 
     # Missing endpoints
     "iamapi.us-west-1.altus.cloudera.com",  # DSE-34294
+
+    # For NIFI Operator
+    "get.helm.sh",
+    ".docker.com",
+    ".github.io",
+    ".githubusercontent.com",
+    "api.github.com"
   ]
 }
 
