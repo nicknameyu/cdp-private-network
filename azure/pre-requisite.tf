@@ -134,6 +134,11 @@ locals {
         scope = azurerm_resource_group.cdp.id
         role  = azurerm_role_definition.cmk.name
       },
+      dataaccess5 = {
+        principal_id = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
+        scope = azurerm_resource_group.prerequisite.id
+        role  = azurerm_role_definition.cmk.name
+      },
       logger1 = {
         principal_id = azurerm_user_assigned_identity.managed_id["logger"].principal_id
         scope = "${azurerm_storage_account.cdp.id}/blobServices/default/containers/logs"    // resource_manager_id no longer supported, changed to this format as per Dongkai's suggestion.
