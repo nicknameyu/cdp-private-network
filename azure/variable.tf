@@ -299,6 +299,11 @@ variable "kv_name" {
   type = string
   default = ""
 }
+variable "kv_rbac" {
+  description = "A switch to set whether the Key vault uses RBAC or Access Policy to control the authorization of data actions. Default to access policy."
+  default     = true
+  type        = bool
+}
 
 variable "public_key" {
   description = "Path for the ssh public key to be added to the jump servers."

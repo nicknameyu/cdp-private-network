@@ -1,3 +1,57 @@
+locals {
+  access_policies = {
+    myself = {
+      tenant_id    = data.azurerm_subscription.current.tenant_id
+      object_id    = data.azurerm_client_config.current.object_id
+      key_permissions = [
+        "Create",
+        "List",
+        "Delete",
+        "Get",
+        "Purge",
+        "Recover",
+        "Update",
+        "GetRotationPolicy",
+        "SetRotationPolicy"
+      ]
+      secret_permissions = [
+        "Set",
+      ]
+    },
+    spn = {
+      tenant_id    = data.azurerm_subscription.current.tenant_id
+      object_id    = var.spn_object_id
+
+      key_permissions = [
+          "List",
+          "Get",
+      ]
+      secret_permissions = [
+          "Set",
+      ]
+    },
+    dataaccess = {
+      tenant_id    = data.azurerm_subscription.current.tenant_id
+      object_id    = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
+
+      key_permissions = [
+          "List",
+          "Get",
+          "UnwrapKey",
+          "WrapKey",
+          "Encrypt",            // Datalake doesn't need this, DW doesn't need this. But DF needs it. DF didn't need this a few months before. added on 10/16/2024
+          "Decrypt",            // Datalake doesn't need this, DW doesn't need this. But DF needs it. DF didn't need this a few months before. added on 10/16/2024
+      ]
+      secret_permissions = []
+    }
+  }
+}
+resource "azurerm_role_assignment" "cmk_myself" {
+  scope                = azurerm_resource_group.prerequisite.id
+  role_definition_name = "Key Vault Administrator"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
 resource "azurerm_key_vault" "kv" {
   count                      = var.kv_name != "" ? 1:0
   name                       = var.kv_name
@@ -7,63 +61,19 @@ resource "azurerm_key_vault" "kv" {
   sku_name                   = "premium"
   soft_delete_retention_days = 7
   purge_protection_enabled   = true
-
-  access_policy {
-    tenant_id = data.azurerm_subscription.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-
-    key_permissions = [
-      "Create",
-      "List",
-      "Delete",
-      "Get",
-      "Purge",
-      "Recover",
-      "Update",
-      "GetRotationPolicy",
-      "SetRotationPolicy"
-    ]
-    secret_permissions = [
-      "Set",
-    ]
+  enable_rbac_authorization  = var.kv_rbac
+  dynamic "access_policy" {
+    for_each = var.kv_rbac ? {}:local.access_policies
+    content {
+      tenant_id          = access_policy.value["tenant_id"]
+      object_id          = access_policy.value["object_id"]
+      key_permissions    = access_policy.value["key_permissions"]
+      secret_permissions = access_policy.value["secret_permissions"]
+    }
   }
-
-  lifecycle {
-    ignore_changes = [ access_policy ]
-  }
+  depends_on = [ azurerm_role_assignment.cmk_myself ]
   tags = var.tags
   
-}
-
-resource "azurerm_key_vault_access_policy" "spn" {
-  count        = var.kv_name != "" ? 1:0
-  key_vault_id = azurerm_key_vault.kv[0].id
-  tenant_id    = data.azurerm_subscription.current.tenant_id
-  object_id    = var.spn_object_id
-
-  key_permissions = [
-      "List",
-      "Get",
-  ]
-  secret_permissions = [
-      "Set",
-  ]
-}
-
-resource "azurerm_key_vault_access_policy" "dataaccess" {
-  count        = var.kv_name != "" ? 1:0
-  key_vault_id = azurerm_key_vault.kv[0].id
-  tenant_id    = data.azurerm_subscription.current.tenant_id
-  object_id    = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
-
-  key_permissions = [
-      "List",
-      "Get",
-      "UnwrapKey",
-      "WrapKey",
-      "Encrypt",            // Datalake doesn't need this, DW doesn't need this. But DF needs it. DF didn't need this a few months before. added on 10/16/2024
-      "Decrypt",            // Datalake doesn't need this, DW doesn't need this. But DF needs it. DF didn't need this a few months before. added on 10/16/2024
-  ]
 }
 
 resource "azurerm_key_vault_key" "default" {

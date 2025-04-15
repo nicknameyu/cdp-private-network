@@ -1,4 +1,7 @@
 # Change log
+## v0.3.7 Azure
+- Default RBAC permission control on Key Valt.
+
 ## v0.3.6 Azure
 - Allow hub VNET to access the file storage.
 - Additional permission for liftie base on doc update.
