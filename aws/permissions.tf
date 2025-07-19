@@ -13,7 +13,14 @@ resource "aws_iam_policy" "ec2kms" {
   policy      = file("./policies/aws-cdp-ec2-kms-policy.json")
   tags        = var.tags
 }
-
+resource "aws_iam_policy" "customer" {
+  for_each    = var.customer_xa_policy == null ? {} : zipmap( [for i in range(length(var.customer_xa_policy)): tostring(i)], var.customer_xa_policy )
+  name        = basename(each.value)
+  path        = "/"
+  description = basename(each.value)
+  policy      = file(each.value)
+  tags        = var.tags  
+}
 resource "aws_iam_role" "cross_account" {
   count               = var.cross_account_role == null ? 1:0
   name                = "${var.owner}-cdp-poc"
@@ -31,8 +38,9 @@ data "aws_iam_role" "cross_account" {
   name  = var.cross_account_role
 }
 resource "aws_iam_role_policy_attachment" "default" {
+  for_each = var.customer_xa_policy == null ? {"standard" = aws_iam_policy.cross_account.arn } : {for key, value in aws_iam_policy.customer : key => value.arn}
   role = local.cross_account_role
-  policy_arn = aws_iam_policy.cross_account.arn
+  policy_arn = each.value
 }
 resource "aws_iam_role_policy_attachment" "ec2kms" {
   role = local.cross_account_role

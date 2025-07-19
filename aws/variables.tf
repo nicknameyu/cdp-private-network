@@ -66,6 +66,23 @@ locals {
         az_sn   = 0
     }
   }
+  core_public_subnets = {
+    subnet_1 = {
+      name    = "pub_subnet_1"
+      cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 1)
+      az_sn   = 0
+    }
+    subnet_2 = {
+      name    = "pub_subnet_2"
+      cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 2)
+      az_sn   = 1
+    }
+    subnet_3 = {
+      name    = "pub_subnet_3"
+      cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 3)
+      az_sn   = length(data.aws_availability_zones.available.names) > 2 ? 2:0
+    }
+  }
   cdp_vpc_masknum = tonumber(split("/", var.cdp_vpc.cidr)[1])
   cdp_subnets     = {
     subnet1 = {
@@ -340,5 +357,11 @@ variable "create_windows_jumpserver" {
 variable "tags" {
   description = "Tags to be applied to the resources."
   type = map(string)
+  default = null
+}
+
+variable "customer_xa_policy" {
+  description = "List of path to policy files provided by customer."
+  type = list(string)
   default = null
 }

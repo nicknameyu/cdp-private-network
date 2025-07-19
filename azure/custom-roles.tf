@@ -296,6 +296,11 @@ resource "azurerm_role_definition" "cmk" {
       "Microsoft.DBforPostgreSQL/servers/keys/write",
       "Microsoft.KeyVault/vaults/accessPolicies/write"
     ]
+    data_actions = [
+      "Microsoft.KeyVault/vaults/keys/read", 
+      "Microsoft.KeyVault/vaults/keys/wrap/action", 
+      "Microsoft.KeyVault/vaults/keys/unwrap/action"
+    ]
 
   }
 
