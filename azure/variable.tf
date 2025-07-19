@@ -136,6 +136,7 @@ variable "fw_app_rules" {
         "login.microsoftonline.com",                  // AKS
         "packages.microsoft.com",                     // AKS
         "acs-mirror.azureedge.net",                   // AKS
+        "packages.aks.azure.com",                     // AKS, requested by MS on notice to replace the acs-mirror.azureedge.net which will be deprecated by 9/30/2027
         "data.policy.core.windows.net",               // AKS Azure Policy
         "store.policy.core.windows.net",              // AKS Azure Policy
         "dc.services.visualstudio.com",               // AKS Azure Policy
@@ -149,6 +150,8 @@ variable "fw_app_rules" {
         "files.pythonhosted.org",                     // Microsoft tools
         "mirrorlist.centos.org",                      // Centos tools
         "apt.releases.hashicorp.com",                 // hashicorp terraform
+
+        "*.snapcraft.io"                              // snap for ubuntu
       ]
       type = "Https"
       port = "443"

@@ -1,4 +1,14 @@
 # Change log
+
+## v0.3.8 AWS
+- Adding an option to allow using customer cross account role policy. 
+- Move routing resources to a new `routing.tf` file to reduce the number of resources in `network.tf `.
+- Move DNS resources to a new `dnsresolver.tf` file to reduce the number of resources in `network.tf `.
+- Move S3 VPC Gateway endpoint resources to a new `s3endpoint.tf` file to reduce the number of resources in `network.tf `.
+- Remove KMS interface endpoint cause it is useless without private hosted zone. Further study may be required how to use interface endpoint in private deployment.
+- Added 3 public subnet in core VPC so that this network can allow creating public environment.
+- Add `s3:DeleteObjectVersion` permission to ranger role on `s3://<bucket>/data/*`. THis is for RAZ. DL provisioning fails without this permission.
+ 
 ## v0.3.7 Azure
 - Default RBAC permission control on Key Valt.
 

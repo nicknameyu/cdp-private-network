@@ -83,6 +83,9 @@ This repository contains Terraform configurations for setting up an AWS infrastr
 ### Windows jump server 
 - **`create_windows_jumpserver`** (bool): This is a switch to control whether to create a windows server as a jump server in public subnet. Default to false.
 
+### customer policy
+- **`customer_xa_policy`** (list of strings): Provide the paths of the customer's cross account role policies for testing.
+
 ## Usage
 
 To use this Terraform configuration, ensure you have Terraform installed and configured with AWS credentials. Clone the repository, customize the variables as needed, and run the following commands:

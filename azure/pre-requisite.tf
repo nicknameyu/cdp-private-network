@@ -218,7 +218,7 @@ locals {
     },
     dataaccess_dns = {
       principal_id = azurerm_user_assigned_identity.managed_id["dataaccess"].principal_id
-      scope = var.dns_zone_subscription_id == null ? azurerm_resource_group.network.id : azurerm_resource_group.dns[0].id
+      scope = local.dns_zone_resource_group_id
       role  = azurerm_role_definition.dns_zone.name
     }
   }

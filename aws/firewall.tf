@@ -27,7 +27,7 @@ resource "aws_networkfirewall_rule_group" "fw_standard_rg" {
       stateful_rule {
         action = "PASS"
         header {
-          destination      = local.core_subnets["core"].cidr
+          destination      = var.core_vpc.cidr
           destination_port = 22
           direction        = "FORWARD"
           protocol         = "SSH"
@@ -67,6 +67,21 @@ resource "aws_networkfirewall_rule_group" "fw_standard_rg" {
         rule_option {
           keyword  = "sid"
           settings = ["4"]
+        }
+      }
+      stateful_rule {
+        action = "PASS"
+        header {
+          destination      = var.core_vpc.cidr
+          destination_port = 443
+          direction        = "FORWARD"
+          protocol         = "TCP"
+          source           = "ANY"
+          source_port      = "ANY"
+        }
+        rule_option {
+          keyword  = "sid"
+          settings = ["5"]
         }
       }
     }

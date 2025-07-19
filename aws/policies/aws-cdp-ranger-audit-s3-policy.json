@@ -21,6 +21,14 @@
           "s3:DeleteObject"
         ],
         "Resource": ["${CDP_BUCKET_ARN}", "${CDP_BUCKET_ARN}/*"]
+      },
+      {
+        "Sid": "RAZ",
+        "Effect": "Allow",
+        "Action": [
+          "s3:DeleteObjectVersion"
+        ],
+        "Resource": ["${CDP_BUCKET_ARN}/data/*"]
       }
     ]
   }

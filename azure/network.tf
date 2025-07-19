@@ -182,6 +182,9 @@ resource "azurerm_resource_group" "dns" {
   provider = azurerm.secondary
   tags     = var.tags
 }
+locals {
+  dns_zone_resource_group_id = var.dns_zone_subscription_id == null ? azurerm_resource_group.network.id : azurerm_resource_group.dns[0].id
+}
 
 resource "azurerm_private_dns_zone" "aks" {
   name                = "privatelink.${var.location}.azmk8s.io"
