@@ -19,6 +19,10 @@ variable "core_vpc" {
     condition     = tonumber(split("/", var.core_vpc.cidr)[1]) <= 26
     error_message = "A minimum /26 CIDR is required for core VPC."
   }
+  default = {
+    cidr = "10.3.0.0/16"
+    name = ""
+  }
 }
 
 variable "cdp_vpc"{
@@ -30,14 +34,20 @@ variable "cdp_vpc"{
     condition     = tonumber(split("/", var.cdp_vpc.cidr)[1]) <= 22
     error_message = "A minimum /22 CIDR is required for cdp VPC."
   }
+  default = {
+    cidr = "10.4.0.0/16"
+    name = ""
+  }
 }
 variable "tgw_name" {
   description = "Name of the trasit gateway."
   type = string
+  default = ""
 }
 variable "fw_name" {
   description = "Name of the firewall."
   type = string
+  default = ""
 }
 
 locals {
@@ -87,17 +97,17 @@ locals {
   cdp_subnets     = {
     subnet1 = {
         name    = "subnet1"
-        cidr    = cidrsubnet(var.cdp_vpc.cidr, 24 - local.cdp_vpc_masknum, 0)
+        cidr    = cidrsubnet(var.cdp_vpc.cidr, 23 - local.cdp_vpc_masknum, 0)
         az_sn   = 0
     }
     subnet2 = {
         name    = "subnet2"
-        cidr    = cidrsubnet(var.cdp_vpc.cidr, 24 - local.cdp_vpc_masknum, 1)
+        cidr    = cidrsubnet(var.cdp_vpc.cidr, 23 - local.cdp_vpc_masknum, 1)
         az_sn   = 1
     }
     subnet3 = {
         name    = "subnet3"
-        cidr    = cidrsubnet(var.cdp_vpc.cidr, 24 - local.cdp_vpc_masknum, 2)
+        cidr    = cidrsubnet(var.cdp_vpc.cidr, 23 - local.cdp_vpc_masknum, 2)
         az_sn   = length(data.aws_availability_zones.available.names) > 2 ? 2:0
     }
   }
@@ -118,10 +128,12 @@ variable "ssh_key" {
 variable "igw_name" {
   description = "Name of the internet gateway."
   type = string
+  default = ""
 }
 variable "natgw_name" {
   description = "Name of the NAT gateway."
   type = string
+  default = ""
 }
 
 variable "cross_account_role" {

@@ -2,13 +2,13 @@
 resource "aws_vpc" "core" {
   cidr_block = var.core_vpc.cidr
   enable_dns_support = true
-  tags = merge({ Name = var.core_vpc.name }, var.tags)
+  tags = merge({ Name = var.core_vpc.name == "" ? "${var.owner}_core_vpc" : var.core_vpc.name }, var.tags)
 }
 resource "aws_vpc" "cdp" {
   cidr_block = var.cdp_vpc.cidr
   enable_dns_support = true
   enable_dns_hostnames = true
-  tags = merge({ Name = var.cdp_vpc.name }, var.tags)
+  tags = merge({ Name = var.cdp_vpc.name == "" ? "${var.owner}_cdp_vpc" : var.cdp_vpc.name }, var.tags)
 }
 
 resource "aws_subnet" "core" {
@@ -29,9 +29,12 @@ resource "aws_subnet" "core_public" {
   map_public_ip_on_launch = true
 
   tags = merge({
-    Name = each.value.name
+    Name = each.value.name,
+    "kubernetes.io/role/elb" = 1
   }, var.tags)
-
+  lifecycle {
+    ignore_changes = [ tags, tags_all ]
+  }
 }
 resource "aws_subnet" "cdp" {
   for_each = local.cdp_subnets
@@ -99,7 +102,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.core.id
 
   tags = merge({
-    Name = var.igw_name
+    Name = var.igw_name == "" ? "${var.owner}_igw" : var.igw_name
   }, var.tags)
 }
 
@@ -135,7 +138,7 @@ resource "aws_nat_gateway" "nat" {
   allocation_id     = aws_eip.nat.id
   subnet_id         = aws_subnet.core["nat"].id
   tags = merge({
-    Name = var.natgw_name
+    Name = var.natgw_name == "" ? "${var.owner}_natgw" : var.natgw_name
     owner = var.owner
   }, var.tags)
 }
@@ -144,7 +147,7 @@ resource "aws_nat_gateway" "nat" {
 resource "aws_ec2_transit_gateway" "tgw" {
   dns_support = "disable"
   tags = merge({
-    Name = var.tgw_name
+    Name = var.tgw_name == "" ? "${var.owner}_tgw" : var.tgw_name
   }, var.tags)
 }
 
