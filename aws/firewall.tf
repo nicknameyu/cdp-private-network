@@ -175,7 +175,7 @@ resource "aws_networkfirewall_rule_group" "public" {
   tags = var.tags
 }
 resource "aws_networkfirewall_firewall_policy" "fw" {
-  name = "${var.fw_name}-policy"
+  name = var.fw_name == "" ? "${var.owner}-firewall-policy" : "${var.fw_name}-policy"
 
 
   firewall_policy {
@@ -202,7 +202,7 @@ resource "aws_networkfirewall_firewall_policy" "fw" {
   tags = var.tags
 }
 resource "aws_networkfirewall_firewall" "fw" {
-  name                = var.fw_name
+  name                = var.fw_name == "" ? "${var.owner}-firewall" : var.fw_name
   firewall_policy_arn = aws_networkfirewall_firewall_policy.fw.arn
   vpc_id              = aws_vpc.core.id
   subnet_mapping {
