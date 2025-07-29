@@ -1,11 +1,11 @@
 # Change log
 
-## v0.3.9 AWS
+## v0.3.29 AWS
 - Set default values for VPC name and CIDR
 - Set default values for names of Internet Gateway, Firewall, NAT Gateway, Transit gateway.
 - Increase CIDR for subnets in CDP VPC to /23 to accomodate more IP for more CAI Clusters.
 
-## v0.3.8 AWS
+## v0.3.28 AWS
 - Adding an option to allow using customer cross account role policy. 
 - Move routing resources to a new `routing.tf` file to reduce the number of resources in `network.tf `.
 - Move DNS resources to a new `dnsresolver.tf` file to reduce the number of resources in `network.tf `.
@@ -14,14 +14,14 @@
 - Added 3 public subnet in core VPC so that this network can allow creating public environment.
 - Add `s3:DeleteObjectVersion` permission to ranger role on `s3://<bucket>/data/*`. THis is for RAZ. DL provisioning fails without this permission.
  
-## v0.3.7 Azure
+## v0.3.27 Azure
 - Default RBAC permission control on Key Valt.
 
-## v0.3.6 Azure
+## v0.3.26 Azure
 - Allow hub VNET to access the file storage.
 - Additional permission for liftie base on doc update.
 
-## v0.3.5 AWS
+## v0.3.25 AWS
 - Add a couple of firewall rules for NIFI operator
 - Add a couple s3 bucket policies for ranger audit role to allow ranger audit role:
 ```
