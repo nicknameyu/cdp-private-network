@@ -94,7 +94,9 @@ resource "azurerm_linux_virtual_machine" "hub-jump" {
       "sudo chown root:bind /etc/bind/named.conf.options",
       "sudo chmod 644 /etc/bind/named.conf.options",
       "chmod 600 /home/${local.admin_username}/.ssh/id_rsa",
-      "sudo systemctl restart bind9.service"
+      "sudo systemctl restart bind9.service",
+      "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash",
+      "sudo az aks install-cli"
     ]
   }
 }
