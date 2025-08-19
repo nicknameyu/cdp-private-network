@@ -73,126 +73,6 @@ locals {
   pg_flx_subnet_cidr           = cidrsubnet(var.cdp_cidr, 28 - local.cdp_vnet_masknum, 1)
 }
 
-variable "fw_app_rules" {
-  default = {
-    https_rules = {
-      target_fqdns = [ 
-        "raw.githubusercontent.com", 
-        "github.com",
-        # "*.v2.us-west-1.ccm.cdp.cloudera.com",        // According to doc, this one should be addressed by IP prefix, but actually not. 07/18/2023
-        #                                               // nslookup found the ip address for this FQDN is different to those on document.
-        #                                               // Doc says: "35.80.24.128/27", "35.166.86.177/32", "52.36.110.208/32", "52.40.165.49/32"
-        #                                               // nslookup found: "54.191.65.58", "35.163.159.76", "52.13.59.204"
-        "dbusapi.us-west-1.sigma.altus.cloudera.com", // US Based control Plane
-        "s3.amazonaws.com",
-        "*.s3.amazonaws.com",                         // US Based control plane
-        "api.eu-1.cdp.cloudera.com",                  // EU Based control plane
-        "api.ap-1.cdp.cloudera.com",                  // AP Based control plane
-        "archive.cloudera.com",                       // Parcels
-        "api.us-west-1.cdp.cloudera.com",             // US Based control Plane API
-        "api.eu-1.cdp.cloudera.com",                  // EU Based control Plane API
-        "api.ap-1.cdp.cloudera.com",                  // AP Based control Plane API
-        "container.repository.cloudera.com",          // Docker image
-        "docker.repository.cloudera.com",             // Docker Image
-        "container.repo.cloudera.com",                // Docker Image for data services
-        "*.s3.us-west-2.amazonaws.com",               // Docker image for data services
-        "s3.us-west-2.amazonaws.com",                 // Document doesn't have this one. But DF will fail to download flows from S3.
-        "*.s3.eu-west-1.amazonaws.com",                // Document doesn't have this one. But DW will fail to download flows from S3 in EU.
-        "*.s3.eu-1.amazonaws.com",                    // Docker image for data services
-        "*.s3.ap-southeast-1.amazonaws.com",          // Docker image for data services
-        "s3-r-w.us-west-1.amazonaws.com",                // Docker image for data services
-        "*.execute-api.us-west-1.amazonaws.com",         // Docker image for data services
-        "auth.docker.io",
-        "cloudera-docker-dev.jfrog.io",
-        "docker-images-prod.s3.amazonaws.com",
-        "gcr.io",
-        "k8s.gcr.io",
-        "quay-registry.s3.amazonaws.com",
-        "quay.io",
-        "quayio-production-s3.s3.amazonaws.com",
-        "docker.io",
-        "*.docker.io",
-        "production.cloudflare.docker.com",
-        "storage.googleapis.com",
-        "consoleauth.altus.cloudera.com",             // Public Signing Key Retrieval US
-        "console.us-west-1.cdp.cloudera.com",         // Public Signing Key Retrieval US
-        "consoleauth.us-west-1.core.altus.cloudera.com", // This one isn't in document 07/18/2023
-        "console.eu-1.cdp.cloudera.com",              // Public Signing Key Retrieval EU
-        "console.ap-1.cdp.cloudera.com",              // Public Signing Key Retrieval AP
-        "pypi.org",                                   // SQL Stream builder, postgreSQL driver install
-        # "*.dfs.core.windows.net",                     // Azure storage account
-        # "*.postgres.database.azure.com",              // PostgresDB
-        "management.azure.com",                       // Azure	
-        "*.agentsvc.azure-automation.net",            // MS LogAnalytics Optional
-        "*.ods.opinsights.azure.com",                 // MS LogAnalytics Optional
-        "*.oms.opinsights.azure.com",                 // MS LogAnalytics Optional
-        # "*.blob.core.windows.net",                    // MS LogAnalytics Optional
-        "www.digicert.com",                           // Digicert
-        "cacerts.digicert.com",                       // Digicert
-        "*.cacerts.digicert.com",                       // Digicert
-        "*.hcp.westus.azmk8s.io",                     // AKS
-        "mcr.microsoft.com",                          // AKS
-        "*.data.mcr.microsoft.com",                   // AKS
-        "login.microsoftonline.com",                  // AKS
-        "packages.microsoft.com",                     // AKS
-        "acs-mirror.azureedge.net",                   // AKS
-        "packages.aks.azure.com",                     // AKS, requested by MS on notice to replace the acs-mirror.azureedge.net which will be deprecated by 9/30/2027
-        "data.policy.core.windows.net",               // AKS Azure Policy
-        "store.policy.core.windows.net",              // AKS Azure Policy
-        "dc.services.visualstudio.com",               // AKS Azure Policy
-        "nvidia.github.io",                           // AKS GPU
-        "us.download.nvidia.com",                     // AKS GPU
-        "download.docker.com",                        // AKS GPU
-        "aka.ms",                                     // Microsoft tools
-        "pypi.python.org",                            // Microsoft tools
-        "*.github.com",                               // Microsoft tools
-        "objects.githubusercontent.com",              // Microsoft tools
-        "files.pythonhosted.org",                     // Microsoft tools
-        "mirrorlist.centos.org",                      // Centos tools
-        "apt.releases.hashicorp.com",                 // hashicorp terraform
-
-        "*.snapcraft.io"                              // snap for ubuntu
-      ]
-      type = "Https"
-      port = "443"
-    },
-    http_rules = {
-      target_fqdns = [
-        "security.ubuntu.com",                        // AKS
-        "azure.archive.ubuntu.com",                   // AKS
-        "changelogs.ubuntu.com",                      // AKS
-        "archive.ubuntu.com",                         // AKS
-      ]
-      type = "Http"
-      port = "80"
-    }
-  }
-}
-variable "fw_net_rules" {
-  default = {
-    # ssh_rules = {                                   // testing found this is not required, Aug 31
-    #   ip_prefix = [                                 // this is for CCMv1
-    #     "44.234.52.96/27"
-    #   ]
-    #   destination_ports = ["6000-6049",]
-    #   protocols         = ["TCP",]
-    # },
-    https_rules = {
-      ip_prefix = [ 
-        "35.80.24.128/27",
-        "35.166.86.177/32",
-        "52.36.110.208/32",
-        "52.40.165.49/32",
-        "3.65.246.128/27",   // EU based Control Plane
-        "3.26.127.64/27",    // AP based control plane
-      ]
-      destination_ports = ["443",]
-      protocols         = ["TCP",]
-    }
-  }
-}
-
-
 variable "firewall_name" {
   description = "The name for the Azure Firewall. Default to $owner-fw"
   type = string
@@ -343,4 +223,44 @@ variable "subscription_id" {
 variable "dns_zone_subscription_id" {
   description = "The subscription id for the private DNS zone subscription."
   default     = null
+}
+
+variable "storage_account_tier" {
+  default = "Standard"
+  type = string
+  description = "CDP Storage Account Tier. Default to `Standard`. "
+}
+variable "storage_account_replication_type" {
+  default = "LRS"
+  type = string
+  description = "CDP Storage Account replication type."
+}
+
+variable "tenant_id" {
+  type = string
+  description = "tenant ID of the Azure AD. "
+}
+
+variable "enable_dw" {
+  type = bool
+  default = true
+  description = "Enable DW permissions. Default to true."
+}
+
+variable "enable_liftie" {
+  type = bool
+  default = true
+  description = "Enable Liftie permissions. Default to true."
+}
+
+variable "enable_de" {
+  type = bool
+  default = true
+  description = "Enable Liftie permissions. Default to true."
+}
+
+variable "ds_custom_role" {
+  type = string
+  default = null
+  description = "This is the custom role for data services to be granted to managed identity. If not provide, the template will create a default name."
 }
