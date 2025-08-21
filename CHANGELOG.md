@@ -1,5 +1,12 @@
 # Change log
+## v0.4.1 AWS
+- Remove a couple of firewall rules base on testing result.
 
+## v0.4.0 Azure
+- Modulize Azure prerequisites
+  - Resource prerequisits
+  - RBAC prerequisites
+  - CMK prerequisites
 ## v0.3.29 AWS
 - Set default values for VPC name and CIDR
 - Set default values for names of Internet Gateway, Firewall, NAT Gateway, Transit gateway.

@@ -295,8 +295,8 @@ locals {
     "elasticfilesystem.${var.region}.amazonaws.com",    # Firewall rule is recommended
     "elasticloadbalancing.${var.region}.amazonaws.com", # Firewall rule is recommended
     # "rds.${var.region}.amazonaws.com",                # not necessary. Testing result
-    "servicequotas.${var.region}.amazonaws.com",        # Firewall rule is recommended
-    "pricing.${var.region}.amazonaws.com",              # Firewall rule is recommended
+    # "servicequotas.${var.region}.amazonaws.com",        # Firewall rule is recommended, not required base on testing result.
+    # "pricing.${var.region}.amazonaws.com",              # Firewall rule is recommended, not required base on testing result.
   ]
   fw_domain_ep = concat(var.fw_domain_ep, local.fw_regional_domain_ep)
 }
