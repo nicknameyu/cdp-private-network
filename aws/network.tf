@@ -2,6 +2,7 @@
 resource "aws_vpc" "core" {
   cidr_block = var.core_vpc.cidr
   enable_dns_support = true
+  enable_dns_hostnames = true
   tags = merge({ Name = var.core_vpc.name == "" ? "${var.owner}_core_vpc" : var.core_vpc.name }, var.tags)
 }
 resource "aws_vpc" "cdp" {
