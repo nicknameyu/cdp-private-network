@@ -1,4 +1,7 @@
 # Change log
+## v0.4.2 aws
+- enable DNS on hub VPC.
+
 ## v0.4.1 AWS
 - Remove a couple of firewall rules base on testing result.
 
