@@ -1,4 +1,8 @@
 # Change log
+## v0.4.3 AWS
+- Create a security group module to create two pair of security groups in CDP VPC and Core VPC respectively.
+- Update Policy to allow `ec2:DisassociateAddress` and `ec2:DescribeInstanceStatus`
+
 ## v0.4.2 aws
 - enable DNS on hub VPC.
 
