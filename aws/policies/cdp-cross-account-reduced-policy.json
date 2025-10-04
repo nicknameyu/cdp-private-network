@@ -5,6 +5,7 @@
         "Effect": "Allow",
         "Action": [
           "ec2:AssociateAddress",
+          "ec2:DisassociateAddress",
           "ec2:StartInstances",
           "ec2:StopInstances",
           "ec2:AttachVolume",
@@ -68,8 +69,10 @@
       {
         "Effect": "Allow",
         "Action": [
+          "ec2:DisassociateAddress",
           "ec2:DeleteVolume",
           "ec2:DeleteKeyPair",
+          "ec2:DescribeInstanceStatus",
           "ec2:DescribeKeyPairs",
           "ec2:DescribeAvailabilityZones",
           "ec2:DescribeImages",
