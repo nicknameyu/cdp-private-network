@@ -3,7 +3,7 @@ data "aws_ami" "ubuntu" {
 
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"]
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
   }
 
   filter {
@@ -80,7 +80,7 @@ locals {
 resource "aws_instance" "core-jump" {
   ami           =  data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
-  key_name      = aws_key_pair.ssh_pub.key_name
+  key_name      = module.env_prerequisites.ssh_key_name
   depends_on    = [ aws_networkfirewall_firewall.fw ]
   connection {
     type = "ssh"
@@ -168,11 +168,11 @@ resource "aws_network_interface" "cdp-jump" {
 resource "aws_instance" "cdp-jump" {
   ami           =  data.aws_ami.ubuntu.id
   instance_type = "t2.micro"
+  key_name      = module.env_prerequisites.ssh_key_name
 
   user_data = <<EOF
 #!/bin/bash
 echo "Copying the SSH Key to the server"
-echo -e "${aws_key_pair.ssh_pub.public_key}" >> /home/ubuntu/.ssh/authorized_keys
 echo -e "${file(var.ssh_key.private_rsa_key_path)}" > /home/ubuntu/.ssh/id_rsa
 chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
 chmod 600 /home/ubuntu/.ssh/id_rsa
@@ -261,7 +261,7 @@ resource "aws_instance" "win" {
   count         = var.create_windows_jumpserver ? 1:0
   ami           = data.aws_ami.windows.id
   instance_type = "t2.large"
-  key_name      = aws_key_pair.ssh_pub.key_name
+  key_name      = module.env_prerequisites.ssh_key_name
   network_interface {
     network_interface_id = aws_network_interface.win[0].id
     device_index         = 0

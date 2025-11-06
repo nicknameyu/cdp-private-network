@@ -1,47 +1,42 @@
 
-resource "aws_key_pair" "ssh_pub" {
-  key_name   = "${var.owner}-ssh-key"
-  public_key = file(var.ssh_key.public_key_path)
-  tags        = var.tags
+module "env_prerequisites" {
+    source = "github.com/nicknameyu/cdp-prerequisite-module/aws/env-prerequisites"
+    cdp_bucket_name = var.cdp_bucket_name == null ? "${var.owner}-cdp-poc-bucket" : var.cdp_bucket_name
+    region          = var.region
+    role_names = {
+        idbroker       = "${var.owner}-IDBROKER"
+        datalake_admin = "${var.owner}-DATALAKE_ADMIN_ROLE"
+        logger         = "${var.owner}-LOG_ROLE"
+        ranger         = "${var.owner}-RANGER_ROLE"
+    }
+    policy_names = {
+      cross_account_policy        = "${var.owner}-cross-account-policy"
+      ec2-kms-policy              = "${var.owner}-ec2-kms-policy"
+      sse-kms-read-only-policy    = "${var.owner}-sse-kms-read-only-policy"
+      sse-kms-read-write-policy   = "${var.owner}-sse-kms-read-write-policy"
+      idbroker-assume-role-policy = "${var.owner}-idbroker-assume-role-policy"
+      log-policy                  = "${var.owner}-log-policy"
+      datalake-restore-policy     = "${var.owner}-datalake-restore-policy"
+      backup-policy               = "${var.owner}-backup-policy"
+      ranger-audit-s3-policy      = "${var.owner}-ranger-audit-s3-policy"
+      bucket-access-policy        = "${var.owner}-bucket-access-policy"
+      datalake-backup-policy      = "${var.owner}-datalake-backup-policy"
+      datalake-admin-s3-policy    = "${var.owner}-datalake-admin-s3-policy"
+    }
+    ssh_key_name                  = "${var.owner}-ssh-key"
+    ssh_key                       = file("${var.ssh_key.public_key_path}")
+    instance_profile_names        = {
+      data_access                 = "${var.owner}-data-access-instance-profile"
+      log_access                  = "${var.owner}-log-access-instance-profile"
+    }
+    tags                          = merge({ owner = var.owner }, var.tags)
 }
-
-############### Storage Location Base #################
-resource "aws_s3_bucket" "cdp" {
-  bucket = var.cdp_bucket_name == null ? "${var.owner}-cdp-poc-bucket" : var.cdp_bucket_name
-  force_destroy  = true
-
-  tags = merge({
-    Name        = "${var.owner}-cdp-bucket"
-  }, var.tags)
-}
-
-resource "aws_s3_object" "folders" {
-  for_each = toset(["data", "logs", "backups", "ranger"])
-  bucket = aws_s3_bucket.cdp.id
-  key    = "${each.value}/"
-  source = "/dev/null"
-  tags   = var.tags
-}
-
 output "storage_locations" {
-  value = [for x in aws_s3_object.folders : "${aws_s3_bucket.cdp.id}/${x.key}" ]
+  value = module.env_prerequisites.storage_locations
 }
-
-############### KMS Key ##############
-resource "aws_kms_key" "cdp" {
-  description             = "KMS key for CDP"
-  policy = replace(
-    replace(file("./policies/aws-cdp-kms-key-policy.json"), "$${AWS_ACCOUNT_ID}", data.aws_caller_identity.current.account_id),
-    "$${CDP_CROSS_ACCOUNT_ROLE_ARN}", (var.cross_account_role == null ? aws_iam_role.cross_account[0].arn : data.aws_iam_role.cross_account[0].arn))
-  tags        = var.tags
-}
-resource "aws_kms_alias" "cdp" {
-  name          = var.cmk_key_name == null ? "alias/${var.owner}-cdp-key" : "alias/${var.cmk_key_name}"
-  target_key_id = aws_kms_key.cdp.key_id
-}
-output "kms_key" {
+output "cdp_roles" {
   value = {
-    key_arn = aws_kms_key.cdp.arn
-    key_alias_arn = aws_kms_alias.cdp.arn
+    instance_profiles = module.env_prerequisites.instance_profiles
+    cdp_roles = module.env_prerequisites.cdp_role_names
   }
 }

@@ -377,3 +377,30 @@ variable "customer_xa_policy" {
   type = list(string)
   default = null
 }
+
+variable "enable_de" {
+  type = bool
+  default = true
+  description = "Enable permissions for Data Engineering."
+}
+variable "enable_df" {
+  type = bool
+  default = true
+  description = "Enable permissions for Data Flow."
+}
+variable "enable_ai" {
+  type = bool
+  default = true
+  description = "Enable permissions for AI."
+}
+variable "enable_dw" {
+  type = bool
+  default = true
+  description = "Enable permissions for Data Warehouse."
+}
+
+variable "enable_cmk" {
+  type = bool
+  default = true
+  description = "Enable permissions for CMK on Lifie clusters."
+}
