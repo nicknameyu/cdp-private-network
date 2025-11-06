@@ -1,4 +1,10 @@
 # Change log
+## v0.4.4. modulize aws module
+- Modulize all prerequisites modules
+  - cross account role
+  - prerequisites
+  - cmk prerequisites
+  - data service prerequisites
 ## v0.4.3 AWS
 - Create a security group module to create two pair of security groups in CDP VPC and Core VPC respectively.
 - Update Policy to allow `ec2:DisassociateAddress` and `ec2:DescribeInstanceStatus`
