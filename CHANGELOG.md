@@ -1,4 +1,11 @@
 # Change log
+## v0.4.5 Modulize Azure network modules
+- Move all network related code into modules, `az-firewall`, `az-hub_spoke_dns`, `az-private_dns_zone`, `az-vnet`, `az-ubuntu`.
+- Network topology changes:
+  - Changes private subnet CIDRs from /26, /25, /24, /23, /22, /21 to 8*/24. The previous setup was to test CDW CNI network. After CDW supports CNI Overlay, this setup is no longer required.
+  - Egress traffic of jump servers on hub VNET goes directly to internet through public IPs.
+  - Create 8 public subnets on HUB VNET.
+
 ## v0.4.4. modulize aws module
 - Modulize all prerequisites modules
   - cross account role

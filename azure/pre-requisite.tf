@@ -32,8 +32,8 @@ module "nfs-prerequisite" {
   storage_account_name = var.cdp_file_storage
   file_share_name      = "cml-nfs"
   subnet_ids           = concat(
-                                [ for subnet in azurerm_subnet.cdp_subnets: subnet.id ],
-                                [ for subnet in azurerm_subnet.pub: subnet.id ],
+                                [ for k,v in module.hub_vnet.std_subnet_ids: v ],
+                                [ for k,v in module.spoke_vnet.std_subnet_ids: v ],
                               )
   tags                 = var.tags
 }

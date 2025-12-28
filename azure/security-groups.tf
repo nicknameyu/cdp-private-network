@@ -5,8 +5,8 @@ resource "azurerm_network_security_group" "default" {
                            knox    = "${var.owner}-nsg-knox"
                         }
   name                = each.key
-  location            = azurerm_resource_group.network.location
-  resource_group_name = azurerm_resource_group.network.name
+  location            = var.location
+  resource_group_name = module.env-prerequisite.storage_account.resource_group_name
 
   security_rule {
     name                       = "ssh"
