@@ -8,14 +8,17 @@ module "data-services-prerequisites" {
     log_role_name      = module.env_prerequisites.cdp_role_names.logger
     policy_prefix      = "${var.owner}"
 
-    enable_dw          = var.enable_dw
-    enable_de          = var.enable_de
+    # When default permission is applied, most of below data service specific policies are not required
+    enable_dw          = var.default_permission ? false : var.enable_dw
+    enable_de          = var.default_permission ? false : var.enable_de
+
+    # CAI is kind of special, cause CAI backup/restore needs some special permissions which are not even included in default permissions.
     enable_ai          = var.enable_ai
-    enable_df          = var.enable_df
-    enable_cmk         = var.enable_cmk
-    create_eks_role    = var.create_eks_role
+    enable_df          = var.default_permission ? false : var.enable_df
+    enable_cmk         = var.default_permission ? false : var.enable_cmk
+    create_eks_role    = var.default_permission ? false : var.create_eks_role
     liftie_role_stack_name = var.create_eks_role ? "${var.owner}-liftie-role-pair" : null
 
 
-    tags               = merge(var.tags, {owner = "dyu"})
+    tags               = merge(var.tags, {owner = "${var.owner}"})
 }

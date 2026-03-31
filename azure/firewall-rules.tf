@@ -70,6 +70,8 @@ variable "fw_app_rules" {
         "www.microsoft.com",                          // Testing result, this is required by CDE.   8/14/2025
 //        "truststore.pki.rds.amazonaws.com",
 
+        "release-assets.githubusercontent.com",        // for kubectl installation  
+        "dl.k8s.io",                                  // for kubectl installation
         "*.snapcraft.io"                              // snap for ubuntu
       ]
       type = "Https"

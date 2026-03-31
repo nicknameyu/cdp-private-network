@@ -6,5 +6,6 @@ module "cdp_cross_account_role" {
   cdp_xaccount_external_id  = var.cross_account_role == null ? var.cdp_xaccount_external_id : null
   cdp_xaccount_account_id   = "387553343826"
   cross_account_policy_name = "${var.owner}-cdp-xacct-policy"
+  default_permission        = var.default_permission
   tags                      = merge(var.tags, {owner = "${var.owner}"})
 }

@@ -1,4 +1,11 @@
 # Change log
+
+## v0.4.6 Azure and AWS misc update
+- AWS: avoid creating DS specific reduced policy when default policy is applied. 
+- AWS: reference the default permission setting of this workspace in aws permission module call.
+- Azure: add a couple of firewall rules for kubectl installation.
+- Azure: add a script to remove the orphan AKS kubenet routes on all the subnets of a VNET. 
+
 ## v0.4.5 Modulize Azure network modules
 - Move all network related code into modules, `az-firewall`, `az-hub_spoke_dns`, `az-private_dns_zone`, `az-vnet`, `az-ubuntu`.
 - Network topology changes:
