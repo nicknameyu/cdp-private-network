@@ -1,6 +1,6 @@
 module "dns_zone" {
   source               = "./modules/az-private_dns_zones"
-  subscription_id      = "abce3e07-b32d-4b41-8c78-2bcaffe4ea27"
+  subscription_id      = var.dns_zone_subscription_id
   resource_group_name  = "${var.owner}-dns-zone"
   location             = var.location
   vnet_ids = {
