@@ -1,4 +1,6 @@
 # Change log
+## 0.4.7 Azure bug
+- issue #4
 
 ## v0.4.6 Azure and AWS misc update
 - AWS: avoid creating DS specific reduced policy when default policy is applied. 
