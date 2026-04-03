@@ -1,4 +1,9 @@
 # Change log
+## 0.4.7-2 README
+- remove the architecture.md file in aws and azure directory.
+- add README.md in aws and azure directory.
+- update `terraform.tfvars.example.md` files.
+
 ## 0.4.7-1 Azure
 - Update README files for all the modules in azure/modules. Closing #6
 ## 0.4.7 Azure bug
