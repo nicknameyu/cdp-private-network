@@ -1,4 +1,8 @@
 # Change log
+## 0.4.8 Azure changes
+- Changes per source module change : https://github.com/nicknameyu/cdp-prerequisite-module/blob/main/CHANGELOG.MD#v0213-consolidated-azure-update
+- A few firewall rule changes per new firewall rules published on Cloudera Doc website.
+
 ## 0.4.7-2 README
 - remove the architecture.md file in aws and azure directory.
 - add README.md in aws and azure directory.

@@ -268,6 +268,8 @@ variable "fw_domain_ep" {
 
     # Missing endpoints
     "iamapi.us-west-1.altus.cloudera.com",  # DSE-34294
+    "registry-1.docker.io", // added for troubleshooting image
+    ".cloudflarestorage.com", // added for troubleshooting image
 
     # For NIFI Operator
     "get.helm.sh",
