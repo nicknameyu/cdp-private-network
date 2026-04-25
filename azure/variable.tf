@@ -256,9 +256,18 @@ variable "enable_liftie" {
 variable "enable_de" {
   type = bool
   default = true
-  description = "Enable Liftie permissions. Default to true."
+  description = "Enable Data Engineering permissions. Default to true."
 }
-
+variable "enable_ai" {
+  type = bool
+  default = true
+  description = "Enable CAI permissions. Default to true."
+}
+variable "enable_df" {
+  type = bool
+  default = true
+  description = "Enable CDF permissions. Default to true."
+}
 variable "ds_custom_role" {
   type = string
   default = null

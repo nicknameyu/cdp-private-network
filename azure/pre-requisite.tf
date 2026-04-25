@@ -16,34 +16,40 @@ module "env-prerequisite" {
   resource_group_name  = local.resource_group_names.prerequisite
   location             = var.location
   raz_mi_name          = "${var.owner}-cdp-raz"
+  cmk_ds_mi_name       = "${var.owner}-cdp-cmk-ds"
+  enable_de            = var.enable_de
+  de_mi_names          = {
+                            cluster1 = {
+                              service = "${var.owner}-cdp-de-service"
+                              cluster = "${var.owner}-cdp-de-cluster"
+                            }
+                            cluster2 = {
+                              service = "${var.owner}-cdp-de-service2"
+                              cluster = "${var.owner}-cdp-de-cluster2"
+                            }
+                          }
+  subnet_ids           = concat(values(module.spoke_vnet.std_subnet_ids), values(module.hub_vnet.std_subnet_ids))
   obj_storage_performance = {
     account_tier = var.storage_account_tier
     replication  = var.storage_account_replication_type
   }
+  enable_ai           = var.enable_ai
+  create_nfs          = var.enable_ai || var.enable_de
+  nfs_storage_account_name = var.cdp_file_storage
 
   tags                 = var.tags
 }
-
-module "nfs-prerequisite" {
-  source               = "github.com/nicknameyu/cdp-prerequisite-module/azure/nfs-prerequisites"
-  subscription_id      = var.subscription_id
-  resource_group_name  = module.env-prerequisite.storage_account.resource_group_name
-  location             = var.location
-  storage_account_name = var.cdp_file_storage
-  file_share_name      = "cml-nfs"
-  subnet_ids           = concat(
-                                [ for k,v in module.hub_vnet.std_subnet_ids: v ],
-                                [ for k,v in module.spoke_vnet.std_subnet_ids: v ],
-                              )
-  tags                 = var.tags
+output "managed_ids" {
+  value = module.env-prerequisite.mi_ids
 }
+
 
 output "storage_locations" {
   value = {
     storage-location-base = module.env-prerequisite.storage_locations.storage_location_base
     log-location          = module.env-prerequisite.storage_locations.log_location
     backup-location       = module.env-prerequisite.storage_locations.backup_location
-    nfs-file-share        = module.nfs-prerequisite.nfs_file_share
+    nfs-file-share        = module.env-prerequisite.nfs_storage
   }
 }
 

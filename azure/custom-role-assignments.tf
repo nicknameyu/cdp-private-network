@@ -19,7 +19,7 @@ module "managed_identity_rbac" {
   subscription_id      = var.subscription_id
   custom_role_name     = "${var.owner} CDP MI role"
   create_custom_role   = true
-  mi_principal_id      = module.env-prerequisite.mi_principal_ids.dataaccess
+  mi_principal_id      = module.env-prerequisite.mi_principal_ids.cmk
   enable_cmk_rbac      = var.kv_rbac
   enable_dw            = var.enable_dw
   enable_liftie        = var.enable_liftie
@@ -33,6 +33,6 @@ module "dns-zone-role-assignment" {
   }
   principal_ids    = {
     spn = var.spn_object_id
-    mi  = module.env-prerequisite.mi_principal_ids.dataaccess
+    mi  = module.env-prerequisite.mi_principal_ids.cmk
   }
 }

@@ -22,7 +22,13 @@ variable "fw_app_rules" {
         "*.s3.eu-1.amazonaws.com",                    // Docker image for data services
         "*.s3.ap-southeast-1.amazonaws.com",          // Docker image for data services
         "s3-r-w.us-west-1.amazonaws.com",                // Docker image for data services
+        "*.s3.us-east-1.amazonaws.com",                  // AWS Source IP based - US-EAST:
+        "s3-r-w.us-east-1.amazonaws.com",                // AWS Source IP based - US-EAST:
+        "*.execute-api.us-east-1.amazonaws.com",         // AWS Source IP based - US-EAST:
         "*.execute-api.us-west-1.amazonaws.com",         // Docker image for data services
+        "*.api.monitoring.us-west-1.cdp.cloudera.com",   // Observability
+        "*.api.monitoring.eu-1.cdp.cloudera.com",        // Observability
+        "*.api.monitoring.ap-1.cdp.cloudera.com",        // Observability
         "auth.docker.io",
         "cloudera-docker-dev.jfrog.io",
         "docker-images-prod.s3.amazonaws.com",
