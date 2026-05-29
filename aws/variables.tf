@@ -177,17 +177,30 @@ variable "fw_domain_ep" {
     ## AP Based Control Plane
     "api.ap-1.cdp.cloudera.com",
 
+    # Cloudera Observability Metrics
+    ## US-based Control Plane:
+    ".api.monitoring.us-west-1.cdp.cloudera.com",
+    ## EU-based Control Plane:
+    ".api.monitoring.eu-1.cdp.cloudera.com",
+    ## AP-based Control Plane:
+    ".api.monitoring.ap-1.cdp.cloudera.com",
+
     # RPMs
     "cloudera-service-delivery-cache.s3.amazonaws.com",
     # Docker Images
     "container.repository.cloudera.com",
-    "docker.repository.cloudera.com",
+    // "docker.repository.cloudera.com",
     "container.repo.cloudera.com",
     ## US Based control plane
     "prod-us-west-2-starport-layer-bucket.s3.us-west-2.amazonaws.com",
     "prod-us-west-2-starport-layer-bucket.s3.amazonaws.com",
     "s3-r-w.us-west-2.amazonaws.com",
     ".execute-api.us-west-2.amazonaws.com",
+    ## AWS Source IP based - US-EAST:
+    "prod-us-east-1-starport-layer-bucket.s3.us-east-1.amazonaws.com",
+    "prod-us-east-1-starport-layer-bucket.s3.amazonaws.com",
+    "s3-r-w.us-east-1.amazonaws.com",
+    ".execute-api.us-east-1.amazonaws.com",
     ## EU Based control plane
     "prod-eu-west-1-starport-layer-bucket.s3.eu-west-1.amazonaws.com",
     "prod-eu-west-1-starport-layer-bucket.s3.amazonaws.com",
@@ -200,6 +213,17 @@ variable "fw_domain_ep" {
     "s3-r-w.ap-southeast-1.amazonaws.com",
     ".execute-api.ap-southeast-1.amazonaws.com",
 
+    ## AWS Source IP based - EU-Central-1:
+    "prod-eu-central-1-starport-layer-bucket.s3.eu-central-1.amazonaws.com",
+    "prod-eu-central-1-starport-layer-bucket.s3.amazonaws.com",
+    "s3-r-w.eu-central-1.amazonaws.com",
+    ".execute-api.eu-central-1.amazonaws.com",
+
+    ## Default - Based on Geo Location - ASIAPAC:
+    "prod-ap-southeast-1-starport-layer-bucket.s3.ap-southeast-1.amazonaws.com",
+    "prod-ap-southeast-1-starport-layer-bucket.s3.amazonaws.com",
+    "s3-r-w.ap-southeast-1.amazonaws.com",
+    ".execute-api.ap-southeast-1.amazonaws.com",
 
     # global endpoint
     "raw.githubusercontent.com",
@@ -230,6 +254,7 @@ variable "fw_domain_ep" {
     ".cdp.cloudera.com",
     ".v2.ccm.cdp.cloudera.com",
     ".v2.us-west-1.ccm.cdp.cloudera.com",
+    "dbusapi.us-west-1.altus.cloudera.com",            //new added 05/19/2026
     "dbusapi.us-west-1.sigma.altus.cloudera.com",
     "api.us-west-1.cdp.cloudera.com",
     ".s3.us-west-2.amazonaws.com",

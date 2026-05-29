@@ -13,6 +13,7 @@ data "azurerm_resource_group" "dns" {
 }
 locals {
   resource_group_name = var.create_resource_group ? azurerm_resource_group.dns[0].name : data.azurerm_resource_group.dns[0].name
+  resource_group_id   = var.create_resource_group ? azurerm_resource_group.dns[0].id : data.azurerm_resource_group.dns[0].id
 }
 
 ################ Private DNS zones ###############
@@ -27,6 +28,9 @@ resource "azurerm_private_dns_zone" "dns" {
 
 output "private_dns_zones" {
   value = { for k, s in azurerm_private_dns_zone.dns : k => s.id }
+}
+output "resource_group_id" {
+  value = local.resource_group_id
 }
 
 ############## Private DNS Zone Links ##############
