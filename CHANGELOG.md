@@ -1,4 +1,7 @@
 # Change log
+## v0.5.0 Azure RBAC redesign
+- Align with Azure RBAC redesign in prerequiesite modules.
+
 ## 0.4.8 Azure changes
 - Changes per source module change : https://github.com/nicknameyu/cdp-prerequisite-module/blob/main/CHANGELOG.MD#v0213-consolidated-azure-update
 - A few firewall rule changes per new firewall rules published on Cloudera Doc website.

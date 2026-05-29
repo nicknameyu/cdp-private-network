@@ -78,6 +78,9 @@ resource "azurerm_subnet" "nva_subnet" {
 output "resource_group_name" {
   value = local.resource_group_name
 }
+output "resource_group_id" {
+  value = regex("(/subscriptions/[^/]+/resourceGroups/[^/]+)", azurerm_virtual_network.network.id)[0]
+}
 
 output "vnet_id" {
   value = azurerm_virtual_network.network.id
