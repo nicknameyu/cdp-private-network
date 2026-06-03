@@ -1,4 +1,7 @@
 # Change log
+## v0.5.1 Azure
+- Storage encryption module update
+
 ## v0.5.0 Azure RBAC redesign
 - Align with Azure RBAC redesign in prerequiesite modules.
 

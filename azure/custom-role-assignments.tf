@@ -11,7 +11,7 @@ module "service_principal" {
   create_custom_role   = ! var.spn_permision_contributor
 
 
-  scope                              =  {
+  rbac_scope                              =  {
                                           //sub          = "/subscriptions/${var.subscription_id}"
                                           prerequisite = module.env-prerequisite.prerequisite_resouorce_group_id
                                           cdp          = azurerm_resource_group.cdp.id
@@ -19,6 +19,7 @@ module "service_principal" {
   key_vault_id                       = var.kv_rbac ? module.cmk-prerequisite.cmk_key_vault_id : null
 
   vnet_resource_group_id             = module.hub_vnet.resource_group_id
+  dns_zone_subscription_id           = var.dns_zone_subscription_id
   private_dns_zone_resource_group_id = module.dns_zone.resource_group_id
 
   enable_dw            = var.enable_dw

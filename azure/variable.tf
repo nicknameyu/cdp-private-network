@@ -9,6 +9,11 @@ variable "resource_groups" {
   })
   default = null
 }
+variable "kv_resource_group_name" {
+  type = string
+  default = null
+  description = "Key Vault resource group name"
+}
 variable "tags" {
   description = "Tags to be applied to the resources."
   type = map(string)
