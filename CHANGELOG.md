@@ -1,4 +1,10 @@
 # Change log
+
+## v0.5.2 AWS
+- Modulized linux server
+- Automatically install AWS cli and kubectl command on the new created linux server.
+- Use `user_data` to install bind9 DNS configuration.
+
 ## v0.5.1 Azure
 - Storage encryption module update
 

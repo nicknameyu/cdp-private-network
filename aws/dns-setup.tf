@@ -1,7 +1,7 @@
 ################# DNS config for CDP VPC ###############
 resource "aws_vpc_dhcp_options" "cdp" {
   domain_name          = "${var.region}.compute.internal"
-  domain_name_servers  = var.custom_dns ? [aws_instance.core-jump.private_ip] : ["AmazonProvidedDNS"]
+  domain_name_servers  = var.custom_dns ? [module.hub-jump-server.private_ip] : ["AmazonProvidedDNS"]
 
   tags = merge({
     Name = "${var.owner}-cdp-dopt"

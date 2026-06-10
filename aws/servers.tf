@@ -1,203 +1,95 @@
-data "aws_ami" "ubuntu" {
-  most_recent = true
-
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
-  }
-
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-
-  owners = ["099720109477"] # Canonical
-}
-
-#####################Core VPC Jump Server ###################
-resource "aws_security_group" "core-jump" {
-  name   = "${var.owner}-core-jump-sg"
-  vpc_id = aws_vpc.core.id
-
-  ingress {
-    description      = "SSH"
-    from_port        = 22
-    to_port          = 22
-    protocol         = "TCP"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
-  ingress {
-    description      = "DNS"
-    from_port        = 53
-    to_port          = 53
-    protocol         = "UDP"
-    cidr_blocks      = [var.cdp_vpc.cidr, var.core_vpc.cidr]
-  }
-  ingress {
-    description      = "VNC"
-    from_port        = 5901
-    to_port          = 5901
-    protocol         = "TCP"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
-  tags   = var.tags
-}
-resource "aws_eip" "core-jump" {
-  network_interface = aws_network_interface.core-jump.id
-  domain   = "vpc"
-  tags = merge({
-    Name = "${var.owner}-core-jump-eip"
-  }, var.tags)
-}
-output "core_jump_public_ip" {
-  value = aws_eip.core-jump.public_ip
-}
-output "core_jump_private_ip" {
-  value = aws_network_interface.core-jump.private_ip
-}
-
-resource "aws_network_interface" "core-jump" {
-  subnet_id   = aws_subnet.core["core"].id
-  security_groups = [ aws_security_group.core-jump.id ]
-
-  tags = merge({
-    Name = "${var.owner}-core-jump-nic"
-  }, var.tags)
-}
 locals {
-  named_conf         = replace(
-                          replace(file("conf/named.conf"), "$${REGION}", var.region), 
-                          "$${DNS_RESOLVER_IP}", tolist(aws_route53_resolver_endpoint.cdp.ip_address)[0].ip)
-  named_conf_options = file("conf/named.conf.options")
+  dns_server_ingress_rules = {
+                              ssh =  {
+                                from_port        = 22
+                                to_port          = 22
+                                ip_protocol      = "TCP"
+                                cidr_block       = "0.0.0.0/0"
+                              }
+                              CDP_DNS = {
+                                from_port        = 53
+                                to_port          = 53
+                                ip_protocol      = "UDP"
+                                cidr_block       = var.cdp_vpc.cidr
+                              }
+                              HUB_DNS = {
+                                from_port        = 53
+                                to_port          = 53
+                                ip_protocol      = "UDP"
+                                cidr_block       = var.core_vpc.cidr
+                              }
+                            }
+                            
+  dns_server_egress_rules = {
+                              internet = {
+                                from_port        = -1
+                                to_port          = -1
+                                ip_protocol      = "-1"
+                                cidr_block       = "0.0.0.0/0"
+                              }
+                            }
 }
-                                
-resource "aws_instance" "core-jump" {
-  ami           =  data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  key_name      = module.env_prerequisites.ssh_key_name
-  depends_on    = [ aws_networkfirewall_firewall.fw ]
-  connection {
-    type = "ssh"
-    user = "ubuntu"
-    private_key = file(var.ssh_key.private_rsa_key_path)
-    host        = aws_eip.core-jump.public_ip
-  }
-  provisioner "file" {
-    content     = local.named_conf
-    destination = "/tmp/named.conf"
-  }
-  provisioner "file" {
-    source      = "conf/named.conf.options"
-    destination = "/tmp/named.conf.options"
-  }
-  provisioner "file" {
-    source      = var.ssh_key.private_rsa_key_path
-    destination = "/home/ubuntu/.ssh/id_rsa"
-  }
-  user_data     = <<EOF
-#!/usr/bin/bash
-chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
-chmod 600 /home/ubuntu/.ssh/id_rsa
-echo "################ DNS Configuration ##################"
-sudo apt install bind9 -y
-sudo apt install dnsutils -y
-sudo mv /etc/bind/named.conf.options /etc/bind/named.conf.options.backup
-sudo mv /etc/bind/named.conf /etc/bind/named.conf.backup
-sudo mv /tmp/named.conf /etc/bind/named.conf
-sudo mv /tmp/named.conf.options /etc/bind/named.conf.options
-sudo chown root:bind /etc/bind/named.conf.options
-sudo chown root:bind /etc/bind/named.conf
-sudo chmod 644 /etc/bind/named.conf.options
-sudo chmod 644 /etc/bind/named.conf
-sudo systemctl restart bind9.service
-EOF
+## Hub Jump Server
+module "hub-jump-server" {
+  source                  = "./modules/aws_ubuntu_instance"
+  name                    = "${var.owner}-hub-jump"
+  vpc_id                  = aws_vpc.core.id
+  subnet_id               = aws_subnet.core["core"].id
+  enable_pub_ip           = true
+  key_name                = module.env_prerequisites.ssh_key_name
+  bootstrap_scripts       = [ 
+                              file("./scripts/install_aws_cli.sh"), 
+                              file("./scripts/install_kubectl.sh"),
+                              templatefile("./scripts/install_bind9.sh", {
+                                DNS_RESOLVER_IP = tolist(aws_route53_resolver_endpoint.cdp.ip_address)[0].ip
+                                REGION          = var.region
+                              }) 
+                            ]
 
-  network_interface {
-    network_interface_id = aws_network_interface.core-jump.id
-    device_index         = 0
-  }
+  sg_ingress_rules        = local.dns_server_ingress_rules
+  sg_egress_rules         = local.dns_server_egress_rules
 
-  credit_specification {
-    cpu_credits = "unlimited"
-  }
-  tags = merge({
-    Name = "${var.owner}-core-jump"
-  }, var.tags)
-  lifecycle {
-    ignore_changes = [ ami ]
-  }
+  private_key             = file(var.ssh_key.private_rsa_key_path)
+
+  tags                    = var.tags
 }
-
-
+output "dns_server_private_ip" {
+  value = module.hub-jump-server.private_ip
+}
+output "dns_server_public_ip" {
+  value = module.hub-jump-server.public_ip
+}
 ######################## CDP VPC Jump Server ########################
-resource "aws_security_group" "cdp-jump" {
-  name   = "${var.owner}-cdp-jump-sg"
-  vpc_id = aws_vpc.cdp.id
-
-  ingress {
-    description      = "SSH"
-    from_port        = 22
-    to_port          = 22
-    protocol         = "TCP"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
-  tags   = var.tags
+module "cdp-jump-server" {
+  source                  = "./modules/aws_ubuntu_instance"
+  name                    = "${var.owner}-cdp-jump"
+  vpc_id                  = aws_vpc.cdp.id
+  subnet_id               = aws_subnet.cdp["subnet1"].id
+  key_name                = module.env_prerequisites.ssh_key_name
+  bootstrap_scripts       = [ file("./scripts/install_aws_cli.sh"), file("./scripts/install_kubectl.sh") ]
+  tags                    = var.tags
+  sg_ingress_rules        = {
+                              ssh =  {
+                                from_port        = 22
+                                to_port          = 22
+                                ip_protocol      = "TCP"
+                                cidr_block       = "0.0.0.0/0"
+                              }
+                            }
+  sg_egress_rules         = {
+                              internet = {
+                                from_port        = -1
+                                to_port          = -1
+                                ip_protocol      = "-1"
+                                cidr_block       = "0.0.0.0/0"
+                              }
+                            }
+  private_key             = file(var.ssh_key.private_rsa_key_path)
+  depends_on              = [ aws_networkfirewall_firewall.fw ]
 }
-
-resource "aws_network_interface" "cdp-jump" {
-  subnet_id   = aws_subnet.cdp["subnet1"].id
-  security_groups = [ aws_security_group.cdp-jump.id ]
-
-  tags = merge({
-    Name = "${var.owner}-cdp-jump-nic"
-  }, var.tags)
-}
-
-resource "aws_instance" "cdp-jump" {
-  ami           =  data.aws_ami.ubuntu.id
-  instance_type = "t2.micro"
-  key_name      = module.env_prerequisites.ssh_key_name
-
-  user_data = <<EOF
-#!/bin/bash
-echo "Copying the SSH Key to the server"
-echo -e "${file(var.ssh_key.private_rsa_key_path)}" > /home/ubuntu/.ssh/id_rsa
-chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
-chmod 600 /home/ubuntu/.ssh/id_rsa
-EOF
-
-  network_interface {
-    network_interface_id = aws_network_interface.cdp-jump.id
-    device_index         = 0
-  }
-
-  credit_specification {
-    cpu_credits = "unlimited"
-  }
-  tags = merge({
-    Name = "${var.owner}-cdp-jump"
-  }, var.tags)
-  lifecycle {
-    ignore_changes = [ ami ]
-  }
-}
-
 output "cdp_jump_private_ip" {
-  value = aws_network_interface.cdp-jump.private_ip
+  value = module.cdp-jump-server.private_ip
 }
-
 # ################### Windows Server ################
 data "aws_ami" "windows" {
      most_recent = true
