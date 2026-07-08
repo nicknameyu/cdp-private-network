@@ -44,7 +44,7 @@ locals{
 
 module "private_vpc_sgs" {
   source = "./security-groups"
-  vpc_id = aws_vpc.cdp.id
+  vpc_id = module.hub-spoke.spoke_vpc_id
   knox_ingress_rules = local.knox_security_group_rules
   default_ingress_rules = local.default_security_group_rules
   knox_sg_name = "${var.owner}-cdp-knox-sg"
@@ -72,7 +72,7 @@ locals {
 }
 module "pub_vpc_sgs" {
   source                = "./security-groups"
-  vpc_id                = aws_vpc.core.id
+  vpc_id                = module.hub-spoke.hub_vpc_id
   knox_ingress_rules    = local.pub_vpc_knox_sg_rules
   default_ingress_rules = local.pub_vpc_default_sg_rules
   knox_sg_name          = "${var.owner}-pub-knox-sg"
