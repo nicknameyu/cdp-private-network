@@ -1,172 +1,114 @@
-##################### VPCs ######################
-resource "aws_vpc" "core" {
-  cidr_block = var.core_vpc.cidr
-  enable_dns_support = true
-  enable_dns_hostnames = true
-  tags = merge({ Name = var.core_vpc.name == "" ? "${var.owner}_core_vpc" : var.core_vpc.name }, var.tags)
-}
-resource "aws_vpc" "cdp" {
-  cidr_block = var.cdp_vpc.cidr
-  enable_dns_support = true
-  enable_dns_hostnames = true
-  tags = merge({ Name = var.cdp_vpc.name == "" ? "${var.owner}_cdp_vpc" : var.cdp_vpc.name }, var.tags)
-}
-
-resource "aws_subnet" "core" {
-  for_each = local.core_subnets
-  vpc_id     = aws_vpc.core.id
-  cidr_block = each.value.cidr
-  availability_zone = data.aws_availability_zones.available.names[each.value.az_sn]
-
-  tags = merge({
-    Name = each.value.name
-  }, var.tags)
-}
-resource "aws_subnet" "core_public" {
-  for_each          = local.core_public_subnets
-  vpc_id            = aws_vpc.core.id
-  cidr_block        = each.value.cidr
-  availability_zone = data.aws_availability_zones.available.names[each.value.az_sn]
-  map_public_ip_on_launch = true
-
-  tags = merge({
-    Name = each.value.name,
-    "kubernetes.io/role/elb" = 1
-  }, var.tags)
-  lifecycle {
-    ignore_changes = [ tags, tags_all ]
-  }
-}
-resource "aws_subnet" "cdp" {
-  for_each = local.cdp_subnets
-  vpc_id = aws_vpc.cdp.id
-  cidr_block = each.value.cidr
-  availability_zone = data.aws_availability_zones.available.names[each.value.az_sn]
-
-  tags = merge({
-    Name = each.value.name
-    "kubernetes.io/role/internal-elb" = 1
-  }, var.tags)
-
-  lifecycle {
-    ignore_changes = [ tags, tags_all ]
-  }
-}
-
-resource "aws_route_table" "core" {
-  for_each = local.core_subnets
-  vpc_id = aws_vpc.core.id
-
-  tags = merge({
-    Name = "rt_${each.value.name}"
-  }, var.tags)
-
-}
-resource "aws_route_table" "core_public" {
-  for_each = local.core_public_subnets
-  vpc_id = aws_vpc.core.id
-
-  tags = merge({
-    Name = "rt_${each.value.name}"
-  }, var.tags)
-
-}
-
-resource "aws_route_table_association" "core" {
-  for_each       = local.core_subnets
-  subnet_id      = aws_subnet.core[each.key].id
-  route_table_id = aws_route_table.core[each.key].id
-}
-resource "aws_route_table_association" "core_public" {
-  for_each       = local.core_public_subnets
-  subnet_id      = aws_subnet.core_public[each.key].id
-  route_table_id = aws_route_table.core_public[each.key].id
-}
-
-resource "aws_route_table" "cdp" {
-  for_each = local.cdp_subnets
-  vpc_id = aws_vpc.cdp.id
-
-  tags = merge({
-    Name = "rt_${each.value.name}"
-  }, var.tags)
-}
-
-resource "aws_route_table_association" "cdp" {
-  for_each       = local.cdp_subnets
-  subnet_id      = aws_subnet.cdp[each.key].id
-  route_table_id = aws_route_table.cdp[each.key].id
-}
-
-##################### IGW ######################
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.core.id
-
-  tags = merge({
-    Name = var.igw_name == "" ? "${var.owner}_igw" : var.igw_name
-  }, var.tags)
-}
-
-resource "aws_route_table" "igw" {
-  vpc_id = aws_vpc.core.id
-
-  dynamic route{
-    for_each = setsubtract(setsubtract(["core", "private", "nat"], var.firewall_control ? []:["nat"]), var.public_snet_to_firewall ? []:["core"])
-    # for_each = var.firewall_control ? ["core", "private", "nat"]:["core", "private"]
-    content {
-      cidr_block = local.core_subnets[route.value].cidr
-      vpc_endpoint_id = (tolist(aws_networkfirewall_firewall.fw.firewall_status[0].sync_states))[0].attachment[0].endpoint_id
+locals {
+  // Subnet CIDR calculation
+  core_vpc_masknum = tonumber(split("/", var.core_vpc.cidr)[1])
+  core_subnets = {
+    nat = {
+        cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 0)
+        az_sn   = 0
+    }
+    firewall = {
+        cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 1)
+        az_sn   = 0
     }
   }
-  tags = merge({
-    Name = "rt_igw"
-  }, var.tags)
+  public_subnets = {
+    pub_subnet_1 = {
+      cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 1)
+      az_sn   = 0
+    }
+    pub_subnet_2 = {
+      cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 2)
+      az_sn   = 1
+    }
+    pub_subnet_3 = {
+      cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 3)
+      az_sn   = length(data.aws_availability_zones.available.names) > 2 ? 2:0
+    }
+  }
+  hub_private_subnets = {
+    pvt_subnet_1 = {
+      cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 4)
+      az_sn   = 0
+    }
+    pvt_subnet_2 = {
+      cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 5)
+      az_sn   = 1
+    }
+    pvt_subnet_3 = {
+      cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 6)
+      az_sn   = length(data.aws_availability_zones.available.names) > 2 ? 2:0
+    }
+  }
+  spoke_private_subnets = {
+    pvt_subnet_1 = {
+      cidr    = cidrsubnet(var.cdp_vpc.cidr, 23 - local.core_vpc_masknum, 4)
+      az_sn   = 0
+    }
+    pvt_subnet_2 = {
+      cidr    = cidrsubnet(var.cdp_vpc.cidr, 23 - local.core_vpc_masknum, 5)
+      az_sn   = 1
+    }
+    pvt_subnet_3 = {
+      cidr    = cidrsubnet(var.cdp_vpc.cidr, 23 - local.core_vpc_masknum, 6)
+      az_sn   = length(data.aws_availability_zones.available.names) > 2 ? 2:0
+    }
+  }
+}
+module "hub-spoke" {
+  source   = "github.com/nicknameyu/terraform-modules/modules/aws/aws_hubspoke_vpc"
+  region   = var.region
+  tags     = var.tags
+
+  hub_vpc               =  {
+                            name = var.core_vpc.name == "" ? "${var.owner}-hub-vpc" : var.core_vpc.name
+                            cidr = var.core_vpc.cidr
+                          }
+  public_subnets        = local.public_subnets
+  hub_private_subnets   = local.hub_private_subnets
+  spoke_vpc             = {
+                            name = var.cdp_vpc.name == "" ? "${var.owner}-spoke-vpc" : var.cdp_vpc.name
+                            cidr = var.cdp_vpc.cidr
+                          }
+  spoke_private_subnets = local.spoke_private_subnets
+
+  tgw_name              = "${var.owner}-tgw"
+
+  ## Egress
+  igw_name              = "${var.owner}-igw"
+  nat_name              = "${var.owner}-nat"
+  nat_subnet_cidr       = local.core_subnets.nat.cidr
+  firewall_name         = "${var.owner}-firewall"
+  firewall_subnet_cidr  = local.core_subnets.firewall.cidr
+
+  ## DNS server
+  ssh_key_name          = module.env_prerequisites.ssh_key_name
+  ssh_private_key       = file(var.ssh_key.private_rsa_key_path)
+  custom_dns            = var.custom_dns
 }
 
-resource "aws_route_table_association" "igw" {
-  gateway_id     = aws_internet_gateway.igw.id
-  route_table_id = aws_route_table.igw.id
+output "dns_server_private_ip" {
+  value = module.hub-spoke.dns_server_private_ip
+}
+output "dns_server_public_ip" {
+  value = module.hub-spoke.dns_server_public_ip
 }
 
-##################### NAT GW ######################
-resource "aws_eip" "nat" {
-  domain   = "vpc"
-  tags = merge({
-    Name = "eip-nat-gw"
-  }, var.tags)
+## EKS related taggings. This part is not included in the module. 
+resource "aws_ec2_tag" "hub_public" {
+  for_each = module.hub-spoke.hub_public_subnets
+  resource_id = each.value.subnet_id
+  key         = "kubernetes.io/role/elb"
+  value       = "1"
 }
-resource "aws_nat_gateway" "nat" {
-  allocation_id     = aws_eip.nat.id
-  subnet_id         = aws_subnet.core["nat"].id
-  tags = merge({
-    Name = var.natgw_name == "" ? "${var.owner}_natgw" : var.natgw_name
-    owner = var.owner
-  }, var.tags)
+resource "aws_ec2_tag" "hub_private" {
+  for_each = module.hub-spoke.hub_private_subnets
+  resource_id = each.value.subnet_id
+  key         = "kubernetes.io/role/internal-elb"
+  value       = "1"
 }
-
-##################### TGW ######################
-resource "aws_ec2_transit_gateway" "tgw" {
-  dns_support = "disable"
-  tags = merge({
-    Name = var.tgw_name == "" ? "${var.owner}_tgw" : var.tgw_name
-  }, var.tags)
-}
-
-resource "aws_ec2_transit_gateway_vpc_attachment" "core" {
-  subnet_ids         = [aws_subnet.core["private"].id]
-  transit_gateway_id = aws_ec2_transit_gateway.tgw.id
-  vpc_id             = aws_vpc.core.id
-  dns_support        = "disable"
-  tags = merge({
-    Name = "tgwa-core-vpc"
-  }, var.tags)
-}
-resource "aws_ec2_transit_gateway_vpc_attachment" "cdp" {
-  subnet_ids         = [ for snet in aws_subnet.cdp: snet.id ]
-  transit_gateway_id = aws_ec2_transit_gateway.tgw.id
-  vpc_id             = aws_vpc.cdp.id
-  dns_support        = "disable"
-  tags = merge({
-    Name = "tgwa-cdp-vpc"
-  }, var.tags)
+resource "aws_ec2_tag" "spoke_public" {
+  for_each = module.hub-spoke.spoke_private_subnets
+  resource_id = each.value.subnet_id
+  key         = "kubernetes.io/role/internal-elb"
+  value       = "1"
 }

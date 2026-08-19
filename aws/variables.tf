@@ -50,68 +50,68 @@ variable "fw_name" {
   default = ""
 }
 
-locals {
-  // Subnet CIDR calculation
-  core_vpc_masknum = tonumber(split("/", var.core_vpc.cidr)[1])
-  core_subnets = {
+# locals {
+#   // Subnet CIDR calculation
+#   core_vpc_masknum = tonumber(split("/", var.core_vpc.cidr)[1])
+#   core_subnets = {
     
-    core = {
-        name = "coresubnet"
-        cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 0)
-        az_sn   = 0
-    }
-    nat = {
-        name = "natsubnet"
-        cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 1)
-        az_sn   = 0
-    }
-    firewall = {
-        name = "firewallsubnet"
-        cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 2)
-        az_sn   = 0
-    }
-    private = {
-        name = "privatesubnet"
-        cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 3)
-        az_sn   = 0
-    }
-  }
-  core_public_subnets = {
-    subnet_1 = {
-      name    = "pub_subnet_1"
-      cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 1)
-      az_sn   = 0
-    }
-    subnet_2 = {
-      name    = "pub_subnet_2"
-      cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 2)
-      az_sn   = 1
-    }
-    subnet_3 = {
-      name    = "pub_subnet_3"
-      cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 3)
-      az_sn   = length(data.aws_availability_zones.available.names) > 2 ? 2:0
-    }
-  }
-  cdp_vpc_masknum = tonumber(split("/", var.cdp_vpc.cidr)[1])
-  cdp_subnets     = {
-    subnet1 = {
-        name    = "subnet1"
-        cidr    = cidrsubnet(var.cdp_vpc.cidr, 23 - local.cdp_vpc_masknum, 0)
-        az_sn   = 0
-    }
-    subnet2 = {
-        name    = "subnet2"
-        cidr    = cidrsubnet(var.cdp_vpc.cidr, 23 - local.cdp_vpc_masknum, 1)
-        az_sn   = 1
-    }
-    subnet3 = {
-        name    = "subnet3"
-        cidr    = cidrsubnet(var.cdp_vpc.cidr, 23 - local.cdp_vpc_masknum, 2)
-        az_sn   = length(data.aws_availability_zones.available.names) > 2 ? 2:0
-    }
-  }
-}
+#     core = {
+#         name = "coresubnet"
+#         cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 0)
+#         az_sn   = 0
+#     }
+#     nat = {
+#         name = "natsubnet"
+#         cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 1)
+#         az_sn   = 0
+#     }
+#     firewall = {
+#         name = "firewallsubnet"
+#         cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 2)
+#         az_sn   = 0
+#     }
+#     private = {
+#         name = "privatesubnet"
+#         cidr = cidrsubnet(var.core_vpc.cidr, 28 - local.core_vpc_masknum, 3)
+#         az_sn   = 0
+#     }
+#   }
+#   core_public_subnets = {
+#     subnet_1 = {
+#       name    = "pub_subnet_1"
+#       cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 1)
+#       az_sn   = 0
+#     }
+#     subnet_2 = {
+#       name    = "pub_subnet_2"
+#       cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 2)
+#       az_sn   = 1
+#     }
+#     subnet_3 = {
+#       name    = "pub_subnet_3"
+#       cidr    = cidrsubnet(var.core_vpc.cidr, 23 - local.core_vpc_masknum, 3)
+#       az_sn   = length(data.aws_availability_zones.available.names) > 2 ? 2:0
+#     }
+#   }
+#   cdp_vpc_masknum = tonumber(split("/", var.cdp_vpc.cidr)[1])
+#   cdp_subnets     = {
+#     subnet1 = {
+#         name    = "subnet1"
+#         cidr    = cidrsubnet(var.cdp_vpc.cidr, 23 - local.cdp_vpc_masknum, 0)
+#         az_sn   = 0
+#     }
+#     subnet2 = {
+#         name    = "subnet2"
+#         cidr    = cidrsubnet(var.cdp_vpc.cidr, 23 - local.cdp_vpc_masknum, 1)
+#         az_sn   = 1
+#     }
+#     subnet3 = {
+#         name    = "subnet3"
+#         cidr    = cidrsubnet(var.cdp_vpc.cidr, 23 - local.cdp_vpc_masknum, 2)
+#         az_sn   = length(data.aws_availability_zones.available.names) > 2 ? 2:0
+#     }
+#   }
+# }
 
 variable "ssh_key" {
   description = "The public key will be used to create an SSH public key in the instances. The RSA private key is used to decrypt the password created for the DNS server."

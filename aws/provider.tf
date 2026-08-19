@@ -10,6 +10,9 @@ terraform {
 provider "aws" {
   # Configuration options
   region = var.region
+  ignore_tags {
+    key_prefixes = ["kubernetes.io/"]
+  }
 }
 
 data "aws_caller_identity" "current" {}

@@ -1,4 +1,13 @@
 # Change log
+## v0.6.0 AWS modulize AWS code
+- Modulize AWS code in repo: https://github.com/nicknameyu/terraform-modules 
+  - Modulize subnet
+  - modulize VPC
+  - Modulize DNS zerver
+  - Modulize hub-spoke VPC
+  - Modulize firewall
+- Restrict Security group rulles
+- fix bug
 
 ## v0.5.2 AWS
 - Modulized linux server
