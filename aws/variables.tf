@@ -142,6 +142,11 @@ variable "cross_account_role" {
   default = null
 }
 
+variable "create_cross_account_role" {
+  type = bool
+  default = false
+  description = "A flag to control whether to create cross account role. When set to false, a existing role with the name `cross_account_role` must be provided."
+}
 variable "fw_domain_ep" {
   # https://docs.cloudera.com/cdp-public-cloud/cloud/requirements-aws/topics/mc-outbound_access_requirements.html
   default = [
@@ -347,11 +352,6 @@ variable "firewall_control" {
   type = bool
   default = true
   description = "This is to control whether CDP VPC internet traffic is controled by firewall. For testing purpose."
-}
-variable "public_snet_to_firewall" {
-  type = bool
-  default = true
-  description = "This is to control whether public subnet internet traffic is controled by firewall. For testing purpose."
 }
 
 variable "custom_dns" {

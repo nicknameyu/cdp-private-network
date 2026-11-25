@@ -15,8 +15,6 @@ custom_dns = true
 cdp_xaccount_external_id = "*** external ID ***"
 
 //create_windows_jumpserver = true
-public_snet_to_firewall = false
-
 tags = {
     usecase = "testing"
 }
