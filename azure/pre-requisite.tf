@@ -42,7 +42,9 @@ module "env-prerequisite" {
 output "managed_ids" {
   value = module.env-prerequisite.mi_ids
 }
-
+output "data_engineer_mi_ids" {
+  value = module.env-prerequisite.de_mi_ids
+}
 
 output "storage_locations" {
   value = {

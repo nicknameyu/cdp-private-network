@@ -1,4 +1,13 @@
 # Change log
+
+## v0.6.1 AWS and Azure
+- Azure security group update. Modify rules to allow internet access.
+- AWS: Adding tags to Jump servers.
+- AWS: Cross Account role trust relationship. Change hard coded Cloudera account ID to variable.
+- AWS: Cross account role. Add variable to indicate whether cross account role need to be created. 
+- AWS: Add Windows jump server
+- AWS: Upgrade AWS terraform provider version. 
+
 ## v0.6.0 AWS modulize AWS code
 - Modulize AWS code in repo: https://github.com/nicknameyu/terraform-modules 
   - Modulize subnet

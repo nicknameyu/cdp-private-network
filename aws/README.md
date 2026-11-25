@@ -84,7 +84,6 @@ terraform apply
 |---|---|---|---|
 | `fw_name` | `string` | `""` | Firewall name (defaults to `<owner>-firewall`) |
 | `firewall_control` | `bool` | `true` | Route CDP VPC internet traffic through the firewall |
-| `public_snet_to_firewall` | `bool` | `true` | Route public subnet traffic through the firewall |
 | `fw_domain_ep` | `list(string)` | *(see variables.tf)* | HTTPS/TLS domain allowlist for the firewall |
 | `fw_http_ep` | `list(string)` | Ubuntu update domains | HTTP domain allowlist for the firewall |
 
@@ -210,6 +209,6 @@ Regional AWS endpoints (e.g., `eks.us-west-2.amazonaws.com`) are computed dynami
 
 - The `owner` variable is used as a prefix for nearly all resource names. Use a short, unique value (e.g., your username).
 - Subnet CIDRs are calculated automatically from the VPC CIDR using `cidrsubnet()`. The Core VPC requires at minimum a `/26`; the CDP VPC requires at minimum a `/22`.
-- Setting `firewall_control = false` or `public_snet_to_firewall = false` bypasses firewall routing for testing. Do not use in production.
+- Setting `firewall_control = false` bypasses firewall routing for testing. Do not use in production.
 - Windows jump server password is decrypted in Terraform state using your RSA private key. Treat the state file as sensitive.
 - The `cdp_xaccount_account_id` defaults to the Cloudera NA Sandbox tenant. Update this to your CDP tenant's AWS account ID.
